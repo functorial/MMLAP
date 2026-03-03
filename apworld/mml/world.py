@@ -1,14 +1,8 @@
-from collections.abc import Mapping
-from typing import Any
-
-# Imports of base Archipelago modules must be absolute.
-from worlds.AutoWorld import World
-
-# Imports of your world's files must be relative.
 from . import items, locations, regions, rules
 from . import options as mml_options  
 from collections.abc import Mapping
 from typing import Any
+from worlds.AutoWorld import World # Imports of base Archipelago modules must be absolute.
 
 class MMLWorld(World):
     """

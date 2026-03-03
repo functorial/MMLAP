@@ -6,8 +6,8 @@ namespace MMLAP.Models
         int id,
         string name,
         MMLEnums.LocationCategory category,
-        LevelData levelData,
-        ItemData defaultItemData,
+        LevelData? levelData,
+        ItemData? defaultItemData,
         AddressData checkAddressData,
         byte? checkByteValue,
         bool isMissable = false,
@@ -18,8 +18,8 @@ namespace MMLAP.Models
         public int Id { get; set; } = id;
         public string Name { get; set; } = name;
         public LocationCategory Category { get; set; } = category;
-        public LevelData LevelData { get; set; } = levelData;
-        public ItemData DefaultItemData { get; set; } = defaultItemData;
+        public LevelData? LevelData { get; set; } = levelData;
+        public ItemData? DefaultItemData { get; set; } = defaultItemData;
         public AddressData CheckAddressData { get; set; } = checkAddressData;
         public byte? CheckByteValue { get; set; } = checkByteValue;
         public bool IsMissable { get; set; } = isMissable;
