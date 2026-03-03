@@ -125,24 +125,24 @@ def create_item_with_correct_classification(world: MMLWorld, name: str) -> MMLIt
 
 def create_all_items(world: MMLWorld) -> None:
     itemPool: list[MMLItem] = []
-    for mmlItemData in itemDataDict:
-        match mmlItemData.name:
+    for itemName in itemDataDict.keys():
+        match itemName:
             case "Nothing":
                 for _ in range(5):
-                    itemPool.append(world.create_item(mmlItemData.name))
+                    itemPool.append(world.create_item(itemName))
             case "10 Zenny":
                 for _ in range(2):
-                    itemPool.append(world.create_item(mmlItemData.name))
+                    itemPool.append(world.create_item(itemName))
             case "20 Zenny":
                 for _ in range(2):
-                    itemPool.append(world.create_item(mmlItemData.name))
+                    itemPool.append(world.create_item(itemName))
             case "920 Zenny":
                 for _ in range(2):
-                    itemPool.append(world.create_item(mmlItemData.name))
+                    itemPool.append(world.create_item(itemName))
             case "Buster Max":
                 pass
             case _:
-                itemPool.append(world.create_item(mmlItemData.name))
+                itemPool.append(world.create_item(itemName))
 
     number_of_items = len(itemPool)
     number_of_unfilled_locations = len(world.multiworld.get_unfilled_locations(world.player))
