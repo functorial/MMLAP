@@ -174,7 +174,7 @@ location_tables = {
     ],
     "Museum - Floor 2 - Old Heater": [
         # Old heater currently isn't in the item pool
-        locationDataDict["Museum dontation, Old Heater"]
+        locationDataDict["Museum donation, Old Heater"]
     ],
     "Museum - Floor 2 - Old Doll": [
         locationDataDict["Museum donation, Old Doll"]
@@ -202,6 +202,7 @@ location_tables = {
 
     ],
     "Old City (Inside Warehouse Gate)": [
+        # Connects with sub-city, and UR (Old City Exit)
 
     ],
     "Old City (Boss Fight)": [
@@ -235,6 +236,7 @@ location_tables = {
 
     ],
     "Clozer Woods - Bridge Area": [
+        # Connects to underground ruins drillable wall room right
 
     ],
     "Clozer Woods - Boss Fight": [
@@ -355,50 +357,166 @@ location_tables = {
     "Clozer Woods Sub-Gate - Boss Room": [
         locationDataDict["Karumuna Bash Trio defeated"]
     ],
-
-
-
-
-    "Underground Ruins, Drillable Wall Room (Left, Lower)": [
-        # Connects to LML w/ Drill, LU, and 
+    "Focke-Wulf Boss Area": [
+        # Connects from flutter after getting red refractor. Back to flutter on boss defeat
+        locationDataDict["Focke-Wulf defeated"]
     ],
-    "Underground Ruins, Drillable Wall Room (Left, Upper)": [
-        # Requires jump springs
-        locationDataDict["Underground ruins, Drillable wall room west cliff chest"]
+    "Underground Ruins - Orudakoitan Bridge Area (Ledges)": [
+        # Connects back to bridge
+        locationDataDict["Underground ruins, Horokko ledge chest"],
+        locationDataDict["Underground ruins, Clozer exit chest"]
     ],
-    "Underground Ruins, Drillable Wall Room (Left-Middle, Lower)": [
-        # Connects LL w/ Drill, RML w/ Drill, and LMU, and Clozer sub-gate
+    "Underground Ruins - Orudakoitan Bridge Area (Bridge)": [
+        # Connects Drillable Right, Ledges with jump springs
+        locationDataDict["Underground ruins, Fireball Orudakoitan chest" ]
     ],
-    "Underground Ruins, Drillable Wall Room (Left-Middle, Upper)": [
-        # Requires jump springs
-        locationDataDict["Underground ruins, Drillable wall room middle cliff chest"]
-    ],
-    "Underground Ruins, Drillable Wall Room (Right-Middle, Lower)": [
-        # Connects LML w/ Drill, Right w/ Drill, Upper
-    ],
-    "Underground Ruins, Drillable Wall Room (Right-Middle, Upper)": [
-        # Requires jump springs
-        locationDataDict["Underground ruins, Drillable wall room east cliff chest"],
-        locationDataDict["Underground ruins, Drillable wall room east cliff hole"]
-    ],
-    "Underground Ruins, Drillable Wall Room (Right)": [
+    "Underground Ruins - Drillable Wall Area (Right)": [
         # Connects RML w/ Drill, Clozer Woods
         locationDataDict["Underground ruins, Clozer exit chest"],
         locationDataDict["Underground ruins, Trapped box hole"]
     ],
-    "Underground Ruins - Orudakoitan Bridge (Bridge)": [
-        # Connects Drillable Right, Ledges with jump springs
-        locationDataDict["Underground ruins, Fireball Orudakoitan chest" ]
+    "Underground Ruins - Drillable Wall Area (Right-Middle, Upper)": [
+        # Requires jump springs
+        locationDataDict["Underground ruins, Drillable wall room east cliff chest"],
+        locationDataDict["Underground ruins, Drillable wall room east cliff hole"]
     ],
-    "Underground Ruins - Orudakoitan Bridge (Ledges)": [
-        # Connects back to bridge
-        locationDataDict["Underground ruins, Horokko ledge chest"],
-        locationDataDict["Underground ruins, Clozer exit chest"]
+    "Underground Ruins - Drillable Wall Area (Right-Middle, Lower)": [
+        # Connects LML w/ Drill, Right w/ Drill, Upper
+    ],
+    "Underground Ruins - Drillable Wall Area (Left-Middle, Upper)": [
+        # Requires jump springs
+        locationDataDict["Underground ruins, Drillable wall room middle cliff chest"]
+    ],
+    "Underground Ruins - Drillable Wall Area (Left-Middle, Lower)": [
+        # Connects LL w/ Drill, RML w/ Drill, and LMU, and Clozer sub-gate
+    ],
+    "Underground Ruins - Drillable Wall Area (Left, Upper)": [
+        # Requires jump springs
+        locationDataDict["Underground ruins, Drillable wall room west cliff chest"]
+    ],
+    "Underground Ruins - Drillable Wall Area (Left, Lower)": [
+        # Connects to LML w/ Drill, LU, and Spinning Tower Trap Area (Sharukurusu Corridor)
+    ],
+    "Underground Ruins - Spinning Tower Trap Area (Sharukurusu Corridor)": [
+        # Connects Drillable Wall Area (Left, Lower), (ledge room)
+        locationDataDict["Underground ruins, Obstacle room cliff east hole"],
+        locationDataDict["Underground ruins, Obstacle room cliff west hole"]
+    ],
+    "Underground Ruins - Spinning Tower Trap Area (Ledge Room)": [
+        # Connects to (Sharukurusu Corridor) w/ jump springs, and (Arukoitan battle)
+        locationDataDict["Underground ruins, Arukoitan battle south chest"]
+    ],
+    "Underground Ruins - Spinning Tower Trap Area (Arukoitan Battle + Hanmuru Doll)": [
+        # Connects to (Ledge Room) w/e jump springs, (Cardon Forest Surface Exit), (Shekuten Lower)
+        locationDataDict["Underground ruins, Arukoitan battle north chest"]
+    ],
+    "Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Surface Exit)": [
+        # Connects to Cardon Forest, (Hanmuru Doll), (Sub-Gate Exit) w/ jump springs, (Pillar Room West Ledge) w/ jump springs
+    ],
+    "Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Sub-Gate Exit)": [
+        # Connects to Cardon Forest Sub-Gate, (Cardon Forest Surface Exit)
+        locationDataDict["Underground ruins, Miroc room ledge chest"],
+        locationDataDict["Underground ruins, Cross room chest"],
+        locationDataDict["Underground ruins, Miroc room left hole"],
+        locationDataDict["Underground ruins, Miroc room right hole"]
+    ],
+    "Underground Ruins - Cardon Forest Sub-Gate Area (Pillar Room West Ledge)": [
+        # Connects to (Cardon Forest Surface Exit), (Junk Man Rescue Exit)
+        locationDataDict["Underground ruins, 2 box ledge chest"],
+    ],
+    "Underground Ruins - Cardon Forest Sub-Gate Area (Junk Man Rescue Exit)": [
+        # Connects (Pillar Room West Ledge) w/ jump springs, (Main Gate exit) w/ drill arm, (Junk man rescue spot)
+    ],
+    "Underground Ruins - Cardon Forest Sub-Gate Area (Main Gate Exit)": [
+        # Connects to (Junk Man Rescue Exit) w/ drill, main gate ?? 
+        locationDataDict["Underground ruins, Main gate entrance chest"]
+    ],
+    "Underground Ruins - Junk Man Rescue Area (Junk Man Rescue Spot)": [
+        # Connects to (Junk Man Rescue Exit), (Sewer Ledge) w/ jump springs
+        locationDataDict["Underground ruins, Junk store man chest"],
+        locationDataDict["Underground ruins, Junk store man hole"]
+    ],
+    "Underground Ruins - Junk Man Rescue Area (Sewer Ledge)": [
+        # Connects to (Junk Man Rescue Spot), City Sewer
+    ],
+    "Underground Ruins - City Sewer": [
+        # Connects to (Sewer Ledge), Downtown
+    ],
+    "Underground Ruins - Shekuten + Kuruguru Area (Shekuten Lower)": [
+        # Connects (Arukoitan Battle), (Kuruguru Upper) w/ jump springs, (Pillar Room West Ledge)
+        locationDataDict["Underground ruins, Shekuten pillar room hole"]
+    ],
+    "Underground Ruins - Shekuten + Kuruguru Area (Kuruguru Upper)": [
+        # Connects (Shekuten Lower), (Exit to Kuruguru)
+        locationDataDict["Underground ruins, Shekuten pillar room chest"],
+        locationDataDict["Underground ruins, Kuruguru obstacle hole"]
+    ],
+    "Underground Ruins - Lake Jyun Sub-Gate Area (Exit to Kuruguru)": [
+        # Connects (Kuruguru Upper), (Gorubeshu Side Room) w/ drill, (Gorubeshu Walls) w/ drill
+        locationDataDict["Underground ruins, Drillable pillar room south chest"]
+    ],
+    "Underground Ruins - Lake Jyun Sub-Gate Area (Gorubeshu Side Room)": [
+        # Connects (Exit to Kuruguru) w/ drill, (Gorubeshu Trap Chests) w/ drill
+        locationDataDict["Underground ruins, Gold Gorubesshu chest"]
+    ],
+    "Underground Ruins - Lake Jyun Sub-Gate Area (Gorubeshu Trap Chests)": [
+        # Connects (Gorubeshu Side Room) w/ drill, (Lake Jyun sub-gate west exit) w/ drill
+        locationDataDict["Underground ruins, 3 chest room middle chest"]
+    ],
+    "Underground Ruins - Lake Jyun Sub-Gate Area (Lake Jyun Sub-Gate West Exit)": [
+        # Connects (Gorubeshu Trap Chests) w/ drill, Lake Jyun sub-gate
+        locationDataDict["Underground ruins, Drillable pillar room north chest"]
+    ],
+    "Underground Ruins - Lake Jyun Sub-Gate Area (Gorubeshu Walls)": [
+        # Connects (East Exit) w/ drill, (Exit to Kuruguru) w/ drill
+        locationDataDict["Underground ruins, Drillable pillars room south hole"],
+        locationDataDict["Underground ruins, Drillable pillars room west hole"],
+        locationDataDict["Underground ruins, Drillable pillars room north hole"]
+    ],
+    "Underground Ruins - Lake Jyun Sub-Gate Area (Lake Jyun Sub-Gate East Exit)": [
+        # Connects (Gorubeshu Walls) w/ drill, Lake Jyun sub-gate
+    ],
+    "Underground Ruins - Main Gate to Old City Connection": [
+
+    ],
+    "Main Gate - (Entrance)": [
+        locationDataDict["Main Gate, Entrance hole"],
+        locationDataDict["Main Gate, Two Gorubesshu room chest"],
+    ],
+    "Main Gate - (Command Terminal)": [
+        # Connects to (Juno Area) with the sub-city keys
+        locationDataDict["Main Gate, Maze Chest"],
+        locationDataDict["Main Gate, Maze entrance hole"],
+        locationDataDict["Main Gate, Maze Karumuna Bash hole"],
+        locationDataDict["Main Gate, Maze Reaverbot hole"]
+    ],
+    "Main Gate - (Juno Area)": [
+        # Technically this connects to Cardon Forest after killing Juno.
+        locationDataDict["Main Gate, Boss corridor chest"]
+    ],
+    "Old City Sub-City - City": [
+        # Connects with Old City (Inside Warehouse Gate)
+    ],
+    "Old City Sub-City - Chest": [
+        locationDataDict["Old City Sub-City, Chest"]
+    ],
+    "Downtown Sub-City - City": [
+
+    ],
+    "Downtown Sub-City - Chest": [
+        locationDataDict["Downtown Sub-City, Chest"]
+    ],
+    "Uptown Sub-City - City": [
+
+    ],
+    "Uptown Sub-City - Chest": [
+        locationDataDict["Uptown Sub-City, Chest"]
     ]
 }
 
 def create_all_regions(world: MMLWorld) -> list:
-    create_region = lambda region_name, location_table: create_region_generic(world, region_name, location_table)
+    #create_region = lambda region_name, location_table: create_region_generic(world, region_name, location_table)
+    universe = Region("Universe", world.player, world.multiworld)
     regions = [universe]
     world.multiworld.regions += regions
 
