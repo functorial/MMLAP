@@ -310,7 +310,6 @@ public partial class App : Application
 
     private static void ItemManager_ItemReceived(object? sender, ItemReceivedEventArgs args)
     {
-        Log.Logger.Information("asdf");
         Dictionary<long, ItemData> itemDataDict = LocationHelpers.GetItemDataDict();
         if (APClient.CurrentSession != null && itemDataDict.TryGetValue(args.Item.Id, out ItemData? itemData))
         {
