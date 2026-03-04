@@ -29,7 +29,7 @@ location_tables = {
         locationDataDict["Ocean tower, Left chest"]
     ],
     "Ocean Tower - Room 3": [
-        locationDataDict["Damaged Hanmuru Doll defeated"]
+        locationDataDict["Escape the Ocean Tower"]
     ],
     "Cardon Forest": [
         
