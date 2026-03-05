@@ -1,1 +1,1 @@
-from .world import MMLWorld as MMLWorld
+from .world import GameWorld as GameWorld

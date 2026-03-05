@@ -28,8 +28,8 @@ namespace MMLAP;
 public partial class App : Application
 {
     // TODO: Remember to set this in MMLAP.Desktop as well.
-    public static string Version = "0.0.1";
-    public static List<string> SupportedVersions = ["0.0.1"];
+    public static string Version = "0.1.0";
+    public static List<string> SupportedVersions = ["0.1.0"];
 
     public static MainWindowViewModel Context;
     public static ArchipelagoClient APClient { get; set; }

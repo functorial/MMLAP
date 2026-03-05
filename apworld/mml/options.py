@@ -20,7 +20,7 @@ class Goal(Choice):
     default = option_juno
 
 @dataclass
-class MMLOptions(PerGameCommonOptions):
+class GameOptions(PerGameCommonOptions):
     goal: Goal
 
 option_presets = {}
