@@ -283,7 +283,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     "Apple market, Electric goods box",
-                    "Apple market, Book store box",
+                   #"Apple market, Book store box",
                     "Apple market, Junk store box",
                     "Apple market, North pail",
                     "Apple market, South pail"
@@ -313,7 +313,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Apple Market - Junk Shop (Turn-in Rescue)": 
             GameRegionData(
                 [
-                    "Rescue the shop owner's husband"
+                   #"Rescue the shop owner's husband"
                 ],
                 [
                     ExitData("Apple Market - Junk Shop")
@@ -505,7 +505,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     "Uptown, Hospital right pail",
-                    "Uptown, Hospital left pail",
+                   #"Uptown, Hospital left pail",
                     "Uptown, Ocean corner pail"
                 ],
                 [
@@ -592,7 +592,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     "Wily's Boat, Right box",
-                    "Wily's Boat, Left box"
+                   #"Wily's Boat, Left box"
                 ],
                 [
                     ExitData("Uptown"),
@@ -799,9 +799,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     "Yass plains, Plateau house box",
-                    "Yass plains, Plateau house pail",
+                   #"Yass plains, Plateau house pail",
                     "Yass plains, Behind hideout pail",
-                    "Yass plains, Across hideout pail"
+                   #"Yass plains, Across hideout pail"
                 ],
                 [
                     ExitData("City Hall - Outside"),

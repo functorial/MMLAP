@@ -48,7 +48,7 @@ itemDataDict = {
     "Old Shield"                        : ItemData(0x0251, ItemClassification.progression                             ), # progresses museum -> progression
     "Shiny Red Stone"                   : ItemData(0x0252, ItemClassification.progression                             ), # progresses museum -> progression
     "Ring"                              : ItemData(0x0256, ItemClassification.progression                             ), # give to roll -> progression
-    "Mine Parts Kit"                    : ItemData(0x0258, ItemClassification.filler                                  ),
+   #"Mine Parts Kit"                    : ItemData(0x0258, ItemClassification.filler                                  ),
     "Cannon Kit"                        : ItemData(0x0259, ItemClassification.progression                             ),
     "Grenade Kit"                       : ItemData(0x025A, ItemClassification.filler                                  ),
     "Blumebear Parts"                   : ItemData(0x025B, ItemClassification.useful                                  ), # strong special weapon -> useful
@@ -127,9 +127,6 @@ def create_all_items(world: GameWorld) -> None:
     itemPool: list[GameItem] = []
     for itemName in itemDataDict.keys():
         match itemName:
-            case "Nothing":
-                for _ in range(5):
-                    itemPool.append(world.create_item(itemName))
             case "10 Zenny":
                 for _ in range(2):
                     itemPool.append(world.create_item(itemName))
@@ -139,6 +136,10 @@ def create_all_items(world: GameWorld) -> None:
             case "920 Zenny":
                 for _ in range(2):
                     itemPool.append(world.create_item(itemName))
+            case "Nothing":
+               #for _ in range(5):
+               #    itemPool.append(world.create_item(itemName))
+                pass
             case "Buster Max":
                 pass
             case _:
