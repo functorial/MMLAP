@@ -1,6 +1,7 @@
 from __future__ import annotations
 from .regions import get_regionDataDict
-from BaseClasses import Location
+from . import items
+from BaseClasses import Location, ItemClassification
 from enum import IntEnum
 from typing import TYPE_CHECKING, NamedTuple
 
@@ -24,7 +25,7 @@ locationDataDict = {
     "Ocean tower, Right chest"                                      : LocationData(1,   LocationCategory.CONTAINER,  True),
     "Ocean tower, Left chest"                                       : LocationData(2,   LocationCategory.CONTAINER,  True),
     "Apple market, Electric goods box"                              : LocationData(3,   LocationCategory.CONTAINER, False),
-    "Apple market, Book store box"                                  : LocationData(4,   LocationCategory.CONTAINER, False),
+   #"Apple market, Book store box"                                  : LocationData(4,   LocationCategory.CONTAINER, False),
     "Apple market, Junk store box"                                  : LocationData(5,   LocationCategory.CONTAINER, False),
     "Apple market, North pail"                                      : LocationData(6,   LocationCategory.CONTAINER, False),
     "Apple market, South pail"                                      : LocationData(7,   LocationCategory.CONTAINER, False),
@@ -34,15 +35,15 @@ locationDataDict = {
     "Downtown, Center pail"                                         : LocationData(11,  LocationCategory.CONTAINER, False),
     "Downtown, Library pail"                                        : LocationData(12,  LocationCategory.CONTAINER, False),
     "Uptown, Hospital right pail"                                   : LocationData(13,  LocationCategory.CONTAINER, False),
-    "Uptown, Hospital left pail"                                    : LocationData(14,  LocationCategory.CONTAINER, False),
+   #"Uptown, Hospital left pail"                                    : LocationData(14,  LocationCategory.CONTAINER, False),
     "Uptown, Ocean corner pail"                                     : LocationData(15,  LocationCategory.CONTAINER, False),
     "Wily's Boat, Right box"                                        : LocationData(16,  LocationCategory.CONTAINER, False),
-    "Wily's Boat, Left box"                                         : LocationData(17,  LocationCategory.CONTAINER, False),
+   #"Wily's Boat, Left box"                                         : LocationData(17,  LocationCategory.CONTAINER, False),
     "Wily's Boat, Pail"                                             : LocationData(18,  LocationCategory.CONTAINER, False),
     "Yass plains, Plateau house box"                                : LocationData(19,  LocationCategory.CONTAINER, False),
-    "Yass plains, Plateau house pail"                               : LocationData(20,  LocationCategory.CONTAINER, False),
+   #"Yass plains, Plateau house pail"                               : LocationData(20,  LocationCategory.CONTAINER, False),
     "Yass plains, Behind hideout pail"                              : LocationData(21,  LocationCategory.CONTAINER, False),
-    "Yass plains, Across hideout pail"                              : LocationData(22,  LocationCategory.CONTAINER, False),
+   #"Yass plains, Across hideout pail"                              : LocationData(22,  LocationCategory.CONTAINER, False),
     "Underground ruins, Junk store man chest"                       : LocationData(23,  LocationCategory.CONTAINER, False),
     "Underground ruins, Junk store man hole"                        : LocationData(24,  LocationCategory.CONTAINER, False),
     "Underground ruins, Main gate entrance chest"                   : LocationData(25,  LocationCategory.CONTAINER, False),
@@ -124,7 +125,7 @@ locationDataDict = {
     "Karumuna Bash Trio defeated"                                   : LocationData(101, LocationCategory.COMBAT,    False),
     "Focke-Wulf defeated"                                           : LocationData(102, LocationCategory.COMBAT,    False),
     "Theodore Bruno defeated"                                       : LocationData(103, LocationCategory.COMBAT,    False),
-    "Rescue the shop owner's husband"                               : LocationData(104, LocationCategory.QUEST,     False),
+   #"Rescue the shop owner's husband"                               : LocationData(104, LocationCategory.QUEST,     False),
     "Race Technical Course Rank A"                                  : LocationData(105, LocationCategory.QUEST,     False),
     "Beast Hunter Rank A"                                           : LocationData(106, LocationCategory.QUEST,     False),
     "Race Straight Course Rank A"                                   : LocationData(107, LocationCategory.QUEST,     False),
@@ -172,3 +173,16 @@ def create_regular_locations(world: GameWorld) -> None:
 
 def create_events(world: GameWorld) -> None:
     return None
+
+def lock_missables_to_filler(world) -> None:
+    # Assign a random filler item to each missable location
+    filler_item_names = [
+        name for name, cls in items.ITEM_NAME_TO_CATEGORY.items()
+        if cls == ItemClassification.filler
+    ]
+    world.locked_missable_filler_names = []
+    missable_locations = [loc for loc in world.multiworld.get_locations(world.player) if locationDataDict[loc.name].isMissable]
+    for loc in missable_locations:
+        name = world.random.choice(filler_item_names) 
+        loc.place_locked_item(world.create_item(name))
+        world.locked_missable_filler_names.append(name)

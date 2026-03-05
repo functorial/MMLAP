@@ -45,7 +45,8 @@ namespace MMLAP.Helpers
         public static void ReceiveBusterPart(ItemData itemData)
         {
             ulong busterInv = Addresses.UnequippedBusterInvStart.Address;
-            for (uint i = 0; i < 34; i++)
+            int busterInvLength = Addresses.UnequippedBusterInvStart.ByteLength ?? 34;
+            for (uint i = 0; i < busterInvLength; i++)
             {
                 ulong busterInvSlot = busterInv + i;
                 byte invSlotVal = Memory.ReadByte(busterInvSlot);
