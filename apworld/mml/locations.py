@@ -1,6 +1,7 @@
 from __future__ import annotations
 from .regions import get_regionDataDict
-from BaseClasses import Location
+from . import items
+from BaseClasses import Location, ItemClassification
 from enum import IntEnum
 from typing import TYPE_CHECKING, NamedTuple
 
@@ -172,3 +173,16 @@ def create_regular_locations(world: GameWorld) -> None:
 
 def create_events(world: GameWorld) -> None:
     return None
+
+def lock_missables_to_filler(world) -> None:
+    # Assign a random filler item to each missable location
+    filler_item_names = [
+        name for name, cls in items.ITEM_NAME_TO_CATEGORY.items()
+        if cls == ItemClassification.filler
+    ]
+    world.locked_missable_filler_names = []
+    missable_locations = [loc for loc in world.multiworld.get_locations(world.player) if locationDataDict[loc.name].isMissable]
+    for loc in missable_locations:
+        name = world.random.choice(filler_item_names) 
+        loc.place_locked_item(world.create_item(name))
+        world.locked_missable_filler_names.append(name)

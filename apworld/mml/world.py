@@ -24,6 +24,7 @@ class GameWorld(World):
     def create_regions(self) -> None:
         regions.create_and_connect_regions(self)
         locations.create_all_locations(self)
+        locations.lock_missables_to_filler(self)
 
     def set_rules(self) -> None:
         rules.set_all_rules(self)

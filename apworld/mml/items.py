@@ -125,25 +125,45 @@ def create_item_with_correct_classification(world: GameWorld, name: str) -> Game
 
 def create_all_items(world: GameWorld) -> None:
     itemPool: list[GameItem] = []
+    
+    # Get filler items 
+    locked_counts: dict[str, int] = {}
+    for name in getattr(world, "locked_missable_filler_names", []):
+        locked_counts[name] = locked_counts.get(name, 0) + 1
+
+    # Assign quantities to items
     for itemName in itemDataDict.keys():
+        add_count = 1
         match itemName:
             case "10 Zenny":
                 for _ in range(2):
                     itemPool.append(world.create_item(itemName))
+                    add_count = 2
             case "20 Zenny":
                 for _ in range(2):
                     itemPool.append(world.create_item(itemName))
+                    add_count = 2
             case "920 Zenny":
                 for _ in range(2):
                     itemPool.append(world.create_item(itemName))
+                    add_count = 2
             case "Nothing":
                #for _ in range(5):
                #    itemPool.append(world.create_item(itemName))
-                pass
+                add_count = 0
             case "Buster Max":
-                pass
+                add_count = 0
             case _:
-                itemPool.append(world.create_item(itemName))
+                add_count = 1
+
+        # Handle quantities for locked (missable) location items 
+        locked_for_name = locked_counts.get(itemName, 0)
+        to_add = add_count - locked_for_name
+        if to_add < 0:
+            to_add = 0
+        locked_counts[itemName] = max(0, locked_for_name - add_count)
+        for _ in range(to_add):
+            itemPool.append(world.create_item(itemName))
 
     number_of_items = len(itemPool)
     number_of_unfilled_locations = len(world.multiworld.get_unfilled_locations(world.player))
