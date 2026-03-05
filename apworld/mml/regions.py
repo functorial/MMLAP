@@ -57,6 +57,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     
     def has_drill_arm() -> Callable[[CollectionState], bool]:
         return has_item("Blunted Drill")
+    
+    def has_jet_skates() -> Callable[[CollectionState], bool]:
+        return has_all_items(["Rollerboard", "Old Hoverjets"])
 
     def has_explosive_wep() -> Callable[[CollectionState], bool]:
         has_powered_buster = has_item("Cannon Kit")
@@ -545,7 +548,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     ExitData("Uptown - TV Station (Beast Hunter Game)"),
                     ExitData("Uptown - TV Station (Balloon Fantasy Game)"),
-                    ExitData("Uptown - TV Station (Racing Game)", has_all_items("Rollerboard", "Old Hoverjets")),
+                    ExitData("Uptown - TV Station (Racing Game)", has_jet_skates()),
                 ]
             ),
         "Uptown - TV Station (Beast Hunter Game)": 
