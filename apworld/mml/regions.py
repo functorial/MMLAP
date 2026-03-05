@@ -114,7 +114,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         return has_all_items()
     
     def has_completed_lake_jyun() -> Callable[[CollectionState], bool]:
-        return has_all(has_jump_springs(), has_lake_jyun_keys())
+        return has_all([has_jump_springs(), has_lake_jyun_keys()])
     
     def has_completed_clozer_woods() -> Callable[[CollectionState], bool]:
         return has_all([has_jump_springs(), has_lake_jyun_keys(), has_clozer_woods_keys()])
