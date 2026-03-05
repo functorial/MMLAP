@@ -13,10 +13,24 @@ class GameRegionData(NamedTuple):
     locationNameList: list[str]
     exitDataList: list[ExitData]
 
+def run_unit_tests(world:GameWorld):
+    region_data_dict = get_regionDataDict(world)
+    # Test 1: Print one-way entrances
+    one_way_entrances = []
+    for source_region_name in region_data_dict.keys():
+        for exitData in region_data_dict[source_region_name].exitDataList:
+            target_region_name = exitData.defaultTargetRegionName
+            target_region_exits = region_data_dict[target_region_name].exitDataList
+            if source_region_name not in [target_target.defaultTargetRegionName for target_target in target_region_exits]:
+                one_way_entrances.append(f"{source_region_name} -> {target_region_name}")
+    print("One-way entrances:")
+    for e in one_way_entrances:
+        print(f"\t{e}")
+
 def create_and_connect_regions(world: GameWorld) -> None:
     regionDataDict = get_regionDataDict(world)
-   
-   # Creating all regions
+    run_unit_tests(world)
+    # Creating all regions
     regions = []
     for region_name in regionDataDict.keys():
         regions.append(Region(region_name, world.player, world.multiworld))
@@ -39,13 +53,13 @@ def create_and_connect_regions(world: GameWorld) -> None:
             )
 
 def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
-    def has_item(item_name: str):
+    def has_item(item_name: str) -> Callable[[CollectionState], bool]:
         return lambda state: state.has(item_name, world.player)
     
     def has_all(bool_func_list: list[Callable[[CollectionState], bool]]=[]) -> Callable[[CollectionState], bool]:
         return lambda state: all([f(state) for f in bool_func_list])
     
-    def has_all_items(item_names:list[str]=[]):
+    def has_all_items(item_names:list[str]=[]) -> Callable[[CollectionState], bool]:
         return has_all([has_item(item_name) for item_name in item_names])
     
     def has_any(bool_func_list: list[Callable[[CollectionState], bool]]) -> Callable[[CollectionState], bool]:
@@ -58,7 +72,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         return has_item("Blunted Drill")
     
     def has_grand_grenade() -> Callable[[CollectionState], bool]:
-        return has_item("")
+        return has_item("Bomb Schematic")
     
     def can_destroy_cracked_walls() -> Callable[[CollectionState], bool]:
         return has_all([has_drill_arm(), has_grand_grenade()])
@@ -70,11 +84,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         has_powered_buster = has_item("Cannon Kit")
         has_grand_grenade = has_item("Bomb Schematic")
         has_active_buster = has_item("Guidance Unit")
-        has_spread_buster = has_all_items([
-            "Ancient Book",
-            "Old Launcher",
-           #"Arm Supporter"
-        ]) 
+        has_spread_buster = has_all_items(["Ancient Book", "Old Launcher"])
         return has_any([has_powered_buster, has_grand_grenade, has_active_buster, has_spread_buster])
 
     def has_completed_museum() -> Callable[[CollectionState], bool]:
@@ -115,14 +125,11 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         ]
         return has_all_items(items)
 
-    def has_completed_cardon_forest() -> Callable[[CollectionState], bool]:
-        return has_all_items()
-    
     def has_completed_lake_jyun() -> Callable[[CollectionState], bool]:
-        return has_all([has_jump_springs(), has_lake_jyun_keys()])
+        return has_all([has_jump_springs, has_lake_jyun_keys])
     
     def has_completed_clozer_woods() -> Callable[[CollectionState], bool]:
-        return has_all([has_jump_springs(), has_lake_jyun_keys(), has_clozer_woods_keys()])
+        return has_all([has_completed_lake_jyun, has_clozer_woods_keys, has_explosive_wep])
 
     # Current Assumptions:
     # - Yellow Refractor = No requirement b/c cardon keys aren't randomized
@@ -183,10 +190,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Surface Exit)"),
                     ExitData("Outside Cardon Forest Sub-Gate"),
                     ExitData("Flutter - Common Room", has_completed_lake_jyun()),
-                    ExitData("Support Car / R&D Room"),
-                    ExitData("Support Car / R&D Room (Gift Flower)"),#, has_item("Flower")),
-                    ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
-                    ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring"))
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Flutter - Common Room": 
@@ -200,10 +204,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Flutter - Mega Man's Room"),
                     ExitData("Flutter - Roll's Room"),
                     ExitData("Clozer Woods Sub-Gate - Entrance"),
-                    ExitData("Support Car / R&D Room"),
-                    ExitData("Support Car / R&D Room (Gift Flower)"),#, has_item("Flower")),
-                    ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
-                    ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring"))
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Flutter - Barrell's Room": 
@@ -239,7 +240,16 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
-                    ExitData("Flutter - Common Room")
+                    ExitData("Support Car / R&D Room (Gift Flower)"),#, has_item("Flower")),
+                    ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
+                    ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring")),
+                    ExitData("Flutter - Common Room"),
+                    ExitData("Cardon Forest"),
+                    ExitData("Downtown - Outside"),
+                    ExitData("City Hall - Outside"),
+                    ExitData("Uptown"),
+                    ExitData("Old City"),
+                    ExitData("Outside Cardon Forest Sub-Gate")
                 ]
             ),
         "Support Car / R&D Room (Gift Flower)": 
@@ -248,7 +258,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     "Gift Flower to Roll"
                 ],
                 [
-                    ExitData("Flutter - Common Room")
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Support Car / R&D Room (Gift Music Box)": 
@@ -257,7 +267,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     "Gift Music Box to Roll"
                 ],
                 [
-                    ExitData("Flutter - Common Room")
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Support Car / R&D Room (Gift Ring)": 
@@ -266,7 +276,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     "Gift Ring to Roll"
                 ],
                 [
-                    ExitData("Flutter - Common Room")
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Apple Market": 
@@ -368,15 +378,11 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Downtown - Outside (Discarded Saw)"),# , has_item("Pick")),
                     ExitData("Downtown - Library"),
                     ExitData("City Hall - Outside"),
-                    ExitData("City Hall - Outside (Boss Fight)"),
                     ExitData("Uptown"),
                     ExitData("Old City"),
                     ExitData("Underground Ruins - City Sewer"),
                     ExitData("Downtown Sub-City - City", has_completed_clozer_woods()),
-                    ExitData("Support Car / R&D Room"),
-                    ExitData("Support Car / R&D Room (Gift Flower)"),#, has_item("Flower")),
-                    ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
-                    ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring"))
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Downtown - Outside (Boss fight)": 
@@ -436,10 +442,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("City Hall - Police Station"),
                     ExitData("City Hall - Bank"),
                     ExitData("Yass Plains - Outside"),
-                    ExitData("Support Car / R&D Room"),
-                    ExitData("Support Car / R&D Room (Gift Flower)"),#, has_item("Flower")),
-                    ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
-                    ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring"))
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "City Hall - Outside (Boss Fight)": 
@@ -457,7 +460,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
-                    ExitData("City Hall - Outside")
+                    ExitData("City Hall - Outside"),
+                    ExitData("City Hall - Amelia's Office")
                 ]
             ),
         "City Hall - Amelia's Office": 
@@ -475,7 +479,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
-                    ExitData("City Hall - Outside")
+                    ExitData("City Hall - Outside"),
+                    ExitData("City Hall - Inspector's Office")
                 ]
             ),
         "City Hall - Inspector's Office": 
@@ -510,10 +515,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Wily's Boat - Walkway"),
                     ExitData("Uptown - TV Station"),
                     ExitData("Uptown Sub-City - City", has_completed_clozer_woods()),
-                    ExitData("Support Car / R&D Room"),
-                    ExitData("Support Car / R&D Room (Gift Flower)"),#, has_item("Flower")),
-                    ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
-                    ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring"))
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Uptown - Hospital": 
@@ -551,6 +553,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
+                    ExitData("Uptown"),
                     ExitData("Uptown - TV Station (Beast Hunter Game)"),
                     ExitData("Uptown - TV Station (Balloon Fantasy Game)"),
                     ExitData("Uptown - TV Station (Racing Game)", has_jet_skates()),
@@ -624,7 +627,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("Wily's Boat - Inside"),
-                    ExitData("Lake Jyun - Boss Fight", has_completed_cardon_forest())
+                    ExitData("Lake Jyun - Boss Fight"),#, has_completed_cardon_forest()),
+                    ExitData("Lake Jyun - Outside Sub-Gate"),#, has_completed_cardon_forest())
                 ]
             ),
         "Museum - Floor 1": 
@@ -748,10 +752,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Outside Main Gate"),
                     ExitData("Old City - Power Plant"),
                     ExitData("Old City (Inside Warehouse Gate)", has_completed_clozer_woods()), # After killing Bruno
-                    ExitData("Support Car / R&D Room"),
-                    ExitData("Support Car / R&D Room (Gift Flower)"),#, has_item("Flower")),
-                    ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
-                    ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring"))
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Old City (Inside Warehouse Gate)": 
@@ -772,7 +773,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     "Theodore Bruno defeated"
                 ],
                 [
-                    ExitData("Old City")
+                    ExitData("Old City (Inside Warehouse Gate)")
                 ]
             ),
         "Old City - Power Plant": 
@@ -874,7 +875,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     "Marlwolf defeated"
                 ],
                 [
-                    ExitData("Yass Plains - Outside")
+                    ExitData("Clozer Woods - Bridge Area")
                 ]
             ),
         "Outside Cardon Forest Sub-Gate": # TODO: A big wooden gate appears when pirates attack, and is destroyed by the car after. Ignoring at the moment. 
@@ -885,10 +886,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     ExitData("Cardon Forest"),
                     ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower)"),
-                    ExitData("Support Car / R&D Room"),
-                    ExitData("Support Car / R&D Room (Gift Flower)"),#, has_item("Flower")),
-                    ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
-                    ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring"))
+                    ExitData("Support Car / R&D Room")
                 ]
             ),
         "Cardon Forest Sub-Gate - Refractor Room (Lower)": 
@@ -1031,7 +1029,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Pyramid)", has_jump_springs()),
                     ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Upper East)", has_jump_springs()),
                     ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Upper West)", has_jump_springs()),
-                    ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Upper North)", has_jump_springs())
+                    ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Upper North)", has_jump_springs()),
+                    ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Upper South)", has_jump_springs())
                 ]
             ),
         "Lake Jyun Sub-Gate - Sharukurusu Room (Upper North)": 
@@ -1105,6 +1104,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
+                    ExitData("Clozer Woods Sub-Gate - Entrance"),
                     ExitData("Clozer Woods Sub-Gate - Control Room"),
                     ExitData("Clozer Woods Sub-Gate - Sharukurusu Ambush")
                 ]
@@ -1136,6 +1136,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     
                 ],
                 [
+                    ExitData("Clozer Woods Sub-Gate - Sharukurusu Ambush"),
                     ExitData("Clozer Woods Sub-Gate - Side Elevator Room (Lower)")
                 ]
             ),
@@ -1194,7 +1195,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     
                 ],
                 [
-                    ExitData("Clozer Woods Sub-Gate - Pillar Room (East Cliff)"),
+                    ExitData("Clozer Woods Sub-Gate - Pillar Room (Lower Level)"),
                     ExitData("Clozer Woods Sub-Gate - Breakable Ceiling (Upper)", has_all([
                         has_explosive_wep(),
                         has_jump_springs()
@@ -1207,7 +1208,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     
                 ],
                 [
-                    ExitData("Clozer Woods Sub-Gate - Pillar Room (Lower Level)", has_explosive_wep()),
+                    ExitData("Clozer Woods Sub-Gate - Breakable Ceiling (Lower)", has_explosive_wep()),
                     ExitData("Clozer Woods Sub-Gate - Boss Room")
                 ]
             ),
@@ -1259,7 +1260,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     "Focke-Wulf defeated"
                 ],
                 [
-                    ExitData("Flutter - Common Room")
+                    ExitData("Clozer Woods Sub-Gate - Entrance")
                 ]
             ),
         "Underground Ruins - Orudakoitan Bridge Area (Ledges)": 
@@ -1301,7 +1302,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("Underground Ruins - Drillable Wall Area (Right)", has_drill_arm()),
-                    ExitData("Underground Ruins - Drillable Wall Area (Left-Middle, Upper)", has_drill_arm()),
+                    ExitData("Underground Ruins - Drillable Wall Area (Left-Middle, Lower)", has_drill_arm()),
                     ExitData("Underground Ruins - Drillable Wall Area (Right-Middle, Upper)", has_jump_springs())
                 ]
             ),
@@ -1420,7 +1421,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Surface Exit)"),
-                    ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Junk Man Rescue Exit)")
+                    ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Junk Man Rescue Exit)"),
+                    ExitData("Underground Ruins - Shekuten + Kuruguru Area (Shekuten Lower)")
                 ]
             ),
         "Underground Ruins - Cardon Forest Sub-Gate Area (Junk Man Rescue Exit)": 
@@ -1452,7 +1454,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Junk Man Rescue Exit)"),
-                    ExitData("Underground Ruins - Junk Man Rescue Area (Sewer Ledge)", has_jump_springs())
+                    ExitData("Underground Ruins - Junk Man Rescue Area (Sewer Ledge)", has_jump_springs()),
+                    ExitData("Cardon Forest")
                 ]
             ),
         "Underground Ruins - Junk Man Rescue Area (Sewer Ledge)": 
@@ -1489,11 +1492,13 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Shekuten + Kuruguru Area (Kuruguru Upper)": 
             GameRegionData(
                 [
-                    # Connects (Shekuten Lower), (Exit to Kuruguru)
                     "Underground ruins, Shekuten pillar room chest",
                     "Underground ruins, Kuruguru obstacle hole"
                 ],
-                []
+                [
+                    ExitData("Underground Ruins - Shekuten + Kuruguru Area (Shekuten Lower)"),
+                    ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Exit to Kuruguru)")
+                ]
             ),
         "Underground Ruins - Lake Jyun Sub-Gate Area (Exit to Kuruguru)": 
             GameRegionData(
@@ -1501,7 +1506,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     "Underground ruins, Drillable pillar room south chest"
                 ],
                 [
-                    ExitData("Underground Ruins - Shekuten + Kuruguru Area (Shekuten Lower)"),
+                    ExitData("Underground Ruins - Shekuten + Kuruguru Area (Kuruguru Upper)"),
                     ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Gorubeshu Side Room)", can_destroy_cracked_walls()),
                     ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Gorubeshu Walls)", can_destroy_cracked_walls())
                 ]
