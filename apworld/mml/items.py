@@ -27,9 +27,9 @@ itemDataDict = {
   # "Cardon Forest Sub-Gate Key 1"      : ItemData(0x022E, ItemClassification.progression                             ), # progresses main story -> progression
   # "Cardon Forest Sub-Gate Key 2"      : ItemData(0x022F, ItemClassification.progression                             ), # progresses main story -> progression
   # "Cardon Forest Sub-Gate Key 3"      : ItemData(0x0230, ItemClassification.progression                             ), # progresses main story -> progression
-    "Lake Jyun Sub-Gate Starter Key 1"  : ItemData(0x0231, ItemClassification.progression                             ), # progresses main story -> progression
-    "Lake Jyun Sub-Gate Starter Key 2"  : ItemData(0x0232, ItemClassification.progression                             ), # progresses main story -> progression
-    "Lake Jyun Sub-Gate Starter Key 3"  : ItemData(0x0233, ItemClassification.progression                             ), # progresses main story -> progression
+    "Lake Jyun Sub-Gate Key 1"  : ItemData(0x0231, ItemClassification.progression                             ), # progresses main story -> progression
+    "Lake Jyun Sub-Gate Key 2"  : ItemData(0x0232, ItemClassification.progression                             ), # progresses main story -> progression
+    "Lake Jyun Sub-Gate Key 3"  : ItemData(0x0233, ItemClassification.progression                             ), # progresses main story -> progression
     "Clozer Woods Sub-Gate Key 1"       : ItemData(0x0234, ItemClassification.progression                             ), # progresses main story -> progression
     "Clozer Woods Sub-Gate Key 2"       : ItemData(0x0235, ItemClassification.progression                             ), # progresses main story -> progression
     "Clozer Woods Sub-Gate Key 3"       : ItemData(0x0236, ItemClassification.progression                             ), # progresses main story -> progression
