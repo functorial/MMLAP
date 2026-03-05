@@ -15,7 +15,7 @@ class GameRegionData(NamedTuple):
     exitDataList: list[ExitData]
 
 def create_and_connect_regions(world: GameWorld) -> None:
-    regionDataDict = get_regionDataDict()
+    regionDataDict = get_regionDataDict(world)
    
    # Creating all regions
     regions = []
