@@ -1,5 +1,4 @@
 from __future__ import annotations
-from .locations import LocationData, locationDataDict
 from BaseClasses import Region, CollectionState
 from typing import TYPE_CHECKING, Callable, NamedTuple, Dict
 
@@ -11,7 +10,7 @@ class ExitData(NamedTuple):
     rule: Callable[[CollectionState], bool] = lambda state: True
 
 class GameRegionData(NamedTuple):
-    locationDataList: list[LocationData]
+    locationNameList: list[str]
     exitDataList: list[ExitData]
 
 def create_and_connect_regions(world: GameWorld) -> None:
@@ -148,8 +147,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Ocean Tower - Room 2": 
             GameRegionData(
                 [
-                    locationDataDict["Ocean tower, Right chest"],
-                    locationDataDict["Ocean tower, Left chest"]
+                    "Ocean tower, Right chest",
+                    "Ocean tower, Left chest"
                 ],
                 [
                     ExitData("Ocean Tower - Room 1"),
@@ -159,7 +158,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Ocean Tower - Room 3": 
             GameRegionData(
                 [
-                    locationDataDict["Escape the Ocean Tower"]
+                    "Escape the Ocean Tower"
                 ],
                 [
                     ExitData("Ocean Tower - Room 2"),    # NOTE: This doesn't actually connect in game, but I'm forcing it in logic
@@ -204,7 +203,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Flutter - Barrell's Room": 
             GameRegionData(
                 [
-                    locationDataDict["Flutter, Study chest"]
+                    "Flutter, Study chest"
                 ],
                 [
                     ExitData("Flutter - Common Room")
@@ -240,7 +239,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Support Car / R&D Room (Gift Flower)": 
             GameRegionData(
                 [
-                    locationDataDict["Gift Flower to Roll"]
+                    "Gift Flower to Roll"
                 ],
                 [
                     ExitData("Flutter - Common Room")
@@ -249,7 +248,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Support Car / R&D Room (Gift Music Box)": 
             GameRegionData(
                 [
-                    locationDataDict["Gift Music Box to Roll"]
+                    "Gift Music Box to Roll"
                 ],
                 [
                     ExitData("Flutter - Common Room")
@@ -258,7 +257,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Support Car / R&D Room (Gift Ring)": 
             GameRegionData(
                 [
-                    locationDataDict["Gift Ring to Roll"]
+                    "Gift Ring to Roll"
                 ],
                 [
                     ExitData("Flutter - Common Room")
@@ -267,11 +266,11 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Apple Market": 
             GameRegionData(
                 [
-                    locationDataDict["Apple market, Electric goods box"],
-                    locationDataDict["Apple market, Book store box"],
-                    locationDataDict["Apple market, Junk store box"],
-                    locationDataDict["Apple market, North pail"],
-                    locationDataDict["Apple market, South pail"]
+                    "Apple market, Electric goods box",
+                    "Apple market, Book store box",
+                    "Apple market, Junk store box",
+                    "Apple market, North pail",
+                    "Apple market, South pail"
                 ],
                 [
                     ExitData("Cardon Forest"),
@@ -298,7 +297,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Apple Market - Junk Shop (Turn-in Rescue)": 
             GameRegionData(
                 [
-                    locationDataDict["Rescue the shop owner's husband"]
+                    "Rescue the shop owner's husband"
                 ],
                 [
                     ExitData("Apple Market - Junk Shop")
@@ -352,8 +351,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Downtown - Outside": 
             GameRegionData(
                 [
-                    locationDataDict["Downtown, South east peace sign pail"],
-                    locationDataDict["Downtown, Center east pail"]
+                    "Downtown, South east peace sign pail",
+                    "Downtown, Center east pail"
                 ],
                 [
                     ExitData("Apple Market"),
@@ -377,7 +376,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Downtown - Outside (Boss fight)": 
             GameRegionData(
                 [
-                    locationDataDict["Ferdinand defeated"]
+                    "Ferdinand defeated"
                 ],
                 [
                     ExitData("Downtown - Outside")
@@ -386,7 +385,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Downtown - Outside (Blumebear pail)": 
             GameRegionData(
                 [
-                    locationDataDict["Downtown, Don't kick us pail"]
+                    "Downtown, Don't kick us pail"
                 ],
                 [
                     ExitData("Downtown - Outside")
@@ -395,7 +394,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Downtown - Outside (Lost Bag)": 
             GameRegionData(
                 [
-                    locationDataDict["Downtown, Center pail"]         
+                    "Downtown, Center pail"         
                 ],
                 [
                     ExitData("Downtown - Outside")
@@ -404,7 +403,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Downtown - Outside (Discarded Saw)": 
             GameRegionData(
                 [
-                    locationDataDict["Downtown, Library pail"]
+                    "Downtown, Library pail"
                 ],
                 [
                     ExitData("Downtown - Outside")
@@ -440,7 +439,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "City Hall - Outside (Boss Fight)": 
             GameRegionData(
                 [
-                    locationDataDict["Bon Bonne defeated"]
+                    "Bon Bonne defeated"
                 ],
                 [
                     ExitData("City Hall - Amelia's Office")
@@ -494,9 +493,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Uptown": 
             GameRegionData(
                 [
-                    locationDataDict["Uptown, Hospital right pail"],
-                    locationDataDict["Uptown, Hospital left pail"],
-                    locationDataDict["Uptown, Ocean corner pail"]
+                    "Uptown, Hospital right pail",
+                    "Uptown, Hospital left pail",
+                    "Uptown, Ocean corner pail"
                 ],
                 [
                     ExitData("Downtown - Outside"),
@@ -525,7 +524,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Uptown - Hospital (Missing woman turn-in)": 
             GameRegionData(
                 [
-                    locationDataDict["Save the missing woman"]
+                    "Save the missing woman"
                 ],
                 [
                     ExitData("Uptown - Hospital")
@@ -534,7 +533,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Uptown - Hospital (Ira's Room)": 
             GameRegionData(
                 [
-                    locationDataDict["Cure Ira's illness"]
+                    "Cure Ira's illness"
                 ],
                 [
                     ExitData("Uptown - Hospital")
@@ -554,7 +553,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Uptown - TV Station (Beast Hunter Game)": 
             GameRegionData(
                 [
-                    locationDataDict["Beast Hunter Rank A"]
+                    "Beast Hunter Rank A"
                 ],
                 [
                     ExitData("Uptown - TV Station")
@@ -563,7 +562,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Uptown - TV Station (Balloon Fantasy Game)": 
             GameRegionData(
                 [
-                    locationDataDict["Balloon Fantasy Rank A"]
+                    "Balloon Fantasy Rank A"
                 ],
                 [
                     ExitData("Uptown - TV Station")
@@ -572,9 +571,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Uptown - TV Station (Racing Game)": 
             GameRegionData(
                 [
-                    locationDataDict["Race Technical Course Rank A"],
-                    locationDataDict["Race Straight Course Rank A"],
-                    locationDataDict["Race Left Curve Course Rank A"]
+                    "Race Technical Course Rank A",
+                    "Race Straight Course Rank A",
+                    "Race Left Curve Course Rank A"
                 ],
                 [
                     ExitData("Uptown - TV Station")
@@ -583,8 +582,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Wily's Boat - Walkway": 
             GameRegionData(
                 [
-                    locationDataDict["Wily's Boat, Right box"],
-                    locationDataDict["Wily's Boat, Left box"]
+                    "Wily's Boat, Right box",
+                    "Wily's Boat, Left box"
                 ],
                 [
                     ExitData("Uptown"),
@@ -606,7 +605,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Wily's Boat - Mechanic Area": 
             GameRegionData(
                 [
-                    locationDataDict["Wily's Boat, Pail"]
+                    "Wily's Boat, Pail"
                 ],
                 [
                     ExitData("Wily's Boat - Inside")
@@ -635,7 +634,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Museum - Floor 2": 
             GameRegionData(
                 [
-                    locationDataDict["Museum donation, Old Bone"]
+                    "Museum donation, Old Bone"
                 ],
                 [
                     ExitData("Museum - Floor 1"),
@@ -653,7 +652,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Museum - Floor 2 (Old Bone)": 
             GameRegionData(
                 [
-                    locationDataDict["Museum donation, Old Bone"]
+                    "Museum donation, Old Bone"
                 ],
                 [
                     ExitData("Museum - Floor 2")
@@ -663,7 +662,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     # Old heater currently isn't in the item pool
-                    locationDataDict["Museum donation, Old Heater"]
+                    "Museum donation, Old Heater"
                 ],
                 [
                     ExitData("Museum - Floor 2")
@@ -672,7 +671,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Museum - Floor 2 (Old Doll)": 
             GameRegionData(
                 [
-                    locationDataDict["Museum donation, Old Doll"]
+                    "Museum donation, Old Doll"
                 ],
                 [
                     ExitData("Museum - Floor 2")
@@ -681,7 +680,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Museum - Floor 2 (Antique Bell)": 
             GameRegionData(
                 [
-                    locationDataDict["Museum donation, Antique Bell"]
+                    "Museum donation, Antique Bell"
                 ],
                 [
                     ExitData("Museum - Floor 2")
@@ -690,7 +689,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Museum - Floor 2 (Giant Horn)": 
             GameRegionData(
                 [
-                    locationDataDict["Museum donation, Giant Horn"]
+                    "Museum donation, Giant Horn"
                 ],
                 [
                     ExitData("Museum - Floor 2")
@@ -699,7 +698,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Museum - Floor 2 (Shiny Object)": 
             GameRegionData(
                 [
-                    locationDataDict["Museum donation, Shiny Object"]
+                    "Museum donation, Shiny Object"
                 ],
                 [
                     ExitData("Museum - Floor 2")
@@ -708,7 +707,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Museum - Floor 2 (Old Shield)": 
             GameRegionData(
                 [
-                    locationDataDict["Museum donation, Old Shield"]
+                    "Museum donation, Old Shield"
                 ],
                 [
                     ExitData("Museum - Floor 2")
@@ -717,7 +716,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Museum - Floor 2 (Shiny Red Stone)": 
             GameRegionData(
                 [
-                    locationDataDict["Museum donation, Shiny Red Stone"]
+                    "Museum donation, Shiny Red Stone"
                 ],
                 [
                     ExitData("Museum - Floor 2")
@@ -726,8 +725,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Museum - Floor 2 - (Exhibit Complete)": 
             GameRegionData(
                 [
-                    locationDataDict["Complete the Museum exhibit"],
-                    locationDataDict["Take dangerous object from museum visitor"]
+                    "Complete the Museum exhibit",
+                    "Take dangerous object from museum visitor"
                 ],
                 [
                     ExitData("Museum - Floor 2")
@@ -764,7 +763,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Old City (Boss Fight)": 
             GameRegionData(
                 [
-                    locationDataDict["Theodore Bruno defeated"]
+                    "Theodore Bruno defeated"
                 ],
                 [
                     ExitData("Old City")
@@ -792,10 +791,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Yass Plains - Outside": 
             GameRegionData(
                 [
-                    locationDataDict["Yass plains, Plateau house box"],
-                    locationDataDict["Yass plains, Plateau house pail"],
-                    locationDataDict["Yass plains, Behind hideout pail"],
-                    locationDataDict["Yass plains, Across hideout pail"]
+                    "Yass plains, Plateau house box",
+                    "Yass plains, Plateau house pail",
+                    "Yass plains, Behind hideout pail",
+                    "Yass plains, Across hideout pail"
                 ],
                 [
                     ExitData("City Hall - Outside"),
@@ -866,7 +865,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Clozer Woods - Boss Fight": 
             GameRegionData(
                 [
-                    locationDataDict["Marlwolf defeated"]
+                    "Marlwolf defeated"
                 ],
                 [
                     ExitData("Yass Plains - Outside")
@@ -910,9 +909,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Cardon Forest Sub-Gate - Cliff Room": 
             GameRegionData(
                 [
-                    locationDataDict["Cardon Forest Sub-Gate, Sharukurusu floor hole"],
-                    locationDataDict["Cardon Forest Sub-Gate, Cliff hole"],
-                    locationDataDict["Cardon Forest Sub-Gate, Cliff chest"]
+                    "Cardon Forest Sub-Gate, Sharukurusu floor hole",
+                    "Cardon Forest Sub-Gate, Cliff hole",
+                    "Cardon Forest Sub-Gate, Cliff chest"
                 ],
                 [
                     ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower)"),
@@ -922,9 +921,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Cardon Forest Sub-Gate - Conveyor Belts": 
             GameRegionData(
                 [
-                    locationDataDict["Cardon Forest Sub-Gate, Bottom conveyor hole"],
-                    locationDataDict["Cardon Forest Sub-Gate, Middle conveyor hole"],
-                    locationDataDict["Cardon Forest Sub-Gate, Middle switch chest"]
+                    "Cardon Forest Sub-Gate, Bottom conveyor hole",
+                    "Cardon Forest Sub-Gate, Middle conveyor hole",
+                    "Cardon Forest Sub-Gate, Middle switch chest"
                 ],
                 [
                     ExitData("Cardon Forest Sub-Gate - Cliff Room") # Technically three exits
@@ -934,7 +933,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     # Requires +2 Range upgrade
-                    locationDataDict["Balkon Gerät defeated"]
+                    "Balkon Gerät defeated"
                 ],
                 [
                     ExitData("Lake Jyun - Outside Sub-Gate")#, has_item("Range Booster Alpha"))
@@ -953,9 +952,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Lake Jyun Sub-Gate - Entrance": 
             GameRegionData(
                 [
-                    locationDataDict["Lake Jyun Sub-Gate, Entrance right hole"],
-                    locationDataDict["Lake Jyun Sub-Gate, Entrance left hole"],
-                    locationDataDict["Lake Jyun Sub-Gate, Entrance chest"]
+                    "Lake Jyun Sub-Gate, Entrance right hole",
+                    "Lake Jyun Sub-Gate, Entrance left hole",
+                    "Lake Jyun Sub-Gate, Entrance chest"
                 ],
                 [
                     ExitData("Lake Jyun - Outside Sub-Gate"),
@@ -965,9 +964,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Lake Jyun Sub-Gate - Corridor Room": 
             GameRegionData(
                 [
-                    locationDataDict["Lake Jyun Sub-Gate, East corridor hole"],
-                    locationDataDict["Lake Jyun Sub-Gate, West corridor hole"],
-                    locationDataDict["Lake Jyun Sub-Gate, West corridor chest"]
+                    "Lake Jyun Sub-Gate, East corridor hole",
+                    "Lake Jyun Sub-Gate, West corridor hole",
+                    "Lake Jyun Sub-Gate, West corridor chest"
                 ],
                 [
                     ExitData("Lake Jyun Sub-Gate - Entrance"),
@@ -989,7 +988,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Lake Jyun Sub-Gate - Sharukurusu Room (Upper East)": 
             GameRegionData(
                 [
-                    locationDataDict["Lake Jyun Sub-Gate, Sharukurusu east chest"]
+                    "Lake Jyun Sub-Gate, Sharukurusu east chest"
                 ],
                 [
                     ExitData("Lake Jyun Sub-Gate - Corridor Room"),
@@ -1000,8 +999,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     # Does not require jump springs from Corridor West entrance
-                    locationDataDict["Lake Jyun Sub-Gate, Sharukurusu west chest"],
-                    locationDataDict["Lake Jyun Sub-Gate, Sharukurusu west hole"]
+                    "Lake Jyun Sub-Gate, Sharukurusu west chest",
+                    "Lake Jyun Sub-Gate, Sharukurusu west hole"
                 ],
                 [
                     ExitData("Lake Jyun Sub-Gate - Corridor Room"),
@@ -1011,7 +1010,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Lake Jyun Sub-Gate - Sharukurusu Room (Pyramid)": 
             GameRegionData(
                 [
-                    locationDataDict["Lake Jyun Sub-Gate, Sharukurusu middle chest"]
+                    "Lake Jyun Sub-Gate, Sharukurusu middle chest"
                 ],
                 [
                     ExitData("Lake Jyun Sub-Gate - Sharukurusu Room (Lower)")
@@ -1076,7 +1075,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Lake Jyun Sub-Gate - Boss Room (Active)": 
             GameRegionData(
                 [
-                    locationDataDict["Garudoriten defeated"]
+                    "Garudoriten defeated"
                 ],
                 [
                     ExitData("Lake Jyun Sub-Gate - Boss Room (Inactive)")
@@ -1116,8 +1115,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Clozer Woods Sub-Gate - Sharukurusu Ambush": 
             GameRegionData(
                 [
-                    locationDataDict["Closer Woods Sub-Gate, Sharukurusu E room left hole"],
-                    locationDataDict["Closer Woods Sub-Gate, Sharukurusu E room right hole"]
+                    "Closer Woods Sub-Gate, Sharukurusu E room left hole",
+                    "Closer Woods Sub-Gate, Sharukurusu E room right hole"
                 ],
                 [
                     ExitData("Clozer Woods Sub-Gate - Entrance Elevator Room"),
@@ -1151,7 +1150,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Clozer Woods Sub-Gate - Pillar Room (West Cliff)": 
             GameRegionData(
                 [
-                    locationDataDict["Clozer woods Sub-Gate, Miroc+Gorubesshu west cliff chest"]
+                    "Clozer woods Sub-Gate, Miroc+Gorubesshu west cliff chest"
                 ],
                 [
                     ExitData("Clozer Woods Sub-Gate - Sharukurusu Ambush"),
@@ -1161,10 +1160,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Clozer Woods Sub-Gate - Pillar Room (Lower Level)": 
             GameRegionData(
                 [
-                    locationDataDict["Clozer woods Sub-Gate, Miroc+Gorubesshu southeast pillar hole"],
-                    locationDataDict["Clozer woods Sub-Gate, Miroc+Gorubesshu northeast pillar hole"],
-                    locationDataDict["Clozer woods Sub-Gate, Miroc+Gorubesshu northwest pillar hole"],
-                    locationDataDict["Clozer woods Sub-Gate, Miroc+Gorubesshu southwest pillar hole"]
+                    "Clozer woods Sub-Gate, Miroc+Gorubesshu southeast pillar hole",
+                    "Clozer woods Sub-Gate, Miroc+Gorubesshu northeast pillar hole",
+                    "Clozer woods Sub-Gate, Miroc+Gorubesshu northwest pillar hole",
+                    "Clozer woods Sub-Gate, Miroc+Gorubesshu southwest pillar hole"
                 ],
                 [
                     ExitData("Clozer Woods Sub-Gate - Pillar Room (West Cliff)", has_jump_springs()),
@@ -1177,7 +1176,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Clozer Woods Sub-Gate - Pillar Room (East Cliff)": 
             GameRegionData(
                 [
-                    locationDataDict["Clozer woods Sub-Gate, Miroc+Gorubesshu east cliff chest"]
+                    "Clozer woods Sub-Gate, Miroc+Gorubesshu east cliff chest"
                 ],
                 [
                     ExitData("Clozer Woods Sub-Gate - Pillar Room (Lower Level)")
@@ -1209,7 +1208,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Clozer Woods Sub-Gate - Gorubesshu Corridor": 
             GameRegionData(
                 [
-                    locationDataDict["Clozer Woods Sub-Gate, Gorubesshu corridor east chest"]
+                    "Clozer Woods Sub-Gate, Gorubesshu corridor east chest"
                 ],
                 [
                     ExitData("Clozer Woods Sub-Gate - Pillar Room (Lower Level)", has_completed_lake_jyun()), # Doors broken if not far enough
@@ -1220,7 +1219,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Clozer Woods Sub-Gate - Generator Room (Lower)": 
             GameRegionData(
                 [
-                    locationDataDict["Clozer Woods Sub-Gate, Generator room lower chest"]
+                    "Clozer Woods Sub-Gate, Generator room lower chest"
                 ],
                 [
                     ExitData("Clozer Woods Sub-Gate - Gorubesshu Corridor")
@@ -1230,7 +1229,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     # Can drop down, Connects to Lower & Boss room
-                    locationDataDict["Clozer Woods Sub-Gate, Generator room upper chest"]
+                    "Clozer Woods Sub-Gate, Generator room upper chest"
                 ],
                 [
                     ExitData("Clozer Woods Sub-Gate - Generator Room (Lower)"),
@@ -1240,7 +1239,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Clozer Woods Sub-Gate - Boss Room": 
             GameRegionData(
                 [
-                    locationDataDict["Karumuna Bash Trio defeated"]
+                    "Karumuna Bash Trio defeated"
                 ],
                 [
                     ExitData("Clozer Woods Sub-Gate - Breakable Ceiling (Upper)"),
@@ -1251,7 +1250,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     # Connects from flutter after getting red refractor. Back to flutter on boss defeat
-                    locationDataDict["Focke-Wulf defeated"]
+                    "Focke-Wulf defeated"
                 ],
                 [
                     ExitData("Flutter - Common Room")
@@ -1260,8 +1259,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Orudakoitan Bridge Area (Ledges)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Horokko ledge chest"],
-                    locationDataDict["Underground ruins, Clozer exit chest"]
+                    "Underground ruins, Horokko ledge chest",
+                    "Underground ruins, Clozer exit chest"
                 ],
                 [
                     ExitData("Underground Ruins - Orudakoitan Bridge Area (Bridge)")
@@ -1270,7 +1269,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Orudakoitan Bridge Area (Bridge)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Fireball Orudakoitan chest" ]
+                    "Underground ruins, Fireball Orudakoitan chest"
                 ],
                 [
                     ExitData("Underground Ruins - Orudakoitan Bridge Area (Ledges)", has_jump_springs()),
@@ -1280,8 +1279,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Drillable Wall Area (Right)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Clozer exit chest"],
-                    locationDataDict["Underground ruins, Trapped box hole"]
+                    "Underground ruins, Clozer exit chest",
+                    "Underground ruins, Trapped box hole"
                 ],
                 [
                     ExitData("Underground Ruins - Drillable Wall Area (Right-Middle, Lower)", has_drill_arm()),
@@ -1303,8 +1302,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Drillable Wall Area (Right-Middle, Upper)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Drillable wall room east cliff chest"],
-                    locationDataDict["Underground ruins, Drillable wall room east cliff hole"]
+                    "Underground ruins, Drillable wall room east cliff chest",
+                    "Underground ruins, Drillable wall room east cliff hole"
                 ],
                 [
                     ExitData("Underground Ruins - Drillable Wall Area (Right-Middle, Lower)")
@@ -1325,7 +1324,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Drillable Wall Area (Left-Middle, Upper)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Drillable wall room middle cliff chest"]
+                    "Underground ruins, Drillable wall room middle cliff chest"
                 ],
                 [
                     ExitData("Underground Ruins - Drillable Wall Area (Left-Middle, Lower)")
@@ -1345,7 +1344,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Drillable Wall Area (Left, Upper)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Drillable wall room west cliff chest"]
+                    "Underground ruins, Drillable wall room west cliff chest"
                 ],
                 [
                     ExitData("Underground Ruins - Drillable Wall Area (Left, Lower)")
@@ -1354,8 +1353,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Spinning Tower Trap Area (Sharukurusu Corridor)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Obstacle room cliff east hole"],
-                    locationDataDict["Underground ruins, Obstacle room cliff west hole"]
+                    "Underground ruins, Obstacle room cliff east hole",
+                    "Underground ruins, Obstacle room cliff west hole"
                 ],
                 [
                     ExitData("Underground Ruins - Drillable Wall Area (Left, Lower)"),
@@ -1365,7 +1364,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Spinning Tower Trap Area (Ledge Room)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Arukoitan battle south chest"]
+                    "Underground ruins, Arukoitan battle south chest"
                 ],
                 [
                     ExitData("Underground Ruins - Spinning Tower Trap Area (Sharukurusu Corridor)", has_jump_springs()),
@@ -1375,7 +1374,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Spinning Tower Trap Area (Arukoitan Battle + Hanmuru Doll)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Arukoitan battle north chest"]
+                    "Underground ruins, Arukoitan battle north chest"
                 ],
                 [
                     ExitData("Underground Ruins - Spinning Tower Trap Area (Ledge Room)", has_jump_springs()),
@@ -1398,10 +1397,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Sub-Gate Exit)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Miroc room ledge chest"],
-                    locationDataDict["Underground ruins, Cross room chest"],
-                    locationDataDict["Underground ruins, Miroc room left hole"],
-                    locationDataDict["Underground ruins, Miroc room right hole"]
+                    "Underground ruins, Miroc room ledge chest",
+                    "Underground ruins, Cross room chest",
+                    "Underground ruins, Miroc room left hole",
+                    "Underground ruins, Miroc room right hole"
                 ],
                 [
                     ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Surface Exit)"),
@@ -1411,7 +1410,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Cardon Forest Sub-Gate Area (Pillar Room West Ledge)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, 2 box ledge chest"],
+                    "Underground ruins, 2 box ledge chest",
                 ],
                 [
                     ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Surface Exit)"),
@@ -1432,7 +1431,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Cardon Forest Sub-Gate Area (Main Gate Exit)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Main gate entrance chest"]
+                    "Underground ruins, Main gate entrance chest"
                 ],
                 [
                     ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Junk Man Rescue Exit)", has_drill_arm()),
@@ -1442,8 +1441,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Junk Man Rescue Area (Junk Man Rescue Spot)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Junk store man chest"],
-                    locationDataDict["Underground ruins, Junk store man hole"]
+                    "Underground ruins, Junk store man chest",
+                    "Underground ruins, Junk store man hole"
                 ],
                 [
                     ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Junk Man Rescue Exit)"),
@@ -1473,7 +1472,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Shekuten + Kuruguru Area (Shekuten Lower)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Shekuten pillar room hole"]
+                    "Underground ruins, Shekuten pillar room hole"
                 ],
                 [
                     ExitData("Underground Ruins - Spinning Tower Trap Area (Arukoitan Battle + Hanmuru Doll)"),
@@ -1485,15 +1484,15 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     # Connects (Shekuten Lower), (Exit to Kuruguru)
-                    locationDataDict["Underground ruins, Shekuten pillar room chest"],
-                    locationDataDict["Underground ruins, Kuruguru obstacle hole"]
+                    "Underground ruins, Shekuten pillar room chest",
+                    "Underground ruins, Kuruguru obstacle hole"
                 ],
                 []
             ),
         "Underground Ruins - Lake Jyun Sub-Gate Area (Exit to Kuruguru)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Drillable pillar room south chest"]
+                    "Underground ruins, Drillable pillar room south chest"
                 ],
                 [
                     ExitData("Underground Ruins - Shekuten + Kuruguru Area (Shekuten Lower)"),
@@ -1504,7 +1503,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Lake Jyun Sub-Gate Area (Gorubeshu Side Room)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Gold Gorubesshu chest"]
+                    "Underground ruins, Gold Gorubesshu chest"
                 ],
                 [
                     ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Exit to Kuruguru)", has_drill_arm()),
@@ -1514,7 +1513,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Lake Jyun Sub-Gate Area (Gorubeshu Trap Chests)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, 3 chest room middle chest"]
+                    "Underground ruins, 3 chest room middle chest"
                 ],
                 [
                     ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Gorubeshu Side Room)", has_drill_arm()),
@@ -1524,7 +1523,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Lake Jyun Sub-Gate Area (Lake Jyun Sub-Gate West Exit)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Drillable pillar room north chest"]
+                    "Underground ruins, Drillable pillar room north chest"
                 ],
                 [
                     ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Gorubeshu Trap Chests)", has_drill_arm()),
@@ -1534,9 +1533,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Underground Ruins - Lake Jyun Sub-Gate Area (Gorubeshu Walls)": 
             GameRegionData(
                 [
-                    locationDataDict["Underground ruins, Drillable pillars room south hole"],
-                    locationDataDict["Underground ruins, Drillable pillars room west hole"],
-                    locationDataDict["Underground ruins, Drillable pillars room north hole"]
+                    "Underground ruins, Drillable pillars room south hole",
+                    "Underground ruins, Drillable pillars room west hole",
+                    "Underground ruins, Drillable pillars room north hole"
                 ],
                 [
                     ExitData("Underground Ruins - Lake Jyun Sub-Gate Area (Lake Jyun Sub-Gate East Exit)", has_drill_arm()),
@@ -1566,8 +1565,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Main Gate - (Entrance)": 
             GameRegionData(
                 [
-                    locationDataDict["Main Gate, Entrance hole"],
-                    locationDataDict["Main Gate, Two Gorubesshu room chest"],
+                    "Main Gate, Entrance hole",
+                    "Main Gate, Two Gorubesshu room chest",
                 ],
                 [
                     ExitData("Main Gate - (Command Terminal)"),
@@ -1587,11 +1586,11 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             ),
         "Main Gate - (Maze)": 
             GameRegionData(
-                [-
-                    locationDataDict["Main Gate, Maze Chest"],
-                    locationDataDict["Main Gate, Maze entrance hole"],
-                    locationDataDict["Main Gate, Maze Karumuna Bash hole"],
-                    locationDataDict["Main Gate, Maze Reaverbot hole"]
+                [
+                    "Main Gate, Maze Chest",
+                    "Main Gate, Maze entrance hole",
+                    "Main Gate, Maze Karumuna Bash hole",
+                    "Main Gate, Maze Reaverbot hole"
                 ],
                 [
                     ExitData("Main Gate - (Command Terminal)", has_completed_clozer_woods()),
@@ -1613,7 +1612,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             GameRegionData(
                 [
                     # Technically this connects to Cardon Forest after killing Juno.
-                    locationDataDict["Main Gate, Boss corridor chest"]
+                    "Main Gate, Boss corridor chest"
                 ],
                 [
                     ExitData("Main Gate - Juno Area (Sub-City Key Doors)", has_sub_city_keys()),
@@ -1633,7 +1632,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Old City Sub-City - Chest": 
             GameRegionData(
                 [
-                    locationDataDict["Old City Sub-City, Chest"]
+                    "Old City Sub-City, Chest"
                 ],
                 [
                     ExitData("Old City Sub-City - City")
@@ -1652,7 +1651,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Downtown Sub-City - Chest": 
             GameRegionData(
                 [
-                    locationDataDict["Downtown Sub-City, Chest"]
+                    "Downtown Sub-City, Chest"
                 ],
                 [
                     ExitData("Downtown Sub-City - City")
@@ -1671,7 +1670,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Uptown Sub-City - Chest": 
             GameRegionData(
                 [
-                    locationDataDict["Uptown Sub-City, Chest"]
+                    "Uptown Sub-City, Chest"
                 ],
                 [
                     ExitData("Uptown Sub-City - City")

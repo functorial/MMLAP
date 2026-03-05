@@ -1,4 +1,5 @@
 from __future__ import annotations
+from .regions import get_regionDataDict
 from BaseClasses import Location
 from enum import IntEnum
 from typing import TYPE_CHECKING, NamedTuple
@@ -161,8 +162,12 @@ def create_all_locations(world: GameWorld) -> None:
     return None
 
 def create_regular_locations(world: GameWorld) -> None:
-    universe = world.get_region("Universe")
-    universe.add_locations(LOCATION_NAME_TO_ID, GameLocation)
+    region_data_dict = get_regionDataDict(world)
+    for region_name in region_data_dict.keys():
+        region_data = region_data_dict[region_name]
+        region = world.get_region(region_name)
+        location_names_with_ids = get_location_names_with_ids(region_data.locationNameList)
+        region.add_locations(location_names_with_ids, GameLocation)
     return None
 
 def create_events(world: GameWorld) -> None:
