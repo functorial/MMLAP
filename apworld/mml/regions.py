@@ -243,7 +243,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Support Car / R&D Room (Gift Flower)"),#, has_item("Flower")),
                     ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
                     ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring")),
-                    ExitData("Flutter - Common Room"),
+                    ExitData("Flutter - Roll's Room", has_completed_lake_jyun()),
                     ExitData("Cardon Forest"),
                     ExitData("Downtown - Outside"),
                     ExitData("City Hall - Outside"),
@@ -1117,8 +1117,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Clozer Woods Sub-Gate - Sharukurusu Ambush": 
             GameRegionData(
                 [
-                    "Closer Woods Sub-Gate, Sharukurusu E room left hole",
-                    "Closer Woods Sub-Gate, Sharukurusu E room right hole"
+                    "Clozer Woods Sub-Gate, Sharukurusu E room left hole",
+                    "Clozer Woods Sub-Gate, Sharukurusu E room right hole"
                 ],
                 [
                     ExitData("Clozer Woods Sub-Gate - Entrance Elevator Room"),

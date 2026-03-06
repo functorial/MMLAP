@@ -15,6 +15,7 @@ class GameWorld(World):
 
     options_dataclass = mml_options.GameOptions
     options: mml_options.GameOptions
+    topology_present: bool = True
 
     location_name_to_id = locations.LOCATION_NAME_TO_ID
     item_name_to_id = items.ITEM_NAME_TO_ID
