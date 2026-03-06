@@ -20,9 +20,15 @@
 ## What does randomization do to this game?
 
 ### Locations
-- The opening of most chests, cardboard boxes, and garbage pails.
-- Peeking into hidden holes in the wall.
+- The opening of most chests, cardboard boxes, and garbage pails
+- Peeking into hidden holes in the wall
 - Defeating bosses
+- TV Station games rank As
+- Some side quests:
+  - The Museum questline
+  - Saving the missing woman
+  - Curing Ira's illness
+  - Turning in gift items to Roll
 
 ### Items
 Any item associated with a location above. At the moment, this includes:
@@ -36,5 +42,7 @@ Any item associated with a location above. At the moment, this includes:
 
 ### Anything else?
 Stay tuned!
+
+Credit to Uroogla for giving a starting point for the client, answering a bunch of questions, and early bug testing
 
 [Google sheet from early memory analysis](https://docs.google.com/spreadsheets/d/1OdxZQ6DzbNaAikwdxnH8S9jJZx4L5_loxPrnsaE8nSU)
