@@ -105,11 +105,11 @@ public partial class App : Application
         {
             return;
         }
-        Log.Logger.Information($"> {a.Command}");
         string command = a.Command.Trim().ToLower();
         switch (command)
         {
             case "reload":
+                Log.Logger.Information($"> {a.Command}");
                 if (APClient != null && APClient.ItemManager != null)
                 {
                     Log.Logger.Information("Clearing the game state.  Please reconnect to the server while in game to refresh received items.");
@@ -122,6 +122,7 @@ public partial class App : Application
                 }
                 break;
             case "goal":
+                Log.Logger.Information($"> {a.Command}");
                 string goalText;
                 if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goalValueObj))
                 {
@@ -140,7 +141,7 @@ public partial class App : Application
                 Log.Logger.Information($"Your goal is: {goalText}.");
                 break;
             default:
-                Log.Logger.Information("Command not recognized. Did you mean one of the following?\n  [reload]: Forces all items to reload.\n  [goal]: Show current goal.");
+                APClient?.SendMessage(a.Command);
                 break;
         }
         return;
