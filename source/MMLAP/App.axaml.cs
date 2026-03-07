@@ -367,7 +367,8 @@ public partial class App : Application
             LocationManager_EnableLocationsCondition()
         )
         {
-            if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goalValueObj))
+            APClient.Options.TryGetValue("goal", out var goalValueObj);
+            if (APClient != null && APClient.Options != null)
             {
                 int goalValue = goalValueObj as int? ?? 0;
                 bool isGoalComplete = (CompletionGoal)goalValue switch

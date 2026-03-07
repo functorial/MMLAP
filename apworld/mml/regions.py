@@ -87,6 +87,16 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         has_spread_buster = has_all_items(["Ancient Book", "Old Launcher"])
         return has_any([has_powered_buster, has_grand_grenade, has_active_buster, has_spread_buster])
 
+    def has_completed_clubhouse() -> Callable[[CollectionState], bool]:
+        # The reward for this quest is not randomized, but the items for it are.
+        items = [
+            "Saw",
+            "Stag Beetle",
+            "Beetle",
+            "Comic Book"
+        ]
+        return has_all_items(items)
+
     def has_completed_museum() -> Callable[[CollectionState], bool]:
         items = [
            #"Lipstick",
@@ -99,7 +109,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             "Old Shield",
             "Shiny Red Stone"
         ]
-        return has_all_items(items)
+        # Use has_completed_clubhouse() instead of checking for Old Heater, since it isn't randomized.
+        return has_all_items(items) and has_completed_clubhouse()
     
     def has_lake_jyun_keys() -> Callable[[CollectionState], bool]:
         items = [
@@ -240,7 +251,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
 
                 ],
                 [
-                    ExitData("Support Car / R&D Room (Gift Flower)"),#, has_item("Flower")),
+                    ExitData("Support Car / R&D Room (Gift Flower)", has_item("Flower")),
                     ExitData("Support Car / R&D Room (Gift Music Box)", has_item("Music Box")),
                     ExitData("Support Car / R&D Room (Gift Ring)", has_item("Ring")),
                     ExitData("Flutter - Roll's Room", has_completed_lake_jyun()),
@@ -525,8 +536,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("Uptown"),
-                    ExitData("Uptown - Hospital (Missing woman turn-in)"),
-                    ExitData("Uptown - Hospital (Ira's Room)")
+                    ExitData("Uptown - Hospital (Missing woman turn-in)", has_completed_clozer_woods()),
+                    ExitData("Uptown - Hospital (Ira's Room)", has_completed_lake_jyun())
                 ]
             ),
         "Uptown - Hospital (Missing woman turn-in)": 
@@ -649,7 +660,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     ExitData("Museum - Floor 1"),
                     ExitData("Museum - Floor 2 (Old Bone)", has_item("Old Bone")),
-                    ExitData("Museum - Floor 2 (Old Heater)"), #, has_item("Old Heater")),
+                    # TODO: I think this logic isn't quite right and you don't need the full quest done.
+                    ExitData("Museum - Floor 2 (Old Heater)", has_completed_clubhouse()),
                     ExitData("Museum - Floor 2 (Old Doll)", has_item("Old Doll")),
                     ExitData("Museum - Floor 2 (Antique Bell)", has_item("Antique Bell")),
                     ExitData("Museum - Floor 2 (Giant Horn)", has_item("Giant Horn")),

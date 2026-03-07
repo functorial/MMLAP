@@ -36,8 +36,9 @@ itemDataDict = {
     "'Watcher' Key"                     : ItemData(0x0237, ItemClassification.progression                             ), # progresses main story -> progression
     "'Sleeper' Key"                     : ItemData(0x0238, ItemClassification.progression                             ), # progresses main story -> progression
     "'Dreamer' Key"                     : ItemData(0x0239, ItemClassification.progression                             ), # progresses main story -> progression
+    "Flower"                            : ItemData(0x0244, ItemClassification.progression                             ), # LOCATION NOT IMPLEMENTED YET
     "Bag"                               : ItemData(0x0245, ItemClassification.filler                                  ), # SIDEQUESTS NOT IMPLEMENTED YET
-    "Saw"                               : ItemData(0x0248, ItemClassification.filler                                  ), # SIDEQUESTS NOT IMPLEMENTED YET
+    "Saw"                               : ItemData(0x0248, ItemClassification.progression                             ), # SIDEQUESTS NOT IMPLEMENTED YET
     "Music Box"                         : ItemData(0x024A, ItemClassification.progression                             ), # give to roll -> progression
     "Old Bone"                          : ItemData(0x024B, ItemClassification.progression                             ), # progresses museum -> progression
   # "Old Heater"                        : ItemData(0x024C, ItemClassification.progression                             ), # progresses museum -> progression
@@ -47,6 +48,9 @@ itemDataDict = {
     "Shiny Object"                      : ItemData(0x0250, ItemClassification.progression                             ), # progresses museum -> progression
     "Old Shield"                        : ItemData(0x0251, ItemClassification.progression                             ), # progresses museum -> progression
     "Shiny Red Stone"                   : ItemData(0x0252, ItemClassification.progression                             ), # progresses museum -> progression
+    "Stag Beetle"                       : ItemData(0x0253, ItemClassification.progression                             ), # LOCATION NOT IMPLEMENTED YET
+    "Beetle"                            : ItemData(0x0254, ItemClassification.progression                             ), # LOCATION NOT IMPLEMENTED YET
+    "Comic Book"                        : ItemData(0x0255, ItemClassification.progression                             ), # LOCATION NOT IMPLEMENTED YET
     "Ring"                              : ItemData(0x0256, ItemClassification.progression                             ), # give to roll -> progression
    #"Mine Parts Kit"                    : ItemData(0x0258, ItemClassification.filler                                  ),
     "Cannon Kit"                        : ItemData(0x0259, ItemClassification.progression                             ),
@@ -136,13 +140,15 @@ def create_all_items(world: GameWorld) -> None:
         add_count = 1
         match itemName:
             case "10 Zenny":
-                for _ in range(2):
-                    itemPool.append(world.create_item(itemName))
-                    add_count = 2
+                # Reduced count of some filler items to temporarily add Flower, Comic Book, Beetle, and Stag Beetle
+                # TODO: Revert when locations are randomized.
+                #for _ in range(2):
+                #    itemPool.append(world.create_item(itemName))
+                    add_count = 0
             case "20 Zenny":
-                for _ in range(2):
-                    itemPool.append(world.create_item(itemName))
-                    add_count = 2
+                #for _ in range(2):
+                #    itemPool.append(world.create_item(itemName))
+                    add_count = 0
             case "920 Zenny":
                 for _ in range(2):
                     itemPool.append(world.create_item(itemName))
