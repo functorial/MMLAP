@@ -6,6 +6,7 @@ using Archipelago.Core.Helpers;
 using Archipelago.Core.Models;
 using Archipelago.Core.Util;
 using Archipelago.MultiClient.Net;
+using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
 using Archipelago.MultiClient.Net.Models;
 using Avalonia;
@@ -26,8 +27,6 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reflection;
 using System.Security.Principal;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Timers;
 using static MMLAP.Models.MMLEnums;
 
@@ -96,9 +95,9 @@ public partial class App : Application
 
     /**
      * Returns a Dictionary of details from the most recent connection.
-     * 
+     *
      * File path is ./connection.json.
-     * 
+     *
      * @return A Dictionary with the most recent connection, with keys of host and slot.
      */
     public static Dictionary<String, String> GetLastConnectionDetails()
@@ -109,7 +108,7 @@ public partial class App : Application
 
     /**
      * Saves a details from the most recent connection to ./connection.json.
-     * 
+     *
      * @param A Dictionary with the most recent connection, with keys of host and slot.
      */
     public static void SaveLastConnectionDetails(Dictionary<String, String> lastConnectionDetails)
@@ -225,7 +224,7 @@ public partial class App : Application
     {
         Context.ConnectButtonEnabled = false;
         System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
-        Log.Logger.Information("Connecting..."); 
+        Log.Logger.Information("Connecting...");
 
         // Refreshing subscriptions
         if (APClient != null)
@@ -287,14 +286,14 @@ public partial class App : Application
         APClient.MessageReceived += Client_MessageReceived;
 
         // Connect to host and log in to slot => init Options, ItemManager, LocationManager
-        await APClient.Connect((e.Host??"localhost:38281").Trim(), "Mega Man Legends");
+        await APClient.Connect((e.Host ?? "localhost:38281").Trim(), "Mega Man Legends");
         if (!APClient.IsConnected)
         {
             Log.Logger.Error("Your host seems to be invalid.  Please confirm that you have entered it correctly.");
             Context.ConnectButtonEnabled = true;
             return;
         }
-        PlayerName = e.Slot??"".Trim();
+        PlayerName = e.Slot ?? "".Trim();
         await APClient.Login(PlayerName, !string.IsNullOrWhiteSpace(e.Password) ? e.Password : null);
         if (!APClient.IsLoggedIn)
         {
@@ -390,7 +389,7 @@ public partial class App : Application
         }
         return;
     }
-    
+
     private static async void Client_Disconnected(object? sender, EventArgs args)
     {
         Log.Logger.Information("Disconnected from Archipelago");
@@ -407,7 +406,7 @@ public partial class App : Application
         if (
             APClient != null &&
             APClient.ItemManager != null &&
-            APClient.CurrentSession != null && 
+            APClient.CurrentSession != null &&
             GameLocations != null &&
             LocationManager_EnableLocationsCondition() &&
             System.Threading.Interlocked.CompareExchange(ref IsInGameSyncInitialized, 1, 0) == 0 // Only start the game loop once per connection
@@ -423,7 +422,7 @@ public partial class App : Application
 
     /**
      * Adds a hint message to the Hints tab.
-     * 
+     *
      * @param message The message with the hint.
      */
     private static void LogHint(LogMessage message)
@@ -563,6 +562,7 @@ public partial class App : Application
                     ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
                     if (currentLevelID != PreviousLevelID)
                     {
+                        APClient.CurrentSession.DataStorage[Scope.Slot, "MML_ROOM"] = currentLevelID;
                         IsManagingLevelChange = true;
                     }
                     PreviousLevelID = currentLevelID;
@@ -607,7 +607,7 @@ public partial class App : Application
                                     )
                                     {
                                         //OverwrittenTextData = TextHelpers.OverwriteText(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData));
-                                        byte[] writeTextArr = TextHelpers.ConcatArrays(TextHelpers.newPage, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84])); 
+                                        byte[] writeTextArr = TextHelpers.ConcatArrays(TextHelpers.newPage, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
                                         Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                                     }
                                     break;
@@ -657,7 +657,7 @@ public partial class App : Application
                         // Task 3: If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
                         if (!Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber ?? 7))
                         {
-                            while(TextDataToWriteStack.TryPop(out var overwrittenTextData))
+                            while (TextDataToWriteStack.TryPop(out var overwrittenTextData))
                             {
                                 Memory.WriteByteArray(overwrittenTextData.StartAddress, overwrittenTextData.TextByteArr);
                             }
@@ -793,7 +793,7 @@ public partial class App : Application
     {
         if (
             APClient != null &&
-            APClient.LocationManager != null && 
+            APClient.LocationManager != null &&
             APClient.CurrentSession != null &&
             ScoutedLocationItemData != null
         )
@@ -814,7 +814,7 @@ public partial class App : Application
     {
         if (
             APClient != null &&
-            APClient.CurrentSession != null && 
+            APClient.CurrentSession != null &&
             ItemDataDict.TryGetValue(args.Item.Id, out ItemData? itemData)
         )
         {
