@@ -26,8 +26,6 @@ using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reflection;
 using System.Security.Principal;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Timers;
 using static MMLAP.Models.MMLEnums;
 
@@ -539,7 +537,7 @@ public partial class App : Application
     {
         if (System.Threading.Interlocked.CompareExchange(ref IsGameLoopRunning, 1, 0) != 0)
         {
-            return; // Previous call is still running, skip this tick.
+            return; // Previous call is still running, skip this tick
         }
         try
         {
@@ -549,7 +547,7 @@ public partial class App : Application
                 APClient.CurrentSession != null
             )
             {
-                // Pause loop if title menu or save menu
+                // Pause loop if in title menu or save menu
                 if (
                     MemoryHelpers.IsOutOfTitleScreen() &&
                     !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0)
@@ -575,15 +573,28 @@ public partial class App : Application
                     {
                         System.Threading.Thread.Sleep(50);
 
-                        // Task 2b: Based on current level, do things like overwrite text for locations that were scouted and manipulate worker dialogue and warehouse doors to prevent soft-locks.
+                        // Task 2b: Based on current level, do things like overwrite text, write code
                         if (
                             IsManagingLevelChange &&
                             LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
                         )
                         {
-                            switch (currentLevelData)
+                            string areaName = currentLevelData.AreaName;
+                            string roomName = currentLevelData.RoomName;
+
+                            switch (areaName)
                             {
-                                case { RoomName: "Ira's Room" }:
+                                case ("Cardon Forest Sub-gate"):
+                                    Log.Logger.Information("Writing EnableInsideCardonSubGate");
+                                    MemoryHelpers.WriteCode(Codes.EnableInsideCardonSubGate);
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            switch (roomName)
+                            {
+                                case ("Ira's Room"):
                                     // Handle "Cure Ira's illness" location
                                     if (
                                         ScoutedLocationItemData != null &&
@@ -596,7 +607,7 @@ public partial class App : Application
                                         TextDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData)));
                                     }
                                     break;
-                                case { RoomName: "Junk Shop" }:
+                                case ("Junk Shop"):
                                     //Handle "Rescue the shop owner's husband" location
                                     if (
                                         ScoutedLocationItemData != null &&
@@ -611,7 +622,7 @@ public partial class App : Application
                                         Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                                     }
                                     break;
-                                case { RoomName: "City Hall Outdoors" }:
+                                case ("City Hall Outdoors"):
                                     // Handle worker dialogue for Pick
                                     List<byte[]> substrs =
                                         [
@@ -625,7 +636,7 @@ public partial class App : Application
                                     byte[] workerTextChange = TextHelpers.ConcatArrayList(substrs);
                                     Memory.WriteByteArray(Addresses.WorkerGetPickTextStart.Address, workerTextChange);
                                     break;
-                                case { RoomName: "Downtown" }:
+                                case ("Downtown"):
                                     // Handle library pail in case player can't trigger worker dialogue because they already have the Saw
                                     if (
                                         Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber ?? 0) ||
@@ -640,7 +651,7 @@ public partial class App : Application
                                         Memory.WriteBit(Addresses.BagPailIsReady.Address, Addresses.BagPailIsReady.BitNumber ?? 7, true);
                                     }
                                     break;
-                                case { RoomName: "Old City (dogs, no weapons)" }:
+                                case ("Old City (dogs, no weapons)"):
                                     // Prevent warehouse soft-lock by moving (invisible) warehouse double doors z-axis
                                     if (!Memory.ReadBit(Addresses.SubCitiesSurfaced.Address, Addresses.SubCitiesSurfaced.BitNumber ?? 1))
                                     {

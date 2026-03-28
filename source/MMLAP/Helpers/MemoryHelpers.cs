@@ -1,5 +1,5 @@
 ﻿using Archipelago.Core.Util;
-using Serilog;
+using MMLAP.Models;
 using System.Linq;
 
 namespace MMLAP.Helpers
@@ -15,7 +15,7 @@ namespace MMLAP.Helpers
         {
             bool isInGameOrCutscene = Memory.ReadByte(Addresses.TitleScreen.Address) == 0xA4;
             short currentLevelID = Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
-            bool isInTitleScreenCutscene = new short[] 
+            bool isInTitleScreenCutscene = new short[]
             {
                     0x0100,  // Scrolling text cutscene
                     0x0700,  // Gesselschaft cutscene
@@ -28,6 +28,14 @@ namespace MMLAP.Helpers
                     0x0707   // Gesselschaft cutscene
             }.Contains(currentLevelID);
             return isInGameOrCutscene && !isInTitleScreenCutscene;
+        }
+
+        public static void WriteCode(OpCode[] code)
+        {
+            foreach (OpCode op in code)
+            {
+                Memory.Write(op.StartAddress, op.Instruction);
+            }
         }
     }
 }
