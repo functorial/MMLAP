@@ -1,5 +1,4 @@
 ﻿using Archipelago.Core.Models;
-using Archipelago.MultiClient.Net.Models;
 using MMLAP.Models;
 using System.Collections.Generic;
 using static MMLAP.Models.MMLEnums;
