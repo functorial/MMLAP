@@ -1,11 +1,11 @@
 ﻿namespace MMLAP.Models
 {
     public class OpCode(
-        ulong startAddress,
-        ulong instruction
+        uint startAddress,
+        uint instruction
     )
     {
-        public ulong StartAddress { get; set; } = startAddress;
-        public ulong Instruction { get; set; } = instruction;
+        public uint StartAddress { get; set; } = startAddress;
+        public uint Instruction { get; set; } = instruction;
     }
 }
