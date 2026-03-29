@@ -582,16 +582,29 @@ public partial class App : Application
                             string areaName = currentLevelData.AreaName;
                             string roomName = currentLevelData.RoomName;
 
+                            // Do area-based writes first
                             switch (areaName)
                             {
-                                case ("Cardon Forest Sub-gate"):
-                                    Log.Logger.Information("Writing EnableInsideCardonSubGate");
-                                    MemoryHelpers.WriteCode(Codes.EnableInsideCardonSubGate);
+                                case ("Cardon Forest Sub-Gate"):
+                                    MemoryHelpers.WriteCode(Codes.EnableCardonSubGateInside);
+                                    break;
+                                case ("Lake Jyun Sub-Gate"):
+                                    MemoryHelpers.WriteCode(Codes.EnableJyunSubGateInside);
+                                    break;
+                                case ("Clozer Woods Sub-Gate"):
+                                    MemoryHelpers.WriteCode(Codes.EnableClozerSubGateInside);
+                                    break;
+                                case ("Outside Cardon Forest Sub-Gate"):
+                                    //MemoryHelpers.WriteCode(Codes.EnableCardonSubGateOutside);
+                                    break;
+                                case ("Clozer Woods"):
+                                    //MemoryHelpers.WriteCode(Codes.EnableClozerSubGateOutside);
                                     break;
                                 default:
                                     break;
                             }
 
+                            // Do room-based writes second
                             switch (roomName)
                             {
                                 case ("Ira's Room"):
