@@ -22,6 +22,7 @@ using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
@@ -49,11 +50,14 @@ public partial class App : Application
     private static string? PlayerName { get; set; }
     private static bool HasSubmittedGoal { get; set; } = false;
     private static int IsInGameSyncInitialized = 0;
-    private static Timer? GameLoopTimer { get; set; }
-    private static int IsGameLoopRunning = 0;
+    private static Timer? SlowGameLoopTimer { get; set; }
+    private static int IsSlowLoopRunning = 0;
+    private static Timer? FastGameLoopTimer { get; set; }
+    private static int IsFastLoopRunning = 0;
     private static Timer? StartMMLTimer { get; set; }
     private static ConcurrentStack<TextData> TextDataToWriteStack { get; set; } = new();
     private static ushort? PreviousLevelID { get; set; }
+    private static byte CurrentProgressionCounter { get; set; } = 0x0;
     private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
     private static bool IsReceivingItemsAfterLoad { get; set; } = false;
@@ -363,10 +367,15 @@ public partial class App : Application
             System.Threading.Thread.Sleep(250);
 
             // Start gameplay loop
-            GameLoopTimer = new Timer();
-            GameLoopTimer.Elapsed += new ElapsedEventHandler(ModifyGameLoop);
-            GameLoopTimer.Interval = 500;
-            GameLoopTimer.Enabled = true;
+            SlowGameLoopTimer = new Timer();
+            SlowGameLoopTimer.Elapsed += new ElapsedEventHandler(SlowGameLoop);
+            SlowGameLoopTimer.Interval = 500;
+            SlowGameLoopTimer.Enabled = true;
+
+            FastGameLoopTimer = new Timer();
+            FastGameLoopTimer.Elapsed += new ElapsedEventHandler(FastGameLoop);
+            FastGameLoopTimer.Interval = 1;
+            FastGameLoopTimer.Enabled = true;
 
             Log.Logger.Information("Connected to Archipelago");
             Log.Logger.Information($"Playing {APClient.CurrentSession.ConnectionInfo.Game} as {APClient.CurrentSession.Players.GetPlayerName(APClient.CurrentSession.ConnectionInfo.Slot)}");
@@ -395,7 +404,8 @@ public partial class App : Application
         Log.Logger.Information("Disconnected from Archipelago");
         // Avoid ongoing timers affecting a new game.
         StartMMLTimer?.Enabled = false;
-        GameLoopTimer?.Enabled = false;
+        SlowGameLoopTimer?.Enabled = false;
+        FastGameLoopTimer?.Enabled = false;
         HasSubmittedGoal = false;
         System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
         return;
@@ -534,9 +544,9 @@ public partial class App : Application
         }
     }
 
-    private static async void ModifyGameLoop(object? sender, ElapsedEventArgs e)
+    private static async void FastGameLoop(object? sender, ElapsedEventArgs e)
     {
-        if (System.Threading.Interlocked.CompareExchange(ref IsGameLoopRunning, 1, 0) != 0)
+        if (System.Threading.Interlocked.CompareExchange(ref IsFastLoopRunning, 1, 0) != 0)
         {
             return; // Previous call is still running, skip this tick
         }
@@ -548,14 +558,99 @@ public partial class App : Application
                 APClient.CurrentSession != null
             )
             {
-                // Pause loop if in title menu or save menu
+                // Task: This is for hijacking game code which is loaded and executed only once during loading screens
+                // Pause loop actions if not in loading screen
+                if (
+                    Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0)
+                )
+                {
+                    ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+                    if (
+                        LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
+                    )
+                    {
+                        string areaName = currentLevelData.AreaName;
+                        switch (areaName)
+                        {
+                            case ("Cardon Forest (Flutter Broken)"):
+                                Log.Logger.Information("Fast load screen detected. Enabling Cardon Forest doors.");
+                                MemoryHelpers.WriteCode(Codes.EnableDoorsCardonForest(CurrentProgressionCounter));
+                                break;
+                            case ("Cardon Forest (Flutter Fixed)"):
+                                Log.Logger.Information("Fast load screen detected. Enabling Cardon Forest doors.");
+                                MemoryHelpers.WriteCode(Codes.EnableDoorsCardonForest(CurrentProgressionCounter));
+                                break;
+                            case ("Outside Cardon Forest Sub-Gate"):
+                                Log.Logger.Information("Fast load screen detected. Enabling Cardon Sub-Gate outside doors.");
+                                MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideCardonSubGate(CurrentProgressionCounter));
+                                break;
+                            case ("Apple Market"):
+                                Log.Logger.Information("Fast load screen detected. Enabling Apple Market doors.");
+                                MemoryHelpers.WriteCode(Codes.EnableDoorsAppleMarket(CurrentProgressionCounter));
+                                break;
+                            case ("Downtown"):
+                                Log.Logger.Information("Fast load screen detected. Enabling Downtown doors.");
+                                MemoryHelpers.WriteCode(Codes.EnableDoorsDowntown(CurrentProgressionCounter));
+                                break;
+                            case ("City Hall"):
+                                Log.Logger.Information("EnableDoorsCityHall");
+                                MemoryHelpers.WriteCode(Codes.EnableDoorsCityHall(CurrentProgressionCounter));
+                                break;
+                            case ("Clozer Woods"):
+                                Log.Logger.Information("Fast load screen detected. Enabling Clozer Woods doors.");
+                                MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideClozerSubGate(CurrentProgressionCounter));
+                                break;
+                            //case ("Wily's Boat"):
+                            //    // TODO: This should probably read AP items received once Yellow refractor is shuffled into the item pool.
+                            //    if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
+                            //    {
+                            //        Log.Logger.Information("Fast load screen detected. Enabling Wily's Boat doors.");
+                            //        MemoryHelpers.WriteCode(Codes.EnableBoatFixWilysBoat(CurrentProgressionCounter));
+                            //    }
+                            //    break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Logger.Warning("Encountered an error while managing the game loop.");
+            Log.Logger.Warning(ex.ToString());
+            Log.Logger.Warning("This is not necessarily a problem if it happens during release or collect.");
+        }
+        finally
+        {
+            System.Threading.Interlocked.Exchange(ref IsFastLoopRunning, 0);
+        }
+        return;
+    }
+
+    private static async void SlowGameLoop(object? sender, ElapsedEventArgs e)
+    {
+        if (System.Threading.Interlocked.CompareExchange(ref IsSlowLoopRunning, 1, 0) != 0)
+        {
+            return; // Previous call is still running, skip this tick
+        }
+        try
+        {
+            if (
+                APClient != null &&
+                APClient.ItemManager != null &&
+                APClient.CurrentSession != null
+            )
+            {
+                // Pause loop actions if in title menu or save menu
                 if (
                     MemoryHelpers.IsOutOfTitleScreen() &&
                     !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0)
                 )
                 {
-                    // Task 1: Check goal
+                    // Task 1: Read useful memory
                     CheckGoalCondition();
+                    CurrentProgressionCounter = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
 
                     // Task 2: Do things when changing rooms
                     // Task 2a: Check if level has changed, and if so, set flag to manage level change
@@ -588,19 +683,14 @@ public partial class App : Application
                             switch (areaName)
                             {
                                 case ("Cardon Forest Sub-Gate"):
-                                    MemoryHelpers.WriteCode(Codes.EnableCardonSubGateInside);
+                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideCardonSubGate(CurrentProgressionCounter));
                                     break;
                                 case ("Lake Jyun Sub-Gate"):
-                                    MemoryHelpers.WriteCode(Codes.EnableJyunSubGateInside);
+                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideJyunSubGate(CurrentProgressionCounter));
                                     break;
                                 case ("Clozer Woods Sub-Gate"):
-                                    MemoryHelpers.WriteCode(Codes.EnableClozerSubGateInside);
-                                    break;
-                                case ("Outside Cardon Forest Sub-Gate"):
-                                    //MemoryHelpers.WriteCode(Codes.EnableCardonSubGateOutside);
-                                    break;
-                                case ("Clozer Woods"):
-                                    //MemoryHelpers.WriteCode(Codes.EnableClozerSubGateOutside);
+                                    Log.Logger.Information("Fast load screen detected. Enabling Clozer Sub-Gate doors.");
+                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideClozerSubGate(CurrentProgressionCounter));
                                     break;
                                 default:
                                     break;
@@ -771,7 +861,7 @@ public partial class App : Application
         }
         finally
         {
-            System.Threading.Interlocked.Exchange(ref IsGameLoopRunning, 0);
+            System.Threading.Interlocked.Exchange(ref IsSlowLoopRunning, 0);
         }
         return;
     }
@@ -808,7 +898,7 @@ public partial class App : Application
     {
         bool[] conditions = [
             MemoryHelpers.IsOutOfTitleScreen(),
-            !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber??0),
+            !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber ?? 0),
             !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber??0),
             !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber??0)
         ];

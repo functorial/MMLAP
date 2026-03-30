@@ -6,6 +6,7 @@ namespace MMLAP
     {
         // Player status
         public static readonly AddressData CurrentLevel = new(0xC356E, null, 2);
+        public static readonly AddressData CurrentProgressionCounter = new(0xC1B63, null, 1);
         public static readonly AddressData CurrentZenny = new(0xC1B2C, null, 4);
         public static readonly AddressData UnequippedBusterInvStart = new(0xB5604, null, 34);
         // Goals
@@ -30,5 +31,7 @@ namespace MMLAP
         public static readonly AddressData BagPailIsReady = new(0xBE3BA, 7, null);
         // Main story flags
         public static readonly AddressData SubCitiesSurfaced = new(0xBE382, 1, null);
+        // TODO: Make these locations
+        public static readonly AddressData HasYellowRefractor = new(0xBE41D, 7, null);
     }
 }
