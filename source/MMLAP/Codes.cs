@@ -1,4 +1,4 @@
-﻿using Archipelago.Core.Util;
+﻿using MMLAP;
 using MMLAP.Models;
 using System;
 
@@ -99,9 +99,25 @@ namespace MMLAP
             [
                 // Loads people into the zone (they were evacuated)
                 LoadByteImmediate(0x001003A4, MMLEnums.Register.v1, Math.Max(fastForwardState, currentProgressionCounter)), 
-                Nop(0x001003A8),
-                // Enable "Call Roll" option when talking to worker which usually checks 0xBE37B[1]
-                Nop(0x0005545C) // delete branch that checks 0xBE37B[1] (the "has started taking yellow refractor cutscene" flag)
+                Nop(0x001003A8)
+            ];
+        }
+
+        public static OpCode[] EnableFixBoatCallRoll()
+        {
+            // Enable "Call Roll" option when talking to worker which usually checks 0xBE37B[1]
+            // delete branching that checks 0xBE37B[1] (the "has started taking yellow refractor cutscene" flag)
+            // This is used by other stuff and can cause soft locks if not rewritten
+            return [
+                Nop(Addresses.FixBoatCallRoll.Address)
+            ];
+        }
+
+        public static OpCode[] RestoreFixBoatCallRoll()
+        {
+            // This is what is overwritten by EnableFixBoatCallRoll
+            return [
+                new OpCode(Addresses.FixBoatCallRoll.Address, 0x10400006)  // beq v0, zero, 0x80055478
             ];
         }
 

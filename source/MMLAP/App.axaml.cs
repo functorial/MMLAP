@@ -573,38 +573,30 @@ public partial class App : Application
                         switch (areaName)
                         {
                             case ("Cardon Forest (Flutter Broken)"):
-                                Log.Logger.Information("Fast load screen detected. Enabling Cardon Forest doors.");
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsCardonForest(CurrentProgressionCounter));
                                 break;
                             case ("Cardon Forest (Flutter Fixed)"):
-                                Log.Logger.Information("Fast load screen detected. Enabling Cardon Forest doors.");
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsCardonForest(CurrentProgressionCounter));
                                 break;
                             case ("Outside Cardon Forest Sub-Gate"):
-                                Log.Logger.Information("Fast load screen detected. Enabling Cardon Sub-Gate outside doors.");
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideCardonSubGate(CurrentProgressionCounter));
                                 break;
                             case ("Apple Market"):
-                                Log.Logger.Information("Fast load screen detected. Enabling Apple Market doors.");
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsAppleMarket(CurrentProgressionCounter));
                                 break;
                             case ("Downtown"):
-                                Log.Logger.Information("Fast load screen detected. Enabling Downtown doors.");
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsDowntown(CurrentProgressionCounter));
                                 break;
                             case ("City Hall"):
-                                Log.Logger.Information("EnableDoorsCityHall");
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsCityHall(CurrentProgressionCounter));
                                 break;
                             case ("Clozer Woods"):
-                                Log.Logger.Information("Fast load screen detected. Enabling Clozer Woods doors.");
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideClozerSubGate(CurrentProgressionCounter));
                                 break;
                             case ("Wily's Boat"):
                                 // TODO: This should probably read AP items received once Yellow refractor is shuffled into the item pool.
                                 if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
                                 {
-                                    Log.Logger.Information("Fast load screen detected. Enabling Wily's Boat doors.");
                                     bool boatIsFixed = Memory.ReadBit(Addresses.BoatIsFixed.Address, Addresses.BoatIsFixed.BitNumber ?? 6);
                                     MemoryHelpers.WriteCode(Codes.FastForwardWilysBoat(CurrentProgressionCounter, boatIsFixed));
                                 }
@@ -765,19 +757,35 @@ public partial class App : Application
                                         Memory.WriteByte(0x1169EB, 0xFF);
                                     }
                                     break;
+                                case ("Outside Boat Shop"):
+                                    if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
+                                    {
+                                        MemoryHelpers.WriteCode(Codes.EnableFixBoatCallRoll());
+                                    }
+                                    break;
                                 default:
                                     break;
                             }
                             IsManagingLevelChange = false;
                         }
 
-                        // Task 3: If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
+                        // Task 3: Restore overwritten memory
+                        // Task 3a: If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
                         if (!Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber ?? 7))
                         {
                             while (TextDataToWriteStack.TryPop(out var overwrittenTextData))
                             {
                                 Memory.WriteByteArray(overwrittenTextData.StartAddress, overwrittenTextData.TextByteArr);
                             }
+                        }
+
+                        //Task 3b: Restore branch statement noped in EnableFixBoatCallRoll code which is used elsewhere
+                        if (
+                            Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) != 0x0D00 &&
+                            Memory.ReadUInt(Addresses.FixBoatCallRoll.Address) == 0x00000000
+                        )
+                        {
+                            MemoryHelpers.WriteCode(Codes.RestoreFixBoatCallRoll());
                         }
                     }
 
