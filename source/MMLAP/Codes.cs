@@ -1,4 +1,5 @@
-﻿using MMLAP.Models;
+﻿using Archipelago.Core.Util;
+using MMLAP.Models;
 using System;
 
 namespace MMLAP
@@ -90,15 +91,17 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] EnableBoatFixWilysBoat(byte currentProgressionCounter)
+        public static OpCode[] FastForwardWilysBoat(byte currentProgressionCounter, bool boatIsFixed)
         {
+            // This could go in slow loop, but put in fast loop since NPCs spawn on progression check
+            byte fastForwardState = (byte)(boatIsFixed ? 0x05 : 0x04);
             return
             [
                 // Loads people into the zone (they were evacuated)
-                LoadByteImmediate(0x001003A4, MMLEnums.Register.v1, Math.Max((byte)0x04, currentProgressionCounter)), 
+                LoadByteImmediate(0x001003A4, MMLEnums.Register.v1, Math.Max(fastForwardState, currentProgressionCounter)), 
                 Nop(0x001003A8),
                 // Enable "Call Roll" option when talking to worker which usually checks 0xBE37B[1]
-                LoadByteImmediate(0x0001DA70, MMLEnums.Register.v0, 0x02)  
+                Nop(0x0005545C) // delete branch that checks 0xBE37B[1] (the "has started taking yellow refractor cutscene" flag)
             ];
         }
 

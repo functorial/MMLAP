@@ -380,7 +380,7 @@ public partial class App : Application
             Log.Logger.Information("Connected to Archipelago");
             Log.Logger.Information($"Playing {APClient.CurrentSession.ConnectionInfo.Game} as {APClient.CurrentSession.Players.GetPlayerName(APClient.CurrentSession.ConnectionInfo.Slot)}");
 
-            Dictionary<String, String> lastConnectionDetails = new Dictionary<string, string>();
+            Dictionary<String, String> lastConnectionDetails = new();
             lastConnectionDetails["slot"] = Context.Slot;
             lastConnectionDetails["host"] = Context.Host;
             try
@@ -600,14 +600,15 @@ public partial class App : Application
                                 Log.Logger.Information("Fast load screen detected. Enabling Clozer Woods doors.");
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideClozerSubGate(CurrentProgressionCounter));
                                 break;
-                            //case ("Wily's Boat"):
-                            //    // TODO: This should probably read AP items received once Yellow refractor is shuffled into the item pool.
-                            //    if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
-                            //    {
-                            //        Log.Logger.Information("Fast load screen detected. Enabling Wily's Boat doors.");
-                            //        MemoryHelpers.WriteCode(Codes.EnableBoatFixWilysBoat(CurrentProgressionCounter));
-                            //    }
-                            //    break;
+                            case ("Wily's Boat"):
+                                // TODO: This should probably read AP items received once Yellow refractor is shuffled into the item pool.
+                                if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
+                                {
+                                    Log.Logger.Information("Fast load screen detected. Enabling Wily's Boat doors.");
+                                    bool boatIsFixed = Memory.ReadBit(Addresses.BoatIsFixed.Address, Addresses.BoatIsFixed.BitNumber ?? 6);
+                                    MemoryHelpers.WriteCode(Codes.FastForwardWilysBoat(CurrentProgressionCounter, boatIsFixed));
+                                }
+                                break;
                             default:
                                 break;
                         }
