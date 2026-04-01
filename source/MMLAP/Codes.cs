@@ -108,6 +108,7 @@ namespace MMLAP
             // Enable "Call Roll" option when talking to worker which usually checks 0xBE37B[1]
             // delete branching that checks 0xBE37B[1] (the "has started taking yellow refractor cutscene" flag)
             // This is used by other stuff and can cause soft locks if not rewritten
+            // An execution breakpoint here only hits once in this area, so it should be safe as long as it's restored later
             return [
                 Nop(Addresses.FixBoatCallRoll.Address)
             ];
@@ -118,6 +119,21 @@ namespace MMLAP
             // This is what is overwritten by EnableFixBoatCallRoll
             return [
                 new OpCode(Addresses.FixBoatCallRoll.Address, 0x10400006)  // beq v0, zero, 0x80055478
+            ];
+        }
+
+        public static OpCode[] EnableRedRefractorCutscene(byte currentProgressionCounter)
+        {
+            
+            return
+            [
+                //try1
+                //LoadByteImmediate(0x00106B50, MMLEnums.Register.a1, Math.Max((byte)0x06, currentProgressionCounter))
+                //try2
+                //LoadByteImmediate(0x00106B6C, MMLEnums.Register.a1, Math.Max((byte)0x06, currentProgressionCounter))
+                //try3
+                LoadByteImmediate(0x001001E8, MMLEnums.Register.v1, Math.Max((byte)0x06, currentProgressionCounter)),
+                Nop(0x001001EC)
             ];
         }
 

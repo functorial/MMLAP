@@ -601,6 +601,10 @@ public partial class App : Application
                                     MemoryHelpers.WriteCode(Codes.FastForwardWilysBoat(CurrentProgressionCounter, boatIsFixed));
                                 }
                                 break;
+                            case ("Flutter Takeoff"):
+                                Log.Logger.Information("EnableRedRefractorCutscene");
+                                MemoryHelpers.WriteCode(Codes.EnableRedRefractorCutscene(CurrentProgressionCounter));
+                                break;
                             default:
                                 break;
                         }

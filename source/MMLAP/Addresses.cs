@@ -20,6 +20,7 @@ namespace MMLAP
         public static readonly AddressData SaveDataMenuFlag = new(0x98910, 0, null);
         public static readonly AddressData TitleScreen = new(0x98158, null, 1); // 0xA4 = Cutscenes and in-game, 0x20 = Title screen
         public static readonly AddressData TextBoxOpenFlag = new(0x98A5B, 7, null);
+        public static readonly AddressData SupportCarRnDFlag = new(0x14C433, 1, null);
         // Hideout quest
         public static readonly AddressData WorkerGetPickTextStart = new(0x154A78, null, 0x48); // Huh? A pick? ...
         public static readonly AddressData SawWorkerDialogueIsReady = new(0xBE3BC, 0, null);
@@ -33,6 +34,7 @@ namespace MMLAP
         public static readonly AddressData SubCitiesSurfaced = new(0xBE382, 1, null);
         public static readonly AddressData HasYellowRefractor = new(0xBE41D, 7, null);
         public static readonly AddressData BoatIsFixed = new(0xBE37A, 6, null);
+        public static readonly AddressData HasRedRefractor = new(0xBE41D, 6, null);
         // Utility addresses for codes
         public static readonly AddressData FixBoatCallRoll = new(0x5545C, null, 4);
     }
