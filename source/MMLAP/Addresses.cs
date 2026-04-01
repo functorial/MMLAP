@@ -32,9 +32,10 @@ namespace MMLAP
         public static readonly AddressData BagPailIsReady = new(0xBE3BA, 7, null);
         // Main story flags
         public static readonly AddressData SubCitiesSurfaced = new(0xBE382, 1, null);
-        public static readonly AddressData HasYellowRefractor = new(0xBE41D, 7, null);
         public static readonly AddressData BoatIsFixed = new(0xBE37A, 6, null);
-        public static readonly AddressData HasRedRefractor = new(0xBE41D, 6, null);
+        public static readonly AddressData ShownRollRedRefractor = new(0xBE3B2, 5, null);
+        public static readonly AddressData HasYellowRefractor = new(0xBE41D, 7, null); // TODO: Make these locations / item data
+        public static readonly AddressData HasRedRefractor = new(0xBE41D, 6, null); // TODO: Make these locations / item data
         // Utility addresses for codes
         public static readonly AddressData FixBoatCallRoll = new(0x5545C, null, 4);
     }

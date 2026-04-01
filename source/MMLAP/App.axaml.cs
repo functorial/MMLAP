@@ -573,10 +573,11 @@ public partial class App : Application
                         switch (areaName)
                         {
                             case ("Cardon Forest (Flutter Broken)"):
-                                MemoryHelpers.WriteCode(Codes.EnableDoorsCardonForest(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Codes.EnableDoorsCardonForestFlutterBroken(CurrentProgressionCounter));
                                 break;
                             case ("Cardon Forest (Flutter Fixed)"):
-                                MemoryHelpers.WriteCode(Codes.EnableDoorsCardonForest(CurrentProgressionCounter));
+                                Log.Logger.Information("FastForwardCardonForestFlutterFixed");
+                                MemoryHelpers.WriteCode(Codes.FastForwardCardonForestFlutterFixed(CurrentProgressionCounter));
                                 break;
                             case ("Outside Cardon Forest Sub-Gate"):
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideCardonSubGate(CurrentProgressionCounter));
@@ -590,20 +591,27 @@ public partial class App : Application
                             case ("City Hall"):
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsCityHall(CurrentProgressionCounter));
                                 break;
+                            case ("Uptown"):
+                                MemoryHelpers.WriteCode(Codes.FastForwardUptown(CurrentProgressionCounter));
+                                break;
+                            case ("Old City"):
+                                MemoryHelpers.WriteCode(Codes.FastForwardOldCity(CurrentProgressionCounter));
+                                break;
                             case ("Clozer Woods"):
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideClozerSubGate(CurrentProgressionCounter));
                                 break;
                             case ("Wily's Boat"):
-                                // TODO: This should probably read AP items received once Yellow refractor is shuffled into the item pool.
                                 if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
                                 {
                                     bool boatIsFixed = Memory.ReadBit(Addresses.BoatIsFixed.Address, Addresses.BoatIsFixed.BitNumber ?? 6);
                                     MemoryHelpers.WriteCode(Codes.FastForwardWilysBoat(CurrentProgressionCounter, boatIsFixed));
                                 }
                                 break;
+                            case ("Lake Jyun"):
+                                MemoryHelpers.WriteCode(Codes.EnableLakeJyunBoss());
+                                break;
                             case ("Flutter Takeoff"):
-                                Log.Logger.Information("EnableRedRefractorCutscene");
-                                MemoryHelpers.WriteCode(Codes.EnableRedRefractorCutscene(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Codes.EnableRedRefractorCutscene());
                                 break;
                             default:
                                 break;

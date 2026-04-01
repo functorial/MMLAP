@@ -6,99 +6,99 @@ namespace MMLAP
 {
     public class Codes
     {
-        public static OpCode[] EnableDoorsInsideCardonSubGate(byte currentProgressionCounter)
+        public static OpCode[] EnableDoorsInsideCardonSubGate(byte minProgressionCounter)
         {
             // May be written slowly as it is checked during in-game loop
             return
             [
-                LoadByteImmediate(0x0010031C, MMLEnums.Register.v1, Math.Max((byte)0x03, currentProgressionCounter)),
+                LoadByteImmediate(0x0010031C, MMLEnums.Register.v1, Math.Max((byte)0x03, minProgressionCounter)),
                 Nop(0x00100320)
             ];
         }
 
-        public static OpCode[] EnableDoorsInsideJyunSubGate(byte currentProgressionCounter)
+        public static OpCode[] EnableDoorsInsideJyunSubGate(byte minProgressionCounter)
         {
             // May be written slowly as it is checked during in-game loop
             return
             [
-                LoadByteImmediate(0x001003F4, MMLEnums.Register.v1, Math.Max((byte)0x06, currentProgressionCounter)),
+                LoadByteImmediate(0x001003F4, MMLEnums.Register.v1, Math.Max((byte)0x06, minProgressionCounter)),
                 Nop(0x001003F8)
             ];
         }
 
-        public static OpCode[] EnableDoorsInsideClozerSubGate(byte currentProgressionCounter)
+        public static OpCode[] EnableDoorsInsideClozerSubGate(byte minProgressionCounter)
         {
             // May be written slowly as it is checked during in-game loop
             return
             [
-                LoadByteImmediate(0x00100570, MMLEnums.Register.v1, Math.Max((byte)0x07, currentProgressionCounter)),
+                LoadByteImmediate(0x00100570, MMLEnums.Register.v1, Math.Max((byte)0x07, minProgressionCounter)),
                 Nop(0x00100574)
             ];
         }
 
-        public static OpCode[] EnableDoorsOutsideCardonSubGate(byte currentProgressionCounter)
+        public static OpCode[] EnableDoorsOutsideCardonSubGate(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return
             [
-                LoadByteImmediate(0x00100E00, MMLEnums.Register.a1, Math.Max((byte)0x04, currentProgressionCounter)),
+                LoadByteImmediate(0x00100E00, MMLEnums.Register.a1, Math.Max((byte)0x04, minProgressionCounter)),
                 Nop(0x00100E04)
             ];
         }
 
-        public static OpCode[] EnableDoorsOutsideClozerSubGate(byte currentProgressionCounter)
+        public static OpCode[] EnableDoorsOutsideClozerSubGate(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return
             [
-                LoadByteImmediate(0x001004FC, MMLEnums.Register.a1, Math.Max((byte)0x08, currentProgressionCounter)),
+                LoadByteImmediate(0x001004FC, MMLEnums.Register.a1, Math.Max((byte)0x08, minProgressionCounter)),
                 Nop(0x00100500)
             ];
         }
 
-        public static OpCode[] EnableDoorsCardonForest(byte currentProgressionCounter)
+        public static OpCode[] EnableDoorsCardonForestFlutterBroken(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return [
-                LoadByteImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, currentProgressionCounter))
+                LoadByteImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter))
             ];
         }
 
-        public static OpCode[] EnableDoorsAppleMarket(byte currentProgressionCounter)
+        public static OpCode[] EnableDoorsAppleMarket(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return [
-                LoadByteImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, currentProgressionCounter)),
+                LoadByteImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter)),
             ];
         }
 
-        public static OpCode[] EnableDoorsDowntown(byte currentProgressionCounter)
+        public static OpCode[] EnableDoorsDowntown(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return
             [
-                LoadByteImmediate(0x00106B50, MMLEnums.Register.a1, Math.Max((byte)0x02, currentProgressionCounter)),
-                LoadByteImmediate(0x00106B68, MMLEnums.Register.v0, Math.Max((byte)0x02, currentProgressionCounter)), // Opens doors during Tron / dog scene
+                LoadByteImmediate(0x00106B50, MMLEnums.Register.a1, Math.Max((byte)0x02, minProgressionCounter)),
+                LoadByteImmediate(0x00106B68, MMLEnums.Register.v0, Math.Max((byte)0x02, minProgressionCounter)), // Opens doors during Tron / dog scene
             ];
         }
 
-        public static OpCode[] EnableDoorsCityHall(byte currentProgressionCounter)
+        public static OpCode[] EnableDoorsCityHall(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return
             [
-                LoadByteImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, currentProgressionCounter))
+                LoadByteImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter))
             ];
         }
 
-        public static OpCode[] FastForwardWilysBoat(byte currentProgressionCounter, bool boatIsFixed)
+        public static OpCode[] FastForwardWilysBoat(byte minProgressionCounter, bool boatIsFixed)
         {
             // This could go in slow loop, but put in fast loop since NPCs spawn on progression check
             byte fastForwardState = (byte)(boatIsFixed ? 0x05 : 0x04);
             return
             [
                 // Loads people into the zone (they were evacuated)
-                LoadByteImmediate(0x001003A4, MMLEnums.Register.v1, Math.Max(fastForwardState, currentProgressionCounter)), 
+                LoadByteImmediate(0x001003A4, MMLEnums.Register.v1, Math.Max(fastForwardState, minProgressionCounter)), 
                 Nop(0x001003A8)
             ];
         }
@@ -122,18 +122,58 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] EnableRedRefractorCutscene(byte currentProgressionCounter)
+        public static OpCode[] EnableRedRefractorCutscene()
         {
-            
             return
             [
-                //try1
-                //LoadByteImmediate(0x00106B50, MMLEnums.Register.a1, Math.Max((byte)0x06, currentProgressionCounter))
-                //try2
-                //LoadByteImmediate(0x00106B6C, MMLEnums.Register.a1, Math.Max((byte)0x06, currentProgressionCounter))
-                //try3
-                LoadByteImmediate(0x001001E8, MMLEnums.Register.v1, Math.Max((byte)0x06, currentProgressionCounter)),
+                LoadByteImmediate(0x001001E8, MMLEnums.Register.v1, 0x06),
                 Nop(0x001001EC)
+            ];
+        }
+
+        public static OpCode[] FastForwardCardonForestFlutterFixed(byte minProgressionCounter)
+        {
+            // Fast load
+            return [
+                // Can re-enter flutter
+                LoadByteImmediate(0x00100A38, MMLEnums.Register.a1, Math.Max((byte)0x07, minProgressionCounter)),
+                Nop(0x00100A3C),
+                // Flutter is there
+                LoadByteImmediate(0x00100AE4, MMLEnums.Register.v1, Math.Max((byte)0x07, minProgressionCounter)),
+                Nop(0x00100AE8)
+            ];
+        }
+
+        public static OpCode[] FastForwardOldCity(byte minProgressionCounter)
+        {
+            // Slow
+            return [
+                    LoadByteImmediate(0x001007CC, MMLEnums.Register.v1, Math.Max((byte)0x02, minProgressionCounter)),
+                    Nop(0x001007D0)
+            ];
+        }
+
+        public static OpCode[] FastForwardUptown(byte minProgressionCounter)
+        {
+            // Slow
+            return [
+                    LoadByteImmediate(0x00100644, MMLEnums.Register.v1, Math.Max((byte)0x02, minProgressionCounter)),
+                    Nop(0x00100648)
+            ];
+        }
+
+        public static OpCode[] EnableLakeJyunBoss()
+        {
+            return [
+                //try1
+                LoadByteImmediate(0x00100598, MMLEnums.Register.v1, 0x05),
+                Nop(0x0010059C),
+                //try2
+                LoadByteImmediate(0x0001FBC8, MMLEnums.Register.v1, 0x05),
+                Nop(0x0001FBCC),
+                //try3
+                LoadByteImmediate(0x00116748, MMLEnums.Register.v1, 0x05),
+                Nop(0x0011674C)
             ];
         }
 
