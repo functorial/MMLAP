@@ -36,7 +36,9 @@ namespace MMLAP
         public static readonly AddressData ShownRollRedRefractor = new(0xBE3B2, 5, null);
         public static readonly AddressData HasYellowRefractor = new(0xBE41D, 7, null); // TODO: Make these locations / item data
         public static readonly AddressData HasRedRefractor = new(0xBE41D, 6, null); // TODO: Make these locations / item data
+        public static readonly AddressData HasDefeatedBalkonGerat = new(0xBE37B, 2, null);
+        public static readonly AddressData HasCalledRollToFixBoat = new(0xBE37E, 5, null);
         // Utility addresses for codes
-        public static readonly AddressData FixBoatCallRoll = new(0x5545C, null, 4);
+        public static readonly AddressData FixBoatCallRollUtil = new(0x5545C, null, 4);
     }
 }

@@ -91,15 +91,21 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardWilysBoat(byte minProgressionCounter, bool boatIsFixed)
+        public static OpCode[] FastForwardWilysBoat(byte minProgressionCounter, bool boatIsFixed, bool hasDefeatedBalkonGerat)
         {
             // This could go in slow loop, but put in fast loop since NPCs spawn on progression check
-            byte fastForwardState = (byte)(boatIsFixed ? 0x05 : 0x04);
+            byte fastForwardState = (byte)(hasDefeatedBalkonGerat ? 0x06 : (boatIsFixed ? 0x05 : 0x04));
             return
             [
                 // Loads people into the zone (they were evacuated)
                 LoadByteImmediate(0x001003A4, MMLEnums.Register.v1, Math.Max(fastForwardState, minProgressionCounter)), 
-                Nop(0x001003A8)
+                Nop(0x001003A8),
+                // 
+                LoadByteImmediate(0x00100370, MMLEnums.Register.a1, Math.Max(fastForwardState, minProgressionCounter)),
+                Nop(0x00100374),
+                // 
+                LoadByteImmediate(0x0001FCA4, MMLEnums.Register.v1, Math.Max(fastForwardState, minProgressionCounter)),
+                Nop(0x0001FCA8)
             ];
         }
 
@@ -110,7 +116,7 @@ namespace MMLAP
             // This is used by other stuff and can cause soft locks if not rewritten
             // An execution breakpoint here only hits once in this area, so it should be safe as long as it's restored later
             return [
-                Nop(Addresses.FixBoatCallRoll.Address)
+                Nop(Addresses.FixBoatCallRollUtil.Address)
             ];
         }
 
@@ -118,7 +124,7 @@ namespace MMLAP
         {
             // This is what is overwritten by EnableFixBoatCallRoll
             return [
-                new OpCode(Addresses.FixBoatCallRoll.Address, 0x10400006)  // beq v0, zero, 0x80055478
+                new OpCode(Addresses.FixBoatCallRollUtil.Address, 0x10400006)  // beq v0, zero, 0x80055478
             ];
         }
 
@@ -162,19 +168,34 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] EnableLakeJyunBoss()
+        public static OpCode[] FastForwardLakeJyun(bool hasDefeatedBalkonGerat)
         {
-            return [
-                //try1
+            //byte fastForwardState = (byte)(hasDefeatedBalkonGerat ? 0x06 : 0x05);
+            OpCode[] code = hasDefeatedBalkonGerat ? [
+                // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
+                LoadByteImmediate(0x00100598, MMLEnums.Register.v1, 0x06),
+                Nop(0x0010059C),
+                // Prevents crash after starting phase 1
+                LoadByteImmediate(0x0001FBC8, MMLEnums.Register.v1, 0x06),
+                Nop(0x0001FBCC),
+                // Lets phase 1 load
+                //LoadByteImmediate(0x00116748, MMLEnums.Register.v1, 0x06),
+                //Nop(0x0011674C),
+                // Lets after phase 2 load
+                LoadByteImmediate(0x00101A70, MMLEnums.Register.v1, 0x01)
+            ] :
+            [
+                // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
                 LoadByteImmediate(0x00100598, MMLEnums.Register.v1, 0x05),
                 Nop(0x0010059C),
-                //try2
+                // Prevents crash after starting phase 1
                 LoadByteImmediate(0x0001FBC8, MMLEnums.Register.v1, 0x05),
                 Nop(0x0001FBCC),
-                //try3
+                // Lets phase 1 load
                 LoadByteImmediate(0x00116748, MMLEnums.Register.v1, 0x05),
                 Nop(0x0011674C)
             ];
+            return code;
         }
 
         private static OpCode LoadByteImmediate(uint startAddress, MMLEnums.Register register, byte byteVal)

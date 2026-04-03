@@ -604,11 +604,13 @@ public partial class App : Application
                                 if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
                                 {
                                     bool boatIsFixed = Memory.ReadBit(Addresses.BoatIsFixed.Address, Addresses.BoatIsFixed.BitNumber ?? 6);
-                                    MemoryHelpers.WriteCode(Codes.FastForwardWilysBoat(CurrentProgressionCounter, boatIsFixed));
+                                    bool hasDefeatedBalkonGeratWily = Memory.ReadBit(Addresses.HasDefeatedBalkonGerat.Address, Addresses.HasDefeatedBalkonGerat.BitNumber ?? 2);
+                                    MemoryHelpers.WriteCode(Codes.FastForwardWilysBoat(CurrentProgressionCounter, boatIsFixed, hasDefeatedBalkonGeratWily));
                                 }
                                 break;
                             case ("Lake Jyun"):
-                                MemoryHelpers.WriteCode(Codes.EnableLakeJyunBoss());
+                                bool hasDefeatedBalkonGeratLake = Memory.ReadBit(Addresses.HasDefeatedBalkonGerat.Address, Addresses.HasDefeatedBalkonGerat.BitNumber ?? 2);
+                                MemoryHelpers.WriteCode(Codes.FastForwardLakeJyun(hasDefeatedBalkonGeratLake));
                                 break;
                             case ("Flutter Takeoff"):
                                 MemoryHelpers.WriteCode(Codes.EnableRedRefractorCutscene());
@@ -658,7 +660,7 @@ public partial class App : Application
                     CurrentProgressionCounter = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
 
                     // Task 2: Do things when changing rooms
-                    // Task 2a: Check if level has changed, and if so, set flag to manage level change
+                    // Task 2.a: Check if level has changed, and if so, set flag to manage level change
                     ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
                     if (currentLevelID != PreviousLevelID)
                     {
@@ -675,7 +677,7 @@ public partial class App : Application
                     {
                         System.Threading.Thread.Sleep(50);
 
-                        // Task 2b: Based on current level, do things like overwrite text, write code
+                        // Task 2.b: Based on current level, do things like overwrite text, write code
                         if (
                             IsManagingLevelChange &&
                             LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
@@ -770,7 +772,10 @@ public partial class App : Application
                                     }
                                     break;
                                 case ("Outside Boat Shop"):
-                                    if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
+                                    if (
+                                        Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7) &&
+                                        !Memory.ReadBit(Addresses.HasCalledRollToFixBoat.Address, Addresses.HasCalledRollToFixBoat.BitNumber ?? 5)
+                                    )
                                     {
                                         MemoryHelpers.WriteCode(Codes.EnableFixBoatCallRoll());
                                     }
@@ -782,7 +787,7 @@ public partial class App : Application
                         }
 
                         // Task 3: Restore overwritten memory
-                        // Task 3a: If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
+                        // Task 3.a: If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
                         if (!Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber ?? 7))
                         {
                             while (TextDataToWriteStack.TryPop(out var overwrittenTextData))
@@ -791,13 +796,26 @@ public partial class App : Application
                             }
                         }
 
-                        //Task 3b: Restore branch statement noped in EnableFixBoatCallRoll code which is used elsewhere
+                        //Task 3.b.1: Restore branch statement noped in EnableFixBoatCallRoll code which is used elsewhere
                         if (
-                            Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) != 0x0D00 &&
-                            Memory.ReadUInt(Addresses.FixBoatCallRoll.Address) == 0x00000000
+                            Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) != 0x0D00 && // Wily's Boat, outside
+                            Memory.ReadUInt(Addresses.FixBoatCallRollUtil.Address) == 0x00000000 &&
+                            Memory.ReadBit(Addresses.HasCalledRollToFixBoat.Address, Addresses.HasCalledRollToFixBoat.BitNumber ?? 5)
                         )
                         {
                             MemoryHelpers.WriteCode(Codes.RestoreFixBoatCallRoll());
+                        }
+
+                        // Task 3.b.2: Restore code persisting from FastForwardLakeJyun causing crash later
+                        if (
+                            Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) != 0x0B02 && // On Lake Jyun
+                            Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) != 0x0B03 && // On Lake Jyun
+                            Memory.ReadBit(Addresses.HasDefeatedBalkonGerat.Address, Addresses.HasDefeatedBalkonGerat.BitNumber ?? 2) &&
+                            Memory.ReadUInt(0x0001FBCC) == 0x00000000
+                        )
+                        {
+                            Memory.Write(0x0001FBC8, 0x3C03800C);
+                            Memory.Write(0x0001FBCC, 0x80631B62);
                         }
                     }
 
