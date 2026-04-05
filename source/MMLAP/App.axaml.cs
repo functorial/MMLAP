@@ -38,13 +38,8 @@ public partial class App : Application
     // TODO: Remember to set this in MMLAP.Desktop as well.
     public static readonly string Version = "0.2.6";
     public static readonly List<string> SupportedVersions = ["0.2.0", "0.2.1", "0.2.2", "0.2.3", "0.2.4", "0.2.5", "0.2.6"];
-
-
     public static MainWindowViewModel? Context;
     public static ArchipelagoClient? APClient { get; set; }
-    private static Dictionary<ushort, LevelData> LevelDataDict { get; set; } = LocationHelpers.GetLevelDataDict();
-    private static Dictionary<long, ItemData> ItemDataDict { get; set; } = LocationHelpers.GetItemDataDict();
-    private static Dictionary<int, LocationData> LocationDataDict { get; set; } = LocationHelpers.GetLocationDataDict();
     private static Dictionary<long, ItemData>? ScoutedLocationItemData { get; set; }
     private static List<ILocation>? GameLocations { get; set; }
     private static string? PlayerName { get; set; }
@@ -313,7 +308,7 @@ public partial class App : Application
         APClient.CurrentSession.Locations.CheckedLocationsUpdated += CurrentSession_CheckedLocationsUpdated;
 
         // TODO: parse options
-        GameLocations = LocationHelpers.BuildLocationList(APClient.Options);
+        GameLocations = DataDicts.BuildLocationList(APClient.Options);
         GameLocations = GameLocations.Where(x => x != null && !APClient.CurrentSession.Locations.AllLocationsChecked.Contains(x.Id)).ToList();
 
         int slot = APClient.CurrentSession.ConnectionInfo.Slot;
@@ -323,7 +318,7 @@ public partial class App : Application
         ArchipelagoSession session = APClient.CurrentSession;
         Dictionary<long, ScoutedItemInfo> scoutedLocations = await session.Locations.ScoutLocationsAsync(locationIds);
         ScoutedLocationItemData = scoutedLocations.Keys.ToDictionary(
-            locationId => locationId, locationId => scoutedLocations[locationId].Player.Slot == slot ? ItemDataDict[scoutedLocations[locationId].ItemId] : ItemDataDict[0]
+            locationId => locationId, locationId => scoutedLocations[locationId].Player.Slot == slot ? DataDicts.ItemDataDict[scoutedLocations[locationId].ItemId] : DataDicts.ItemDataDict[0]
         );
 
         // Check apworld version compatibility with host and log results
@@ -566,7 +561,7 @@ public partial class App : Application
                 {
                     ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
                     if (
-                        LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
+                        DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
                     )
                     {
                         string areaName = currentLevelData.AreaName;
@@ -580,7 +575,7 @@ public partial class App : Application
                                 MemoryHelpers.WriteCode(Codes.FastForwardCardonForestFlutterFixed(CurrentProgressionCounter));
                                 break;
                             case ("Outside Cardon Forest Sub-Gate"):
-                                MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideCardonSubGate(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideCardonSubgate(CurrentProgressionCounter));
                                 break;
                             case ("Apple Market"):
                                 MemoryHelpers.WriteCode(Codes.EnableDoorsAppleMarket(CurrentProgressionCounter));
@@ -598,7 +593,7 @@ public partial class App : Application
                                 MemoryHelpers.WriteCode(Codes.FastForwardOldCity(CurrentProgressionCounter));
                                 break;
                             case ("Clozer Woods"):
-                                MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideClozerSubGate(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideClozerSubgate(CurrentProgressionCounter));
                                 break;
                             case ("Wily's Boat"):
                                 if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
@@ -680,7 +675,7 @@ public partial class App : Application
                         // Task 2.b: Based on current level, do things like overwrite text, write code
                         if (
                             IsManagingLevelChange &&
-                            LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
+                            DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
                         )
                         {
                             string areaName = currentLevelData.AreaName;
@@ -690,14 +685,66 @@ public partial class App : Application
                             switch (areaName)
                             {
                                 case ("Cardon Forest Sub-Gate"):
-                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideCardonSubGate(CurrentProgressionCounter));
+                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideCardonSubgate(CurrentProgressionCounter));
                                     break;
                                 case ("Lake Jyun Sub-Gate"):
-                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideJyunSubGate(CurrentProgressionCounter));
+                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideJyunSubgate(CurrentProgressionCounter));
                                     break;
                                 case ("Clozer Woods Sub-Gate"):
-                                    Log.Logger.Information("Fast load screen detected. Enabling Clozer Sub-Gate doors.");
-                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideClozerSubGate(CurrentProgressionCounter));
+                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideClozerSubgate(CurrentProgressionCounter));
+                                    break;
+                                case ("Apple Market"):
+                                    // Handle Flutter Fixed <> Flutter Broken distinction
+                                    if (DataDicts.ExitDataDict.TryGetValue("Apple Market -> Cardon Forest", out ExitData? exitDataAppleToCardon))
+                                    {
+                                        if (Memory.ReadBit(Addresses.HasShownRollRedRefractor.Address, Addresses.HasShownRollRedRefractor.BitNumber ?? 5))
+                                        {
+                                            Memory.WriteByte(exitDataAppleToCardon.TargetAreaAddress, 0x1B);
+                                        }
+                                        else
+                                        {
+                                            Memory.WriteByte(exitDataAppleToCardon.TargetAreaAddress, 0x03);
+                                        }
+                                    }
+                                    break;
+                                case ("Outside Cardon Forest Sub-Gate"):
+                                    // Handle Flutter Fixed <> Flutter Broken distinction
+                                    if (DataDicts.ExitDataDict.TryGetValue("Outside Cardon Forest Sub-Gate -> Cardon Forest", out ExitData? exitDataSubgateToCardon))
+                                    {
+                                        if (Memory.ReadBit(Addresses.HasShownRollRedRefractor.Address, Addresses.HasShownRollRedRefractor.BitNumber ?? 5))
+                                        {
+                                            Memory.WriteByte(exitDataSubgateToCardon.TargetAreaAddress, 0x1B);
+                                        }
+                                        else
+                                        {
+                                            Memory.WriteByte(exitDataSubgateToCardon.TargetAreaAddress, 0x03);
+                                        }
+                                    }
+                                    break;
+                                case ("Underground Ruins"):
+                                    // Handle Flutter Fixed <> Flutter Broken distinction
+                                    if (DataDicts.ExitDataDict.TryGetValue("Underground Ruins, Room 1 (Junk Store Man Area) -> Cardon Forest", out ExitData? exitDataRuins1ToCardon))
+                                    {
+                                        if (Memory.ReadBit(Addresses.HasShownRollRedRefractor.Address, Addresses.HasShownRollRedRefractor.BitNumber ?? 5))
+                                        {
+                                            Memory.WriteByte(exitDataRuins1ToCardon.TargetAreaAddress, 0x1B);
+                                        }
+                                        else
+                                        {
+                                            Memory.WriteByte(exitDataRuins1ToCardon.TargetAreaAddress, 0x03);
+                                        }
+                                    }
+                                    if (DataDicts.ExitDataDict.TryGetValue("Underground Ruins, Room 2 -> Cardon Forest", out ExitData? exitDataRuins2ToCardon))
+                                    {
+                                        if (Memory.ReadBit(Addresses.HasShownRollRedRefractor.Address, Addresses.HasShownRollRedRefractor.BitNumber ?? 5))
+                                        {
+                                            Memory.WriteByte(exitDataRuins2ToCardon.TargetAreaAddress, 0x1B);
+                                        }
+                                        else
+                                        {
+                                            Memory.WriteByte(exitDataRuins2ToCardon.TargetAreaAddress, 0x03);
+                                        }
+                                    }
                                     break;
                                 default:
                                     break;
@@ -711,7 +758,7 @@ public partial class App : Application
                                     if (
                                         ScoutedLocationItemData != null &&
                                         ScoutedLocationItemData.TryGetValue(111, out var iraScoutedItemData) &&
-                                        LocationDataDict.TryGetValue(111, out var iraLocationData) &&
+                                        DataDicts.LocationDataDict.TryGetValue(111, out var iraLocationData) &&
                                         iraLocationData.Name == "Cure Ira's illness" &&
                                         iraLocationData.TextBoxStartAddress != null
                                     )
@@ -724,7 +771,7 @@ public partial class App : Application
                                     if (
                                         ScoutedLocationItemData != null &&
                                         ScoutedLocationItemData.TryGetValue(104, out var rescueScoutedItemData) &&
-                                        LocationDataDict.TryGetValue(104, out var rescueLocationData) &&
+                                        DataDicts.LocationDataDict.TryGetValue(104, out var rescueLocationData) &&
                                         rescueLocationData.Name == "Rescue the shop owner's husband" &&
                                         rescueLocationData.TextBoxStartAddress != null
                                     )
@@ -849,7 +896,7 @@ public partial class App : Application
                         Log.Logger.Information("Re-checking previously checked container locations...");
                         foreach (long locationID in allLocationsChecked)
                         {
-                            if (LocationDataDict.TryGetValue((int)locationID, out LocationData? locationData))
+                            if (DataDicts.LocationDataDict.TryGetValue((int)locationID, out LocationData? locationData))
                             {
                                 if (new[] { LocationCategory.Container, LocationCategory.Hole, LocationCategory.Pickup }.Contains(locationData.Category))
                                 {
@@ -875,7 +922,7 @@ public partial class App : Application
                         Log.Logger.Information("Receiving non-zenny items from previously received items...");
                         foreach (ItemInfo itemInfo in allItemsReceived)
                         {
-                            if (ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData))
+                            if (DataDicts.ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData))
                             {
                                 if (itemData.Category != ItemCategory.Zenny)
                                 {
@@ -954,7 +1001,7 @@ public partial class App : Application
         )
         {
             // Use scouted location item to rewrite textbox
-            LocationData locationData = LocationDataDict[e.CompletedLocation.Id];
+            LocationData locationData = DataDicts.LocationDataDict[e.CompletedLocation.Id];
             if (locationData.TextBoxStartAddress != null)
             {
                 ItemData itemData = ScoutedLocationItemData[e.CompletedLocation.Id];
@@ -970,7 +1017,7 @@ public partial class App : Application
         if (
             APClient != null &&
             APClient.CurrentSession != null &&
-            ItemDataDict.TryGetValue(args.Item.Id, out ItemData? itemData)
+            DataDicts.ItemDataDict.TryGetValue(args.Item.Id, out ItemData? itemData)
         )
         {
             ItemHelpers.ReceiveGenericItem(itemData);

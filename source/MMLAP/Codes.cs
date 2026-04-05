@@ -6,7 +6,7 @@ namespace MMLAP
 {
     public class Codes
     {
-        public static OpCode[] EnableDoorsInsideCardonSubGate(byte minProgressionCounter)
+        public static OpCode[] EnableDoorsInsideCardonSubgate(byte minProgressionCounter)
         {
             // May be written slowly as it is checked during in-game loop
             return
@@ -16,7 +16,7 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] EnableDoorsInsideJyunSubGate(byte minProgressionCounter)
+        public static OpCode[] EnableDoorsInsideJyunSubgate(byte minProgressionCounter)
         {
             // May be written slowly as it is checked during in-game loop
             return
@@ -26,7 +26,7 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] EnableDoorsInsideClozerSubGate(byte minProgressionCounter)
+        public static OpCode[] EnableDoorsInsideClozerSubgate(byte minProgressionCounter)
         {
             // May be written slowly as it is checked during in-game loop
             return
@@ -36,7 +36,7 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] EnableDoorsOutsideCardonSubGate(byte minProgressionCounter)
+        public static OpCode[] EnableDoorsOutsideCardonSubgate(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return
@@ -46,7 +46,7 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] EnableDoorsOutsideClozerSubGate(byte minProgressionCounter)
+        public static OpCode[] EnableDoorsOutsideClozerSubgate(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return
