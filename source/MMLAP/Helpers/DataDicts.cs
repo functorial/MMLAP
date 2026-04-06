@@ -8,6 +8,7 @@ namespace MMLAP.Helpers
     {
         public static readonly Dictionary<string, ExitData> ExitDataDict = new()
         {
+            // TODO: Add weird exits like the elevators and sub city chest rooms
             { "Ocean Tower, Room 1 (Entrance) -> Ocean Tower, Room 2",                       new ExitData("Ocean Tower, Room 1 (Entrance)",                  0x0001, "Ocean Tower, Room 2",                       0x00, 0x11AB9E, 0x02, 0x11ABA0, [0x00, 0xFF, 0xFF, 0xFF, 0x80, 0x18, 0x00, 0x08], 0x11ABA8) },
             { "Ocean Tower, Room 2 -> Ocean Tower, Room 1 (Entrance)",                       new ExitData("Ocean Tower, Room 2",                             0x0002, "Ocean Tower, Room 1 (Entrance)",            0x00, 0x11ABCE, 0x01, 0x11ABD0, [0x00, 0xFF, 0xFF, 0xFF, 0x80, 0xEB, 0x00, 0x00], 0x11ABD8) },
             { "Ocean Tower, Room 2 -> Ocean Tower, Room 3 (Boss)",                           new ExitData("Ocean Tower, Room 2",                             0x0002, "Ocean Tower, Room 3 (Boss)",                0x00, 0x11ABE6, 0x03, 0x11ABE8, [0x00, 0xFF, 0x7F, 0xFE, 0x80, 0xF8, 0x00, 0x08], 0x11ABF0) },
@@ -338,9 +339,9 @@ namespace MMLAP.Helpers
             { 0x1404, new LevelData("Lake Jyun Sub-Gate",             "Refractor Room",                   0x14, 0x04) },
             { 0x1500, new LevelData("Bonne Ending Boat",              "Boat Interior",                    0x15, 0x00) },
             { 0x1501, new LevelData("Bonne Ending Boat",              "Ocean",                            0x15, 0x01) },
-            { 0x1600, new LevelData("Flutter To Sub-Gate Cutscene",    "Cutscene",                         0x16, 0x00) },
-            { 0x1601, new LevelData("Flutter To Sub-Gate Cutscene",    "Flutter Bridge",                   0x16, 0x01) },
-            { 0x1602, new LevelData("Flutter To Sub-Gate Cutscene",    "Return Cutscene",                  0x16, 0x02) },
+            { 0x1600, new LevelData("Flutter To Sub-Gate Cutscene",   "Cutscene",                         0x16, 0x00) },
+            { 0x1601, new LevelData("Flutter To Sub-Gate Cutscene",   "Flutter Bridge",                   0x16, 0x01) },
+            { 0x1602, new LevelData("Flutter To Sub-Gate Cutscene",   "Return Cutscene",                  0x16, 0x02) },
             { 0x1700, new LevelData("Gesselschaft Battle",            "Small Bridge",                     0x17, 0x00) },
             { 0x1701, new LevelData("Gesselschaft Battle",            "Flutter Bridge",                   0x17, 0x01) },
             { 0x1702, new LevelData("Gesselschaft Battle",            "Gesselschaft HQ",                  0x17, 0x02) },
@@ -638,9 +639,9 @@ namespace MMLAP.Helpers
             { 57,  new LocationData(57,  "Cardon Forest Sub-Gate, Bottom conveyor hole",                  LocationCategory.Hole,      LevelDataDict[0x0E02], ItemDataDict[0x801E], new AddressData(0xBE3DC, 4, null), null, false, null,    0x153CDF) },
             { 58,  new LocationData(58,  "Cardon Forest Sub-Gate, Middle conveyor hole",                  LocationCategory.Hole,      LevelDataDict[0x0E02], ItemDataDict[0x024D], new AddressData(0xBE3DC, 6, null), null, false, null,    0x153BD2) },
             { 59,  new LocationData(59,  "Cardon Forest Sub-Gate, Middle switch chest",                   LocationCategory.Container, LevelDataDict[0x0E02], ItemDataDict[0x025A], new AddressData(0xBE400, 3, null), null, false, 0x9F114, 0x8C735)  },
-            { 60,  new LocationData(60,  "Cardon Forest Sub-Gate, Jakko nest starter key get",            LocationCategory.Pickup,    LevelDataDict[0x0E01], ItemDataDict[0x0230], new AddressData(0xBE41D, 1, null), null, false, null,    null)     },
-            { 61,  new LocationData(61,  "Cardon Forest Sub-Gate, Conveyor chest starter key get",        LocationCategory.Pickup,    LevelDataDict[0x0E02], ItemDataDict[0x022F], new AddressData(0xBE41E, 7, null), null, false, null,    null)     },
-            { 62,  new LocationData(62,  "Cardon Forest Sub-Gate, Three switch starter key get",          LocationCategory.Pickup,    LevelDataDict[0x0E00], ItemDataDict[0x022E], new AddressData(0xBE41D, 0, null), null, false, null,    null)     },
+            { 60,  new LocationData(60,  "Cardon Forest Sub-Gate, Jakko nest starter key get",            LocationCategory.Pickup,    LevelDataDict[0x0E01], ItemDataDict[0x0230], new AddressData(0xBE377, 0, null), null, false, null,    null)     }, // The CheckAddressData is synthetic, re: DecoupleCardonForestSubGateKeys
+            { 61,  new LocationData(61,  "Cardon Forest Sub-Gate, Conveyor chest starter key get",        LocationCategory.Pickup,    LevelDataDict[0x0E02], ItemDataDict[0x022F], new AddressData(0xBE377, 1, null), null, false, null,    null)     }, // The CheckAddressData is synthetic, re: DecoupleCardonForestSubGateKeys
+            { 62,  new LocationData(62,  "Cardon Forest Sub-Gate, Three switch starter key get",          LocationCategory.Pickup,    LevelDataDict[0x0E00], ItemDataDict[0x022E], new AddressData(0xBE377, 2, null), null, false, null,    null)     }, // The CheckAddressData is synthetic, re: DecoupleCardonForestSubGateKeys
             { 63,  new LocationData(63,  "Lake Jyun Sub-Gate, Entrance right hole",                       LocationCategory.Hole,      LevelDataDict[0x1400], ItemDataDict[0x807C], new AddressData(0xBE3DC, 1, null), null, false, null,    0x153A7E) },
             { 64,  new LocationData(64,  "Lake Jyun Sub-Gate, Entrance left hole",                        LocationCategory.Hole,      LevelDataDict[0x1400], ItemDataDict[0x8016], new AddressData(0xBE3DD, 7, null), null, false, null,    0x15418E) },
             { 65,  new LocationData(65,  "Lake Jyun Sub-Gate, Entrance chest",                            LocationCategory.Container, LevelDataDict[0x1400], ItemDataDict[0x026F], new AddressData(0xBE401, 7, null), null, false, 0x9F114, 0x8C735)  },
@@ -689,7 +690,7 @@ namespace MMLAP.Helpers
             { 108, new LocationData(108, "Race Left Curve Course Rank A",                                 LocationCategory.Quest,     LevelDataDict[0x0500], ItemDataDict[0x0219], new AddressData(0xBE3B8, 5, null), null, false, null,    0x153BC3) },
             { 109, new LocationData(109, "Race Technical Course Rank A",                                  LocationCategory.Quest,     LevelDataDict[0x0500], ItemDataDict[0x024F], new AddressData(0xBE3B8, 4, null), null, false, null,    0x153BC3) },
             { 110, new LocationData(110, "Save the missing woman",                                        LocationCategory.Quest,     LevelDataDict[0x0801], ItemDataDict[0x0273], new AddressData(0xBE3BE, 7, null), null, false, null,    0x1539A2) },
-          //{ 111, new LocationData(111, "Cure Ira's illness",                                            LocationCategory.Quest,     LevelDataDict[0x0805], ItemDataDict[0x0278], new AddressData(0xBE3BE, 3, null), null, false, null,    0x154657) },
+            { 111, new LocationData(111, "Cure Ira's illness",                                            LocationCategory.Quest,     LevelDataDict[0x0805], ItemDataDict[0x0278], new AddressData(0xBE3BE, 3, null), null, false, null,    0x154657) },
           //{ 112, new LocationData(112, "Tell painter she needs red"
           //{ 113, new LocationData(112, "Get lipstick"
             { 114, new LocationData(114, "Museum donation, Old Bone",                                     LocationCategory.Quest,     LevelDataDict[0x1C01], ItemDataDict[0x00FF], new AddressData(0xBE37F, 7, null), null, false, null,    null)     },

@@ -22,7 +22,6 @@ using Serilog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
@@ -568,47 +567,50 @@ public partial class App : Application
                         switch (areaName)
                         {
                             case ("Cardon Forest (Flutter Broken)"):
-                                MemoryHelpers.WriteCode(Codes.EnableDoorsCardonForestFlutterBroken(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Cheats.EnableDoorsCardonForestFlutterBroken(CurrentProgressionCounter));
                                 break;
                             case ("Cardon Forest (Flutter Fixed)"):
                                 Log.Logger.Information("FastForwardCardonForestFlutterFixed");
-                                MemoryHelpers.WriteCode(Codes.FastForwardCardonForestFlutterFixed(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(CurrentProgressionCounter));
                                 break;
                             case ("Outside Cardon Forest Sub-Gate"):
-                                MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideCardonSubgate(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Cheats.EnableDoorsOutsideCardonSubgate(CurrentProgressionCounter));
                                 break;
                             case ("Apple Market"):
-                                MemoryHelpers.WriteCode(Codes.EnableDoorsAppleMarket(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Cheats.EnableDoorsAppleMarket(CurrentProgressionCounter));
                                 break;
                             case ("Downtown"):
-                                MemoryHelpers.WriteCode(Codes.EnableDoorsDowntown(CurrentProgressionCounter));
-                                break;
-                            case ("City Hall"):
-                                MemoryHelpers.WriteCode(Codes.EnableDoorsCityHall(CurrentProgressionCounter));
+                                bool subCitiesAreSurfacedDowntown = Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1);
+                                MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(CurrentProgressionCounter, subCitiesAreSurfacedDowntown));
                                 break;
                             case ("Uptown"):
-                                MemoryHelpers.WriteCode(Codes.FastForwardUptown(CurrentProgressionCounter));
+                                bool subCitiesAreSurfacedUptown = Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1);
+                                MemoryHelpers.WriteCode(Cheats.FastForwardUptown(CurrentProgressionCounter, subCitiesAreSurfacedUptown));
                                 break;
                             case ("Old City"):
-                                MemoryHelpers.WriteCode(Codes.FastForwardOldCity(CurrentProgressionCounter));
+                                //bool subCitiesAreSurfacedOldCity = Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1);
+                                MemoryHelpers.WriteCode(Cheats.FastForwardOldCity(CurrentProgressionCounter));
+                                break;
+                            case ("City Hall"):
+                                MemoryHelpers.WriteCode(Cheats.EnableDoorsCityHall(CurrentProgressionCounter));
                                 break;
                             case ("Clozer Woods"):
-                                MemoryHelpers.WriteCode(Codes.EnableDoorsOutsideClozerSubgate(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Cheats.EnableDoorsOutsideClozerSubgate(CurrentProgressionCounter));
                                 break;
                             case ("Wily's Boat"):
                                 if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
                                 {
                                     bool boatIsFixed = Memory.ReadBit(Addresses.BoatIsFixed.Address, Addresses.BoatIsFixed.BitNumber ?? 6);
                                     bool hasDefeatedBalkonGeratWily = Memory.ReadBit(Addresses.HasDefeatedBalkonGerat.Address, Addresses.HasDefeatedBalkonGerat.BitNumber ?? 2);
-                                    MemoryHelpers.WriteCode(Codes.FastForwardWilysBoat(CurrentProgressionCounter, boatIsFixed, hasDefeatedBalkonGeratWily));
+                                    MemoryHelpers.WriteCode(Cheats.FastForwardWilysBoat(CurrentProgressionCounter, boatIsFixed, hasDefeatedBalkonGeratWily));
                                 }
                                 break;
                             case ("Lake Jyun"):
                                 bool hasDefeatedBalkonGeratLake = Memory.ReadBit(Addresses.HasDefeatedBalkonGerat.Address, Addresses.HasDefeatedBalkonGerat.BitNumber ?? 2);
-                                MemoryHelpers.WriteCode(Codes.FastForwardLakeJyun(hasDefeatedBalkonGeratLake));
+                                MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyun(hasDefeatedBalkonGeratLake));
                                 break;
                             case ("Flutter Takeoff"):
-                                MemoryHelpers.WriteCode(Codes.EnableRedRefractorCutscene());
+                                MemoryHelpers.WriteCode(Cheats.EnableRedRefractorCutscene());
                                 break;
                             default:
                                 break;
@@ -675,23 +677,26 @@ public partial class App : Application
                         // Task 2.b: Based on current level, do things like overwrite text, write code
                         if (
                             IsManagingLevelChange &&
+                            !Memory.ReadBit(Addresses.CameraAlteredFlag.Address, Addresses.CameraAlteredFlag.BitNumber ?? 0) &&
                             DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
                         )
                         {
                             string areaName = currentLevelData.AreaName;
                             string roomName = currentLevelData.RoomName;
+                            string levelName = areaName + ": " + roomName;
 
                             // Do area-based writes first
                             switch (areaName)
                             {
                                 case ("Cardon Forest Sub-Gate"):
-                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideCardonSubgate(CurrentProgressionCounter));
+                                    MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideCardonSubgate(CurrentProgressionCounter));
+                                    MemoryHelpers.WriteCode(Cheats.DecoupleCardonForestSubGateKeys());
                                     break;
                                 case ("Lake Jyun Sub-Gate"):
-                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideJyunSubgate(CurrentProgressionCounter));
+                                    MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideJyunSubgate(CurrentProgressionCounter));
                                     break;
                                 case ("Clozer Woods Sub-Gate"):
-                                    MemoryHelpers.WriteCode(Codes.EnableDoorsInsideClozerSubgate(CurrentProgressionCounter));
+                                    MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideClozerSubgate(CurrentProgressionCounter));
                                     break;
                                 case ("Apple Market"):
                                     // Handle Flutter Fixed <> Flutter Broken distinction
@@ -751,9 +756,9 @@ public partial class App : Application
                             }
 
                             // Do room-based writes second
-                            switch (roomName)
+                            switch (levelName)
                             {
-                                case ("Ira's Room"):
+                                case ("Uptown: Ira's Room"):
                                     // Handle "Cure Ira's illness" location
                                     if (
                                         ScoutedLocationItemData != null &&
@@ -766,7 +771,7 @@ public partial class App : Application
                                         TextDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData)));
                                     }
                                     break;
-                                case ("Junk Shop"):
+                                case ("Apple Market: Junk Shop"):
                                     //Handle "Rescue the shop owner's husband" location
                                     if (
                                         ScoutedLocationItemData != null &&
@@ -781,7 +786,7 @@ public partial class App : Application
                                         Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                                     }
                                     break;
-                                case ("City Hall Outdoors"):
+                                case ("City Hall: City Hall Outdoors"):
                                     // Handle worker dialogue for Pick
                                     List<byte[]> substrs =
                                         [
@@ -795,7 +800,7 @@ public partial class App : Application
                                     byte[] workerTextChange = TextHelpers.ConcatArrayList(substrs);
                                     Memory.WriteByteArray(Addresses.WorkerGetPickTextStart.Address, workerTextChange);
                                     break;
-                                case ("Downtown"):
+                                case ("Downtown: Downtown"):
                                     // Handle library pail in case player can't trigger worker dialogue because they already have the Saw
                                     if (
                                         Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber ?? 0) ||
@@ -810,21 +815,58 @@ public partial class App : Application
                                         Memory.WriteBit(Addresses.BagPailIsReady.Address, Addresses.BagPailIsReady.BitNumber ?? 7, true);
                                     }
                                     break;
-                                case ("Old City (dogs, no weapons)"):
+                                case ("OldCity: Old City (dogs, no weapons)"):
                                     // Prevent warehouse soft-lock by moving (invisible) warehouse double doors z-axis
-                                    if (!Memory.ReadBit(Addresses.SubCitiesSurfaced.Address, Addresses.SubCitiesSurfaced.BitNumber ?? 1))
+                                    if (!Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1))
                                     {
                                         Memory.WriteByte(0x1169D4, 0xFF);
                                         Memory.WriteByte(0x1169EB, 0xFF);
                                     }
                                     break;
-                                case ("Outside Boat Shop"):
+                                case ("Wily's Boat: Outside Boat Shop"):
                                     if (
                                         Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7) &&
                                         !Memory.ReadBit(Addresses.HasCalledRollToFixBoat.Address, Addresses.HasCalledRollToFixBoat.BitNumber ?? 5)
                                     )
                                     {
-                                        MemoryHelpers.WriteCode(Codes.EnableFixBoatCallRoll());
+                                        MemoryHelpers.WriteCode(Cheats.EnableFixBoatCallRoll());
+                                    }
+                                    break;
+                                case ("Cardon Forest Sub-Gate: Refractor Room"):
+                                    // Handle the yellow refractor terminal as a part of decoupling keys from key pickups
+                                    if (
+                                        DataDicts.ItemDataDict.TryGetValue(0x022E, out var cardonKey1Data) &&
+                                        DataDicts.ItemDataDict.TryGetValue(0x022F, out var cardonKey2Data) &&
+                                        DataDicts.ItemDataDict.TryGetValue(0x0230, out var cardonKey3Data) &&
+                                        cardonKey1Data.InventoryAddressData != null &&
+                                        cardonKey2Data.InventoryAddressData != null &&
+                                        cardonKey3Data.InventoryAddressData != null
+                                    )
+                                    {
+                                        bool hasCardonKey1 = Memory.ReadBit(cardonKey1Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? 1);
+                                        bool hasCardonKey2 = Memory.ReadBit(cardonKey2Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? 0);
+                                        bool hasCardonKey3 = Memory.ReadBit(cardonKey3Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? 7);
+                                        byte numCardonKeysReceived = (byte)new[] { hasCardonKey1, hasCardonKey2, hasCardonKey3 }.Count(t => t);
+                                        byte yellowRefractorTerminalWriteVal;
+                                        switch (numCardonKeysReceived)
+                                        {
+                                            case (0):
+                                                yellowRefractorTerminalWriteVal = 0;
+                                                break;
+                                            case (1):
+                                                yellowRefractorTerminalWriteVal = 4;
+                                                break;
+                                            case (2):
+                                                yellowRefractorTerminalWriteVal = 6;
+                                                break;
+                                            case (3):
+                                                yellowRefractorTerminalWriteVal = 7;
+                                                break;
+                                            default:
+                                                yellowRefractorTerminalWriteVal = 0;
+                                                break;
+                                        }
+                                        Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, yellowRefractorTerminalWriteVal);
                                     }
                                     break;
                                 default:
@@ -850,7 +892,7 @@ public partial class App : Application
                             Memory.ReadBit(Addresses.HasCalledRollToFixBoat.Address, Addresses.HasCalledRollToFixBoat.BitNumber ?? 5)
                         )
                         {
-                            MemoryHelpers.WriteCode(Codes.RestoreFixBoatCallRoll());
+                            MemoryHelpers.WriteCode(Cheats.RestoreFixBoatCallRoll());
                         }
 
                         // Task 3.b.2: Restore code persisting from FastForwardLakeJyun causing crash later

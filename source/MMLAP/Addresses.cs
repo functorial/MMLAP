@@ -12,6 +12,7 @@ namespace MMLAP
         // Goals
         public static readonly AddressData GoalJunoFlag = new(0xBE385, 3, null);
         // Game status
+        // TODO: Is there an indicator for moving through a door? E.g. when "cutscene" of player running through. Useful for slow writes.
         public static readonly AddressData ScreenWipeFlag = new(0x1FF3E2, 0, null);
         public static readonly AddressData LoadingFlag = new(0x98A70, 0, null);
         public static readonly AddressData DungeonMapFlag = new(0x1B80AB, 3, null);
@@ -31,7 +32,7 @@ namespace MMLAP
         public static readonly AddressData StartBagQuest = new(0xBE3B9, 6, null); //lobby man = 0xBE3B9 5, electric = 0xBE3B9 4, baker = 0xBE3B9 2, librarian = 0xBE3B9 3, vending = 0xBE3B9 1, boy1 = 0xBE3B9 0, boy2 = 0xBE3BA 7, talk to inspector with bag 0xBE3BA 6
         public static readonly AddressData BagPailIsReady = new(0xBE3BA, 7, null);
         // Main story flags
-        public static readonly AddressData SubCitiesSurfaced = new(0xBE382, 1, null);
+        public static readonly AddressData SubCitiesAreSurfaced = new(0xBE382, 1, null);
         public static readonly AddressData BoatIsFixed = new(0xBE37A, 6, null);
         public static readonly AddressData HasShownRollRedRefractor = new(0xBE3B2, 6, null);
         public static readonly AddressData HasYellowRefractor = new(0xBE41D, 7, null); // TODO: Make these locations / item data
@@ -40,5 +41,6 @@ namespace MMLAP
         public static readonly AddressData HasCalledRollToFixBoat = new(0xBE37E, 5, null);
         // Utility addresses for codes
         public static readonly AddressData FixBoatCallRollUtil = new(0x5545C, null, 4);
+        public static readonly AddressData YellowRefractorTerminal = new(0xBE439, null, 1);
     }
 }
