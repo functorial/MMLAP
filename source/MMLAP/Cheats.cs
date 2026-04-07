@@ -12,7 +12,7 @@ namespace MMLAP
             // May be written slowly as it is checked during in-game loop
             return
             [
-                LoadByteImmediate(0x00100320, MMLEnums.Register.v1, Math.Max((byte)0x03, minProgressionCounter))
+                LoadHalfImmediate(0x00100320, MMLEnums.Register.v1, Math.Max((byte)0x03, minProgressionCounter))
             ];
         }
 
@@ -21,7 +21,7 @@ namespace MMLAP
             // May be written slowly as it is checked during in-game loop
             return
             [
-                LoadByteImmediate(0x001003F8, MMLEnums.Register.v1, Math.Max((byte)0x06, minProgressionCounter))
+                LoadHalfImmediate(0x001003F8, MMLEnums.Register.v1, Math.Max((byte)0x06, minProgressionCounter))
             ];
         }
 
@@ -30,7 +30,7 @@ namespace MMLAP
             // May be written slowly as it is checked during in-game loop
             return
             [
-                LoadByteImmediate(0x00100574, MMLEnums.Register.v1, Math.Max((byte)0x07, minProgressionCounter))
+                LoadHalfImmediate(0x00100574, MMLEnums.Register.v1, Math.Max((byte)0x07, minProgressionCounter))
             ];
         }
 
@@ -39,7 +39,7 @@ namespace MMLAP
             // Needs to be written fast during loading screen
             return
             [
-                LoadByteImmediate(0x00100E04, MMLEnums.Register.a1, Math.Max((byte)0x04, minProgressionCounter))
+                LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, Math.Max((byte)0x04, minProgressionCounter))
             ];
         }
 
@@ -48,7 +48,7 @@ namespace MMLAP
             // Needs to be written fast during loading screen
             return
             [
-                LoadByteImmediate(0x00100500, MMLEnums.Register.a1, Math.Max((byte)0x08, minProgressionCounter))
+                LoadHalfImmediate(0x00100500, MMLEnums.Register.a1, Math.Max((byte)0x08, minProgressionCounter))
             ];
         }
 
@@ -56,7 +56,7 @@ namespace MMLAP
         {
             // Needs to be written fast during loading screen
             return [
-                LoadByteImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter))
+                LoadHalfImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter))
             ];
         }
 
@@ -64,7 +64,7 @@ namespace MMLAP
         {
             // Needs to be written fast during loading screen
             return [
-                LoadByteImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter)),
+                LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter)),
             ];
         }
 
@@ -74,17 +74,17 @@ namespace MMLAP
             OpCode[] code = subCitiesAreSurfaced ?
             [
                 // Enable Sub-City
-                LoadByteImmediate(0x00106BB0, MMLEnums.Register.v0, 0x09),
+                LoadHalfImmediate(0x00106BB0, MMLEnums.Register.v0, 0x09),
                 // Open doors
-                LoadByteImmediate(0x00106B50, MMLEnums.Register.a1, Math.Max((byte)0x09, minProgressionCounter)),
+                LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, Math.Max((byte)0x09, minProgressionCounter)),
                 // Opens doors during Tron / dog scene
-                LoadByteImmediate(0x00106B68, MMLEnums.Register.v0, Math.Max((byte)0x09, minProgressionCounter)),
+                LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, Math.Max((byte)0x09, minProgressionCounter)),
             ] :
             [
                 // Open doors
-                LoadByteImmediate(0x00106B50, MMLEnums.Register.a1, Math.Max((byte)0x02, minProgressionCounter)),
+                LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, Math.Max((byte)0x02, minProgressionCounter)),
                 // Opens doors during Tron / dog scene
-                LoadByteImmediate(0x00106B68, MMLEnums.Register.v0, Math.Max((byte)0x02, minProgressionCounter)), 
+                LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, Math.Max((byte)0x02, minProgressionCounter)), 
 
             ];
             return code;
@@ -94,7 +94,7 @@ namespace MMLAP
         {
             return 
             [
-                LoadByteImmediate(0x001007D0, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter))
+                LoadHalfImmediate(0x001007D0, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter))
             ];
         }
 
@@ -102,11 +102,11 @@ namespace MMLAP
         {
             OpCode[] code = subCitiesAreSurfaced ?
             [
-                LoadByteImmediate(0x0001FB58, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter)),
-                LoadByteImmediate(0x00100648, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter))
+                LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter)),
+                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter))
             ] :
             [
-                LoadByteImmediate(0x00100648, MMLEnums.Register.v1, Math.Max((byte)0x02, minProgressionCounter))
+                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, Math.Max((byte)0x02, minProgressionCounter))
             ];
             return code;
         }
@@ -116,7 +116,7 @@ namespace MMLAP
             // Needs to be written fast during loading screen
             return
             [
-                LoadByteImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter))
+                LoadHalfImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter))
             ];
         }
 
@@ -127,11 +127,11 @@ namespace MMLAP
             return
             [
                 // Loads people into the zone (they were evacuated)
-                LoadByteImmediate(0x001003A8, MMLEnums.Register.v1, Math.Max(fastForwardState, minProgressionCounter)),
+                LoadHalfImmediate(0x001003A8, MMLEnums.Register.v1, Math.Max(fastForwardState, minProgressionCounter)),
                 // 
-                LoadByteImmediate(0x00100374, MMLEnums.Register.a1, Math.Max(fastForwardState, minProgressionCounter)),
+                LoadHalfImmediate(0x00100374, MMLEnums.Register.a1, Math.Max(fastForwardState, minProgressionCounter)),
                 // 
-                LoadByteImmediate(0x0001FCA8, MMLEnums.Register.v1, Math.Max(fastForwardState, minProgressionCounter))
+                LoadHalfImmediate(0x0001FCA8, MMLEnums.Register.v1, Math.Max(fastForwardState, minProgressionCounter))
             ];
         }
 
@@ -158,7 +158,7 @@ namespace MMLAP
         {
             return
             [
-                LoadByteImmediate(0x001001EC, MMLEnums.Register.v1, 0x06)
+                LoadHalfImmediate(0x001001EC, MMLEnums.Register.v1, 0x06)
             ];
         }
 
@@ -167,9 +167,9 @@ namespace MMLAP
             // Fast load
             return [
                 // Can re-enter flutter
-                LoadByteImmediate(0x00100A3C, MMLEnums.Register.a1, Math.Max((byte)0x07, minProgressionCounter)),
+                LoadHalfImmediate(0x00100A3C, MMLEnums.Register.a1, Math.Max((byte)0x07, minProgressionCounter)),
                 // Flutter is there
-                LoadByteImmediate(0x00100AE8, MMLEnums.Register.v1, Math.Max((byte)0x07, minProgressionCounter))
+                LoadHalfImmediate(0x00100AE8, MMLEnums.Register.v1, Math.Max((byte)0x07, minProgressionCounter))
             ];
         }
 
@@ -178,21 +178,21 @@ namespace MMLAP
             OpCode[] code = hasDefeatedBalkonGerat ? 
             [
                 // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
-                LoadByteImmediate(0x0010059C, MMLEnums.Register.v1, 0x06),
+                LoadHalfImmediate(0x0010059C, MMLEnums.Register.v1, 0x06),
                 // Prevents crash after starting phase 1
-                LoadByteImmediate(0x0001FBCC, MMLEnums.Register.v1, 0x06),
+                LoadHalfImmediate(0x0001FBCC, MMLEnums.Register.v1, 0x06),
                 // Lets phase 1 load
-                //LoadByteImmediate(0x0011674C, MMLEnums.Register.v1, 0x06),
+                //LoadHalfImmediate(0x0011674C, MMLEnums.Register.v1, 0x06),
                 // Lets after phase 2 load
-                LoadByteImmediate(0x00101A70, MMLEnums.Register.v1, 0x01)
+                LoadHalfImmediate(0x00101A70, MMLEnums.Register.v1, 0x01)
             ] :
             [
                 // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
-                LoadByteImmediate(0x0010059C, MMLEnums.Register.v1, 0x05),
+                LoadHalfImmediate(0x0010059C, MMLEnums.Register.v1, 0x05),
                 // Prevents crash after starting phase 1
-                LoadByteImmediate(0x0001FBCC, MMLEnums.Register.v1, 0x05),
+                LoadHalfImmediate(0x0001FBCC, MMLEnums.Register.v1, 0x05),
                 // Lets phase 1 load
-                LoadByteImmediate(0x0011674C, MMLEnums.Register.v1, 0x05)
+                LoadHalfImmediate(0x0011674C, MMLEnums.Register.v1, 0x05)
             ];
             return code;
         }
@@ -220,14 +220,6 @@ namespace MMLAP
                 LoadHalfImmediate(0x0010CA44, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // load keys, switch read 0xBE41E with 0xBE377 (switches key) (confirmed)
 
             ];
-        }
-
-        private static OpCode LoadByteImmediate(uint startAddress, MMLEnums.Register register, byte byteVal)
-        {
-            // registerNumber 0= zero, 1 = at, 2-3 = v0-v1, 4-7 = a0-a3, 8-15 = t0-t7, 16-23 = s0-s7, 24-25 = t8-t9,
-            // 26-27 = k0-k1, 28 = gp, 29 = sp, 30 = fp, 31 = ra
-            uint instruction = 0x24000000 | ((uint)register * 0x10000) | (uint)byteVal; // addiu v1, zero, byteVal
-            return new OpCode(startAddress, instruction);
         }
 
         private static OpCode LoadHalfImmediate(uint startAddress, MMLEnums.Register register, short shortVal)

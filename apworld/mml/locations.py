@@ -150,6 +150,10 @@ LOCATION_DATA_DICT = {
     "Gift Music Box to Roll"                                        : LocationData(125, LocationCategory.QUEST,     False),
     "Gift Ring to Roll"                                             : LocationData(126, LocationCategory.QUEST,     False),
     "Turn in missing bag"                                           : LocationData(127, LocationCategory.QUEST,     False),
+    "Take the yellow refractor"                                     : LocationData(128, LocationCategory.QUEST,     False),
+    "Take the red refractor"                                        : LocationData(129, LocationCategory.QUEST,     False),
+    "Earn citizenship in Kattelox City"                             : LocationData(130, LocationCategory.QUEST,     False),
+    # Goals
     "Juno Defeated"                                                 : LocationData(999, LocationCategory.COMBAT,    False),
 }
 

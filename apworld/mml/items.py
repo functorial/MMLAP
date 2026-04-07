@@ -26,6 +26,9 @@ ITEM_DATA_DICT = {
     "Triple Access"                     : ItemData(0x021D, ItemClassification.filler,                                  None                        ),
     "Buster Unit"                       : ItemData(0x021E, ItemClassification.filler,                                  None                        ),
     "Rapid Fire"                        : ItemData(0x021F, ItemClassification.filler,                                  None                        ),
+    "Yellow Refractor"                  : ItemData(0x0228, ItemClassification.progression,                             None                        ),
+    "Red Refractor"                     : ItemData(0x0229, ItemClassification.progression,                             None                        ),
+    "Citizen's Card"                    : ItemData(0x022A, ItemClassification.progression,                             None                        ),
     "Cardon Forest Sub-Gate Key 1"      : ItemData(0x022E, ItemClassification.progression,                             "Cardon Forest Sub-Gate Key"),
     "Cardon Forest Sub-Gate Key 2"      : ItemData(0x022F, ItemClassification.progression,                             "Cardon Forest Sub-Gate Key"),
     "Cardon Forest Sub-Gate Key 3"      : ItemData(0x0230, ItemClassification.progression,                             "Cardon Forest Sub-Gate Key"),
@@ -39,9 +42,9 @@ ITEM_DATA_DICT = {
     "'Sleeper' Key"                     : ItemData(0x0238, ItemClassification.progression,                             "Sub-City Key"              ),
     "'Dreamer' Key"                     : ItemData(0x0239, ItemClassification.progression,                             "Sub-City Key"              ),
    #"Flower"                            : ItemData(0x0244, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
-    "Bag"                               : ItemData(0x0245, ItemClassification.progression,                             None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
-    "Pick"                              : ItemData(0x0247, ItemClassification.progression,                             None,                       ), # SIDEQUESTS NOT IMPLEMENTED YET
-    "Saw"                               : ItemData(0x0248, ItemClassification.progression,                             None                        ), # SIDEQUESTS NOT IMPLEMENTED YET
+    "Bag"                               : ItemData(0x0245, ItemClassification.progression,                             None                        ), # Bag is in the item pool, associated pail is a location
+    "Pick"                              : ItemData(0x0247, ItemClassification.progression,                             None,                       ), # Pick is in the item pool but there is no location from talking to worker due to issues with getting Saw early
+    "Saw"                               : ItemData(0x0248, ItemClassification.progression,                             None                        ), # Saw is in the item pool, associated pail is a location
     "Music Box"                         : ItemData(0x024A, ItemClassification.progression,                             None                        ),
     "Old Bone"                          : ItemData(0x024B, ItemClassification.progression,                             "Museum"                    ),
   # "Old Heater"                        : ItemData(0x024C, ItemClassification.progression,                             "Museum"                    ),
@@ -119,7 +122,7 @@ ITEM_DATA_DICT = {
     "5130 Zenny"                        : ItemData(0x8201, ItemClassification.filler,                                  None                        ),
     "5600 Zenny"                        : ItemData(0x8230, ItemClassification.filler,                                  None                        ),
     "9240 Zenny"                        : ItemData(0x839C, ItemClassification.useful,                                  None                        ), # Large amount of zenny -> useful
-    "10000 Zenny"                       : ItemData(0x83E8, ItemClassification.useful,                                  None                        )  # Large amount of zenny -> useful
+    "10000 Zenny"                       : ItemData(0x83E8, ItemClassification.useful,                                  None                        ), # Large amount of zenny -> useful
 }
 
 ITEM_NAME_TO_ID       = {itemName: ITEM_DATA_DICT[itemName].id                 for itemName in ITEM_DATA_DICT.keys()}

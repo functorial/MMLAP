@@ -15,7 +15,8 @@ namespace MMLAP.Models
         byte targetRoomID,
         uint targetRoomAddress,
         byte[] targetCoordinatesValue,
-        uint targetCoordinatesAddress
+        uint targetCoordinatesAddress,
+        bool isDoor
     )
     {
         public string SourceName {get; set;} = sourceName;
@@ -27,6 +28,7 @@ namespace MMLAP.Models
         public uint TargetRoomAddress {get; set;} = targetRoomAddress;
         public byte[] TargetCoordinatesValue {get; set;} = targetCoordinatesValue; // 8 bytes: XX XX ZZ ZZ YY YY AA AA
         public uint TargetCoordinatesAddress {get; set;} = targetCoordinatesAddress;
+        public bool IsDoor {get; set;} = isDoor;
         
     }
 }

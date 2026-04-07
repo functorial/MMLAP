@@ -35,8 +35,8 @@ namespace MMLAP;
 public partial class App : Application
 {
     // TODO: Remember to set this in MMLAP.Desktop as well.
-    public static readonly string Version = "0.2.6";
-    public static readonly List<string> SupportedVersions = ["0.2.0", "0.2.1", "0.2.2", "0.2.3", "0.2.4", "0.2.5", "0.2.6"];
+    public static readonly string Version = "0.3.0";
+    public static readonly List<string> SupportedVersions = ["0.3.0"];
     public static MainWindowViewModel? Context;
     public static ArchipelagoClient? APClient { get; set; }
     private static Dictionary<long, ItemData>? ScoutedLocationItemData { get; set; }
@@ -566,38 +566,37 @@ public partial class App : Application
                         string areaName = currentLevelData.AreaName;
                         switch (areaName)
                         {
-                            case ("Cardon Forest (Flutter Broken)"):
+                            case "Cardon Forest (Flutter Broken)":
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsCardonForestFlutterBroken(CurrentProgressionCounter));
                                 break;
-                            case ("Cardon Forest (Flutter Fixed)"):
-                                Log.Logger.Information("FastForwardCardonForestFlutterFixed");
+                            case "Cardon Forest (Flutter Fixed)":
                                 MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(CurrentProgressionCounter));
                                 break;
-                            case ("Outside Cardon Forest Sub-Gate"):
+                            case "Outside Cardon Forest Sub-Gate":
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsOutsideCardonSubgate(CurrentProgressionCounter));
                                 break;
-                            case ("Apple Market"):
+                            case "Apple Market":
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsAppleMarket(CurrentProgressionCounter));
                                 break;
-                            case ("Downtown"):
+                            case "Downtown":
                                 bool subCitiesAreSurfacedDowntown = Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1);
                                 MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(CurrentProgressionCounter, subCitiesAreSurfacedDowntown));
                                 break;
-                            case ("Uptown"):
+                            case "Uptown":
                                 bool subCitiesAreSurfacedUptown = Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1);
                                 MemoryHelpers.WriteCode(Cheats.FastForwardUptown(CurrentProgressionCounter, subCitiesAreSurfacedUptown));
                                 break;
-                            case ("Old City"):
+                            case "Old City":
                                 //bool subCitiesAreSurfacedOldCity = Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1);
                                 MemoryHelpers.WriteCode(Cheats.FastForwardOldCity(CurrentProgressionCounter));
                                 break;
-                            case ("City Hall"):
+                            case "City Hall":
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsCityHall(CurrentProgressionCounter));
                                 break;
-                            case ("Clozer Woods"):
+                            case "Clozer Woods":
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsOutsideClozerSubgate(CurrentProgressionCounter));
                                 break;
-                            case ("Wily's Boat"):
+                            case "Wily's Boat":
                                 if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
                                 {
                                     bool boatIsFixed = Memory.ReadBit(Addresses.BoatIsFixed.Address, Addresses.BoatIsFixed.BitNumber ?? 6);
@@ -605,11 +604,11 @@ public partial class App : Application
                                     MemoryHelpers.WriteCode(Cheats.FastForwardWilysBoat(CurrentProgressionCounter, boatIsFixed, hasDefeatedBalkonGeratWily));
                                 }
                                 break;
-                            case ("Lake Jyun"):
+                            case "Lake Jyun":
                                 bool hasDefeatedBalkonGeratLake = Memory.ReadBit(Addresses.HasDefeatedBalkonGerat.Address, Addresses.HasDefeatedBalkonGerat.BitNumber ?? 2);
                                 MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyun(hasDefeatedBalkonGeratLake));
                                 break;
-                            case ("Flutter Takeoff"):
+                            case "Flutter Takeoff":
                                 MemoryHelpers.WriteCode(Cheats.EnableRedRefractorCutscene());
                                 break;
                             default:
@@ -669,36 +668,35 @@ public partial class App : Application
                     // Wait until loading and screen wipe flags are false (to avoid racing with the game loading assets), then do stuff
                     if (
                         !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0) &&
-                        !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber ?? 0)
+                        !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber ?? 0) &&
+                        DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
                     )
                     {
+                        string areaName = currentLevelData.AreaName;
+                        string roomName = currentLevelData.RoomName;
+                        string levelName = areaName + ": " + roomName;
                         System.Threading.Thread.Sleep(50);
 
                         // Task 2.b: Based on current level, do things like overwrite text, write code
                         if (
                             IsManagingLevelChange &&
-                            !Memory.ReadBit(Addresses.CameraAlteredFlag.Address, Addresses.CameraAlteredFlag.BitNumber ?? 0) &&
-                            DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
+                            !Memory.ReadBit(Addresses.CameraAlteredFlag.Address, Addresses.CameraAlteredFlag.BitNumber ?? 0)
                         )
                         {
-                            string areaName = currentLevelData.AreaName;
-                            string roomName = currentLevelData.RoomName;
-                            string levelName = areaName + ": " + roomName;
-
                             // Do area-based writes first
                             switch (areaName)
                             {
-                                case ("Cardon Forest Sub-Gate"):
+                                case "Cardon Forest Sub-Gate":
                                     MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideCardonSubgate(CurrentProgressionCounter));
                                     MemoryHelpers.WriteCode(Cheats.DecoupleCardonForestSubGateKeys());
                                     break;
-                                case ("Lake Jyun Sub-Gate"):
+                                case "Lake Jyun Sub-Gate":
                                     MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideJyunSubgate(CurrentProgressionCounter));
                                     break;
-                                case ("Clozer Woods Sub-Gate"):
+                                case "Clozer Woods Sub-Gate":
                                     MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideClozerSubgate(CurrentProgressionCounter));
                                     break;
-                                case ("Apple Market"):
+                                case "Apple Market":
                                     // Handle Flutter Fixed <> Flutter Broken distinction
                                     if (DataDicts.ExitDataDict.TryGetValue("Apple Market -> Cardon Forest", out ExitData? exitDataAppleToCardon))
                                     {
@@ -712,7 +710,7 @@ public partial class App : Application
                                         }
                                     }
                                     break;
-                                case ("Outside Cardon Forest Sub-Gate"):
+                                case "Outside Cardon Forest Sub-Gate":
                                     // Handle Flutter Fixed <> Flutter Broken distinction
                                     if (DataDicts.ExitDataDict.TryGetValue("Outside Cardon Forest Sub-Gate -> Cardon Forest", out ExitData? exitDataSubgateToCardon))
                                     {
@@ -726,8 +724,8 @@ public partial class App : Application
                                         }
                                     }
                                     break;
-                                case ("Underground Ruins"):
-                                    // Handle Flutter Fixed <> Flutter Broken distinction
+                                case "Underground Ruins":
+                                    // Handle Flutter Fixed <> Flutter Broken distinction. 
                                     if (DataDicts.ExitDataDict.TryGetValue("Underground Ruins, Room 1 (Junk Store Man Area) -> Cardon Forest", out ExitData? exitDataRuins1ToCardon))
                                     {
                                         if (Memory.ReadBit(Addresses.HasShownRollRedRefractor.Address, Addresses.HasShownRollRedRefractor.BitNumber ?? 5))
@@ -758,7 +756,7 @@ public partial class App : Application
                             // Do room-based writes second
                             switch (levelName)
                             {
-                                case ("Uptown: Ira's Room"):
+                                case "Uptown: Ira's Room":
                                     // Handle "Cure Ira's illness" location
                                     if (
                                         ScoutedLocationItemData != null &&
@@ -771,8 +769,8 @@ public partial class App : Application
                                         TextDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData)));
                                     }
                                     break;
-                                case ("Apple Market: Junk Shop"):
-                                    //Handle "Rescue the shop owner's husband" location
+                                case "Apple Market: Junk Shop":
+                                    // Handle "Rescue the shop owner's husband" location
                                     if (
                                         ScoutedLocationItemData != null &&
                                         ScoutedLocationItemData.TryGetValue(104, out var rescueScoutedItemData) &&
@@ -781,12 +779,29 @@ public partial class App : Application
                                         rescueLocationData.TextBoxStartAddress != null
                                     )
                                     {
-                                        //OverwrittenTextData = TextHelpers.OverwriteText(rescueLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData));
+                                        // Being careful about text box overflow. Replacing new text window from man -> "You got" with a newpage, which saves a bunch of bytes.
+                                        // Not bothering to restore this text
                                         byte[] writeTextArr = TextHelpers.ConcatArrays(TextHelpers.newPage, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
                                         Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                                     }
                                     break;
-                                case ("City Hall: City Hall Outdoors"):
+                                case "Cardon Forest (Flutter Broken): City Entrance":
+                                    // Handle the "Earning citizenship" location
+                                    if (
+                                        ScoutedLocationItemData != null &&
+                                        ScoutedLocationItemData.TryGetValue(130, out var citizensCardScoutedItemData) &&
+                                        DataDicts.LocationDataDict.TryGetValue(130, out var citizensCardLocationData) &&
+                                        citizensCardLocationData.Name == "Earn citizenship in Kattelox City" &&
+                                        citizensCardLocationData.TextBoxStartAddress != null
+                                    )
+                                    {
+                                        // Being careful about text box overflow. Replacing new text window from man -> "You got" with a newpage, which saves a bunch of bytes.
+                                        // Not bothering to restore this text
+                                        byte[] writeTextArr = TextHelpers.ConcatArrays(TextHelpers.newPage, TextHelpers.EncodeYouGotItemWindow(citizensCardScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
+                                        Memory.WriteByteArray(citizensCardLocationData.TextBoxStartAddress ?? 0, writeTextArr);
+                                    }
+                                    break;
+                                case "City Hall: City Hall Outdoors":
                                     // Handle worker dialogue for Pick
                                     List<byte[]> substrs =
                                         [
@@ -800,7 +815,7 @@ public partial class App : Application
                                     byte[] workerTextChange = TextHelpers.ConcatArrayList(substrs);
                                     Memory.WriteByteArray(Addresses.WorkerGetPickTextStart.Address, workerTextChange);
                                     break;
-                                case ("Downtown: Downtown"):
+                                case "Downtown: Downtown":
                                     // Handle library pail in case player can't trigger worker dialogue because they already have the Saw
                                     if (
                                         Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber ?? 0) ||
@@ -815,7 +830,7 @@ public partial class App : Application
                                         Memory.WriteBit(Addresses.BagPailIsReady.Address, Addresses.BagPailIsReady.BitNumber ?? 7, true);
                                     }
                                     break;
-                                case ("OldCity: Old City (dogs, no weapons)"):
+                                case "Old City: Old City (dogs, no weapons)":
                                     // Prevent warehouse soft-lock by moving (invisible) warehouse double doors z-axis
                                     if (!Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1))
                                     {
@@ -823,7 +838,7 @@ public partial class App : Application
                                         Memory.WriteByte(0x1169EB, 0xFF);
                                     }
                                     break;
-                                case ("Wily's Boat: Outside Boat Shop"):
+                                case "Wily's Boat: Outside Boat Shop":
                                     if (
                                         Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7) &&
                                         !Memory.ReadBit(Addresses.HasCalledRollToFixBoat.Address, Addresses.HasCalledRollToFixBoat.BitNumber ?? 5)
@@ -832,7 +847,7 @@ public partial class App : Application
                                         MemoryHelpers.WriteCode(Cheats.EnableFixBoatCallRoll());
                                     }
                                     break;
-                                case ("Cardon Forest Sub-Gate: Refractor Room"):
+                                case "Cardon Forest Sub-Gate: Refractor Room":
                                     // Handle the yellow refractor terminal as a part of decoupling keys from key pickups
                                     if (
                                         DataDicts.ItemDataDict.TryGetValue(0x022E, out var cardonKey1Data) &&
@@ -887,7 +902,7 @@ public partial class App : Application
 
                         //Task 3.b.1: Restore branch statement noped in EnableFixBoatCallRoll code which is used elsewhere
                         if (
-                            Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) != 0x0D00 && // Wily's Boat, outside
+                            levelName != "Wily's Boat: Outside Boat Shop" &&
                             Memory.ReadUInt(Addresses.FixBoatCallRollUtil.Address) == 0x00000000 &&
                             Memory.ReadBit(Addresses.HasCalledRollToFixBoat.Address, Addresses.HasCalledRollToFixBoat.BitNumber ?? 5)
                         )
@@ -897,8 +912,8 @@ public partial class App : Application
 
                         // Task 3.b.2: Restore code persisting from FastForwardLakeJyun causing crash later
                         if (
-                            Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) != 0x0B02 && // On Lake Jyun
-                            Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) != 0x0B03 && // On Lake Jyun
+                            levelName != "Lake Jyun: On the Lake" &&
+                            levelName != "Lake Jyun: Side River" &&
                             Memory.ReadBit(Addresses.HasDefeatedBalkonGerat.Address, Addresses.HasDefeatedBalkonGerat.BitNumber ?? 2) &&
                             Memory.ReadUInt(0x0001FBCC) == 0x00000000
                         )
@@ -907,7 +922,6 @@ public partial class App : Application
                             Memory.Write(0x0001FBCC, 0x80631B62);
                         }
                     }
-
                 }
 
                 // Task 4: Handle receiving items after loading a save (leaving title screen)
@@ -1043,10 +1057,20 @@ public partial class App : Application
         )
         {
             // Use scouted location item to rewrite textbox
-            LocationData locationData = DataDicts.LocationDataDict[e.CompletedLocation.Id];
+            if (!DataDicts.LocationDataDict.TryGetValue(e.CompletedLocation.Id, out LocationData? locationData))
+            {
+                Log.Logger.Warning($"Completed location {e.CompletedLocation.Id} was not found in LocationDataDict.");
+                return;
+            }
+
             if (locationData.TextBoxStartAddress != null)
             {
-                ItemData itemData = ScoutedLocationItemData[e.CompletedLocation.Id];
+                if (!ScoutedLocationItemData.TryGetValue(e.CompletedLocation.Id, out ItemData? itemData))
+                {
+                    Log.Logger.Warning($"Scouted item data is missing for completed location {e.CompletedLocation.Id}.");
+                    return;
+                }
+
                 TextData overwrittenText = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));
                 TextDataToWriteStack.Push(overwrittenText);
             }
