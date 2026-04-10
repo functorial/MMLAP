@@ -213,7 +213,18 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Surface Exit)"),
                     ExitData("Outside Cardon Forest Sub-Gate"),
                     ExitData("Flutter - Common Room", has_completed_lake_jyun()),
-                    ExitData("Support Car / R&D Room")
+                    ExitData("Support Car / R&D Room"),
+                    ExitData("Cardon Forest (Get Citizen's Card)"),
+                ]
+            ),
+        "Cardon Forest (Get Citizen's Card)": 
+            GameRegionData(
+                [
+                    "Earn citizenship in Kattelox City"
+                ],
+                [
+                    ExitData("Cardon Forest"),
+
                 ]
             ),
         "Flutter - Common Room": 
@@ -940,7 +951,17 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     ExitData("Outside Cardon Forest Sub-Gate"),
                     ExitData("Cardon Forest Sub-Gate - Refractor Room (Upper)", has_jump_springs()),
-                    ExitData("Cardon Forest Sub-Gate - Cliff Room") # Door broken until defeated pirates
+                    ExitData("Cardon Forest Sub-Gate - Cliff Room"), # Door broken until defeated pirates
+                    ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower, Get Refractor)", has_cardon_forest_keys()),
+                ]
+            ),
+        "Cardon Forest Sub-Gate - Refractor Room (Lower, Get Refractor)": 
+            GameRegionData(
+                [
+                    "Take the yellow refractor"
+                ],
+                [
+                    ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower)"),
                 ]
             ),
         "Cardon Forest Sub-Gate - Refractor Room (Upper)": 
@@ -1112,10 +1133,22 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             ),
         "Lake Jyun Sub-Gate - Refractor Room": 
             GameRegionData(
-                [],
+                [
+
+                ],
                 [
                     ExitData("Lake Jyun Sub-Gate - Boss Room (Inactive)"),
-                    ExitData("Lake Jyun Sub-Gate - Boss Room (Active)", has_lake_jyun_keys())
+                    ExitData("Lake Jyun Sub-Gate - Boss Room (Active)", has_lake_jyun_keys()),
+                    ExitData("Lake Jyun Sub-Gate - Refractor Room (Get Refractor)", has_lake_jyun_keys()),
+                ]
+            ),
+        "Lake Jyun Sub-Gate - Refractor Room (Get Refractor)": 
+            GameRegionData(
+                [
+                    "Take the red refractor"
+                ],
+                [
+                    ExitData("Lake Jyun Sub-Gate - Refractor Room"),
                 ]
             ),
         "Lake Jyun Sub-Gate - Boss Room (Active)": 

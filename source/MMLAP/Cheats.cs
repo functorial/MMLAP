@@ -1,18 +1,22 @@
 ﻿using MMLAP;
 using MMLAP.Helpers;
 using MMLAP.Models;
+using Archipelago.Core.Util;
 using System;
+using System.Linq;
 
 namespace MMLAP
 {
     public class Cheats
     {
-        public static OpCode[] EnableDoorsInsideCardonSubgate(byte minProgressionCounter)
+        public static OpCode[] FastForwardCardonSubgate(byte minProgressionCounter)
         {
             // May be written slowly as it is checked during in-game loop
             return
             [
-                LoadHalfImmediate(0x00100320, MMLEnums.Register.v1, Math.Max((byte)0x03, minProgressionCounter))
+                LoadHalfImmediate(0x00100320, MMLEnums.Register.v1, Math.Max((byte)0x03, minProgressionCounter)),
+                LoadHalfImmediate(0x0010E7FC, MMLEnums.Register.v1, Math.Max((byte)0x03, minProgressionCounter)),
+                LoadHalfImmediate(0x0010E8B8, MMLEnums.Register.v1, Math.Max((byte)0x03, minProgressionCounter)),
             ];
         }
 
@@ -199,25 +203,51 @@ namespace MMLAP
 
         public static OpCode[] DecoupleCardonForestSubGateKeys()
         {
+            // See related code in 
             AddressData jakkoKeyAddressData = DataDicts.LocationDataDict[60].CheckAddressData;
             AddressData conveyorKeyAddressData = DataDicts.LocationDataDict[61].CheckAddressData;
             AddressData switchesKeyAddressData = DataDicts.LocationDataDict[62].CheckAddressData;
-            short jakkoKeyBitNumberOffset    = (short)((jakkoKeyAddressData.Address    - 0xBE378) * 8 + 1 - (jakkoKeyAddressData.BitNumber ?? 0));
-            short conveyorKeyBitNumberOffset = (short)((conveyorKeyAddressData.Address - 0xBE378) * 8 + 1 - (conveyorKeyAddressData.BitNumber ?? 1));
-            short switchesKeyBitNumberOffset = (short)((switchesKeyAddressData.Address - 0xBE378) * 8 + 1 - (switchesKeyAddressData.BitNumber ?? 2));
+            short jakkoKeyBitNumberOffset    = (short)((jakkoKeyAddressData.Address    - 0xBE378) * 8 + 7 - (jakkoKeyAddressData.BitNumber ?? 0));
+            short conveyorKeyBitNumberOffset = (short)((conveyorKeyAddressData.Address - 0xBE378) * 8 + 7 - (conveyorKeyAddressData.BitNumber ?? 1));
+            short switchesKeyBitNumberOffset = (short)((switchesKeyAddressData.Address - 0xBE378) * 8 + 7 - (switchesKeyAddressData.BitNumber ?? 2));
+            short jakkoRefractorTerminalVirtualOffset = (short)((Addresses.YellowRefractorTerminalVirtual.Address - 0xBE378) * 8 + 1);
+            short conveyorRefractorTerminalVirtualOffset = (short)((Addresses.YellowRefractorTerminalVirtual.Address - 0xBE378) * 8);
+            short switchesRefractorTerminalVirtualOffset = (short)((Addresses.YellowRefractorTerminalVirtual.Address - 0xBE378) * 8 );
             return [
-                LoadHalfImmediate(0x00108F5C, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // replace write 0xBE41D with 0xBE376 (jakko key)
-                LoadHalfImmediate(0x00108F64, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // replace write 0xBE41D with 0xBE376 (conveyor key)
+                // These will make the key pickups write to addresses, set to be distinct from "has key" addresses
+                LoadHalfImmediate(0x00108F5C, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // replace write 0xBE41D with 0xBE377 (jakko key)
+                LoadHalfImmediate(0x00108F64, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // replace write 0xBE41D with 0xBE377 (conveyor key)
                 LoadHalfImmediate(0x00108F4C, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // replace write 0xBE41E with 0xBE377 (switches key)
 
-                // TODO: Figure out if these are correct reads. There is still an issue where Roll says the wrong line after picking up the third key
-              //LoadHalfImmediate(0x0010C784, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // replace read 0xBE41D with 0xBE376
-              //LoadHalfImmediate(0x0010C79C, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // replace read 0xBE41D with 0xBE376
-              //LoadHalfImmediate(0x0010C7B4, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // replace read 0xBE41E with 0xBE377
+                // These execute on loading into a room, determining if the key is there, so we change to the same values above
+                LoadHalfImmediate(0x0010CA24, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // load keys, switch read 0xBE41D with 0xBE377 (jakko key)
+                LoadHalfImmediate(0x0010C9B0, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // load keys, switch read 0xBE41D with 0xBE377 (conveyor key)
+                LoadHalfImmediate(0x0010CA44, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // load keys, switch read 0xBE41E with 0xBE377 (switches key)
 
-                LoadHalfImmediate(0x0010CA24, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // load keys, switch read 0xBE41D with 0xBE376 (jakko key) (confirmed)
-                LoadHalfImmediate(0x0010C9B0, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // load keys, switch read 0xBE41D with 0xBE376 (conveyor key) (confirmed)
-                LoadHalfImmediate(0x0010CA44, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // load keys, switch read 0xBE41E with 0xBE377 (switches key) (confirmed)
+                // TODO: Figure out what these do. There is still an issue where Roll says the wrong line after picking up the third key
+                //LoadHalfImmediate(0x0010C784, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // replace read 0xBE41D with 0xBE377
+                //LoadHalfImmediate(0x0010C79C, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // replace read 0xBE41D with 0xBE377
+                //LoadHalfImmediate(0x0010C7B4, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // replace read 0xBE41E with 0xBE377
+
+                // ?? These should make the sprite go away when picked up and control Roll's voice line
+                //LoadHalfImmediate(0x00108F94, MMLEnums.Register.a0, yellowRefractorTerminalVirtualOffset), // key pickup, switch read 0xBE41D with 0xBE376
+
+                // These should prevent the game writing to the terminal address based on your current key count when changing levels. Handled elsewhere
+                Nop(0x0010C7DC),
+                Nop(0x0010C850),
+                Nop(0x0010C868),
+                Nop(0x0010C870),
+                Nop(0x0010C87C),
+
+                // The refractor terminal reads whether you picked up the keys. These change the address the terminal is manipulated to another.
+                // We need to populate the other address with emulated behavior of the original based on keys in inventory. 
+                // This should probably be done in code injection, but I will put that part in the slow game loop because lazy
+                //LoadHalfImmediate(0x00051228, MMLEnums.Register.a0, -16), // 
+                //LoadHalfImmediate(0x0010BC0C, MMLEnums.Register.a0, -16),
+                //LoadHalfImmediate(0x0010BA84, MMLEnums.Register.a0, -16), // This one is in the internal game loop... 
+                // Jk, too hard. Key pickups also read/write here, so move those instead
+                //LoadHalfImmediate(0x00108F94, MMLEnums.Register.a0, jakkoRefractorTerminalVirtualOffset),
+
 
             ];
         }

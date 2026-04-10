@@ -55,6 +55,7 @@ public partial class App : Application
     private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
     private static bool IsReceivingItemsAfterLoad { get; set; } = false;
+    //private static int YellowRefractorTerminalVal { get; set; } = 0x00;
     private static readonly object _lockObject = new object();
 
     public override void Initialize()
@@ -552,18 +553,21 @@ public partial class App : Application
                 APClient.CurrentSession != null
             )
             {
-                // Task: This is for hijacking game code which is loaded and executed only once during loading screens
-                // Pause loop actions if not in loading screen
+                ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
                 if (
-                    Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0)
+                    DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
                 )
                 {
-                    ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+                    string areaName = currentLevelData.AreaName;
+                    string roomName = currentLevelData.RoomName;
+                    string levelName = areaName + ": " + roomName;
+
+                    // Task: This is for hijacking game code which is loaded and executed only once during loading screens
+                    // Pause these loop actions if not in loading screen
                     if (
-                        DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
+                        Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0)
                     )
                     {
-                        string areaName = currentLevelData.AreaName;
                         switch (areaName)
                         {
                             case "Cardon Forest (Flutter Broken)":
@@ -574,6 +578,10 @@ public partial class App : Application
                                 break;
                             case "Outside Cardon Forest Sub-Gate":
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsOutsideCardonSubgate(CurrentProgressionCounter));
+                                break;
+                            case "Cardon Forest Sub-Gate":
+                                MemoryHelpers.WriteCode(Cheats.FastForwardCardonSubgate(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Cheats.DecoupleCardonForestSubGateKeys());
                                 break;
                             case "Apple Market":
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsAppleMarket(CurrentProgressionCounter));
@@ -610,6 +618,66 @@ public partial class App : Application
                                 break;
                             case "Flutter Takeoff":
                                 MemoryHelpers.WriteCode(Cheats.EnableRedRefractorCutscene());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    // Run these after loading
+                    // These will happen before AND after slow game loop, so be mindful
+                    // and only put stuff here that needs to be fast and doesn't interact with slow game loop
+                    else
+                    {
+                        switch (areaName)
+                        {
+                            case "Cardon Forest Sub-Gate":
+                                // Handle yellow refractor terminal
+                                // Basically we want this byte to reflect key in inventory when interacting with terminal and key sprites picked up elsewhere
+                                // This byte is used for multiple things in the subgate which makes it a big pain in the ass to do with MIPS edits. But this seems to win the race condition in the fast game loop, so whatever
+                                byte focusedCount = 0x00;
+                                byte yellowRefractorTerminalVal = 0x00;
+                                if (Memory.ReadBit(Addresses.YellowRefractorTerminal.Address, 7)) // This bit is flipped when interacting with terminal and also, for a split second(?), when picking up keys. Small sleep seems to get around distinction.
+                                {
+                                    System.Threading.Thread.Sleep(1);
+                                    yellowRefractorTerminalVal = Memory.ReadByte(Addresses.YellowRefractorTerminal.Address);
+                                    if (
+                                        DataDicts.ItemDataDict.TryGetValue(0x022E, out var cardonKey1Data) &&
+                                        DataDicts.ItemDataDict.TryGetValue(0x022F, out var cardonKey2Data) &&
+                                        DataDicts.ItemDataDict.TryGetValue(0x0230, out var cardonKey3Data) &&
+                                        cardonKey1Data.InventoryAddressData != null &&
+                                        cardonKey2Data.InventoryAddressData != null &&
+                                        cardonKey3Data.InventoryAddressData != null
+                                    )
+                                    {
+                                        bool hasCardonKey1 = Memory.ReadBit(cardonKey1Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? 1);
+                                        bool hasCardonKey2 = Memory.ReadBit(cardonKey2Data.InventoryAddressData.Address, cardonKey2Data.InventoryAddressData.BitNumber ?? 0);
+                                        bool hasCardonKey3 = Memory.ReadBit(cardonKey3Data.InventoryAddressData.Address, cardonKey3Data.InventoryAddressData.BitNumber ?? 7);
+                                        focusedCount = (byte)new[] { hasCardonKey1, hasCardonKey2, hasCardonKey3 }.Count(t => t);
+                                    }
+                                }
+                                else
+                                {
+                                    if (
+                                        DataDicts.LocationDataDict.TryGetValue(60, out var hasPickedUpCardonKey1LocationData) &&
+                                        DataDicts.LocationDataDict.TryGetValue(61, out var hasPickedUpCardonKey2LocationData) &&
+                                        DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationData)
+                                    )
+                                    {
+                                        yellowRefractorTerminalVal = Memory.ReadByte(Addresses.YellowRefractorTerminal.Address);
+                                        bool hasPickedUpCardonKey1 = Memory.ReadBit(hasPickedUpCardonKey1LocationData.CheckAddressData.Address, hasPickedUpCardonKey1LocationData.CheckAddressData.BitNumber ?? 0);
+                                        bool hasPickedUpCardonKey2 = Memory.ReadBit(hasPickedUpCardonKey2LocationData.CheckAddressData.Address, hasPickedUpCardonKey2LocationData.CheckAddressData.BitNumber ?? 1);
+                                        bool hasPickedUpCardonKey3 = Memory.ReadBit(hasPickedUpCardonKey3LocationData.CheckAddressData.Address, hasPickedUpCardonKey3LocationData.CheckAddressData.BitNumber ?? 2);
+                                        focusedCount = (byte)new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
+                                    }
+                                }
+                                int yellowRefractorTerminalValOverwrite = focusedCount switch
+                                {
+                                    1 => (yellowRefractorTerminalVal & 0x8F) | 0x40,
+                                    2 => (yellowRefractorTerminalVal & 0x8F) | 0x60,
+                                    3 => (yellowRefractorTerminalVal & 0x8F) | 0x70,
+                                    _ => (yellowRefractorTerminalVal & 0x8F) | 0x00,
+                                };
+                                Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, (byte)yellowRefractorTerminalValOverwrite);
                                 break;
                             default:
                                 break;
@@ -687,8 +755,7 @@ public partial class App : Application
                             switch (areaName)
                             {
                                 case "Cardon Forest Sub-Gate":
-                                    MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideCardonSubgate(CurrentProgressionCounter));
-                                    MemoryHelpers.WriteCode(Cheats.DecoupleCardonForestSubGateKeys());
+                                    //MemoryHelpers.WriteCode(Cheats.FastForwardCardonSubgate(CurrentProgressionCounter));
                                     break;
                                 case "Lake Jyun Sub-Gate":
                                     MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideJyunSubgate(CurrentProgressionCounter));
@@ -847,43 +914,110 @@ public partial class App : Application
                                         MemoryHelpers.WriteCode(Cheats.EnableFixBoatCallRoll());
                                     }
                                     break;
-                                case "Cardon Forest Sub-Gate: Refractor Room":
-                                    // Handle the yellow refractor terminal as a part of decoupling keys from key pickups
-                                    if (
-                                        DataDicts.ItemDataDict.TryGetValue(0x022E, out var cardonKey1Data) &&
-                                        DataDicts.ItemDataDict.TryGetValue(0x022F, out var cardonKey2Data) &&
-                                        DataDicts.ItemDataDict.TryGetValue(0x0230, out var cardonKey3Data) &&
-                                        cardonKey1Data.InventoryAddressData != null &&
-                                        cardonKey2Data.InventoryAddressData != null &&
-                                        cardonKey3Data.InventoryAddressData != null
-                                    )
-                                    {
-                                        bool hasCardonKey1 = Memory.ReadBit(cardonKey1Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? 1);
-                                        bool hasCardonKey2 = Memory.ReadBit(cardonKey2Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? 0);
-                                        bool hasCardonKey3 = Memory.ReadBit(cardonKey3Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? 7);
-                                        byte numCardonKeysReceived = (byte)new[] { hasCardonKey1, hasCardonKey2, hasCardonKey3 }.Count(t => t);
-                                        byte yellowRefractorTerminalWriteVal;
-                                        switch (numCardonKeysReceived)
-                                        {
-                                            case (0):
-                                                yellowRefractorTerminalWriteVal = 0;
-                                                break;
-                                            case (1):
-                                                yellowRefractorTerminalWriteVal = 4;
-                                                break;
-                                            case (2):
-                                                yellowRefractorTerminalWriteVal = 6;
-                                                break;
-                                            case (3):
-                                                yellowRefractorTerminalWriteVal = 7;
-                                                break;
-                                            default:
-                                                yellowRefractorTerminalWriteVal = 0;
-                                                break;
-                                        }
-                                        Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, yellowRefractorTerminalWriteVal);
-                                    }
-                                    break;
+                                //case "Cardon Forest Sub-Gate: Refractor Room":
+                                //    // Handle the yellow refractor terminal as a part of decoupling keys from key pickups
+                                //    if (
+                                //        DataDicts.ItemDataDict.TryGetValue(0x022E, out var cardonKey1Data) &&
+                                //        DataDicts.ItemDataDict.TryGetValue(0x022F, out var cardonKey2Data) &&
+                                //        DataDicts.ItemDataDict.TryGetValue(0x0230, out var cardonKey3Data) &&
+                                //        cardonKey1Data.InventoryAddressData != null &&
+                                //        cardonKey2Data.InventoryAddressData != null &&
+                                //        cardonKey3Data.InventoryAddressData != null
+                                //    )
+                                //    {
+                                //        bool hasCardonKey1 = Memory.ReadBit(cardonKey1Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? /1);
+                                //        bool hasCardonKey2 = Memory.ReadBit(cardonKey2Data.InventoryAddressData.Address, cardonKey2Data.InventoryAddressData.BitNumber ?? /0);
+                                //        bool hasCardonKey3 = Memory.ReadBit(cardonKey3Data.InventoryAddressData.Address, cardonKey3Data.InventoryAddressData.BitNumber ?? /7);
+                                //        byte numCardonKeysReceived = (byte)new[] { hasCardonKey1, hasCardonKey2, hasCardonKey3 }.Count(t => t);
+                                //        int yellowRefractorTerminalWriteVal = Memory.ReadByte(Addresses.YellowRefractorTerminalVirtual.Address);
+                                //        switch (numCardonKeysReceived)
+                                //        {
+                                //            case (0):
+                                //                yellowRefractorTerminalWriteVal = yellowRefractorTerminalWriteVal | 0x00;
+                                //                break;
+                                //            case (1):
+                                //                yellowRefractorTerminalWriteVal = yellowRefractorTerminalWriteVal | 0x40;
+                                //                break;
+                                //            case (2):
+                                //                yellowRefractorTerminalWriteVal = yellowRefractorTerminalWriteVal | 0x60;
+                                //                break;
+                                //            case (3):
+                                //                yellowRefractorTerminalWriteVal = yellowRefractorTerminalWriteVal | 0x30;
+                                //                break;
+                                //            default:
+                                //                yellowRefractorTerminalWriteVal = yellowRefractorTerminalWriteVal | 0x00;
+                                //                break;
+                                //        }
+                                //        //Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, yellowRefractorTerminalWriteVal);
+                                //        Memory.WriteByte(Addresses.YellowRefractorTerminalVirtual.Address, (byte)yellowRefractorTerminalWriteVal);
+                                //    }
+                                //    break;
+                                //case "Cardon Forest Sub-Gate: Cliff Room":
+                                //    if (
+                                //        DataDicts.LocationDataDict.TryGetValue(60, out var hasPickedUpCardonKey1LocationDataCR) &&
+                                //        DataDicts.LocationDataDict.TryGetValue(61, out var hasPickedUpCardonKey2LocationDataCR) &&
+                                //        DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationDataCR)
+                                //    )
+                                //    {
+                                //        bool hasPickedUpCardonKey1 = Memory.ReadBit(hasPickedUpCardonKey1LocationDataCR.CheckAddressData.Address, hasPickedUpCardonKey1LocationDataCR.CheckAddressData.BitNumber ?? 0);
+                                //        bool hasPickedUpCardonKey2 = Memory.ReadBit(hasPickedUpCardonKey2LocationDataCR.CheckAddressData.Address, hasPickedUpCardonKey2LocationDataCR.CheckAddressData.BitNumber ?? 1);
+                                //        bool hasPickedUpCardonKey3 = Memory.ReadBit(hasPickedUpCardonKey3LocationDataCR.CheckAddressData.Address, hasPickedUpCardonKey3LocationDataCR.CheckAddressData.BitNumber ?? 2);
+                                //        byte numCardonKeysPickedUp = (byte)new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
+                                //        byte yellowRefractorTerminalWriteVal;
+                                //        switch (numCardonKeysPickedUp)
+                                //        {
+                                //            case (0):
+                                //                yellowRefractorTerminalWriteVal = 0x00;
+                                //                break;
+                                //            case (1):
+                                //                yellowRefractorTerminalWriteVal = 0x40;
+                                //                break;
+                                //            case (2):
+                                //                yellowRefractorTerminalWriteVal = 0x60;
+                                //                break;
+                                //            case (3):
+                                //                yellowRefractorTerminalWriteVal = 0x30;
+                                //                break;
+                                //            default:
+                                //                yellowRefractorTerminalWriteVal = 0x00;
+                                //                break;
+                                //        }
+                                //        Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, yellowRefractorTerminalWriteVal);
+                                //    }
+                                //    break;
+                                //case "Cardon Forest Sub-Gate: Conveyor Belts":
+                                //    if (
+                                //        DataDicts.LocationDataDict.TryGetValue(60, out var hasPickedUpCardonKey1LocationDataCB) &&
+                                //        DataDicts.LocationDataDict.TryGetValue(61, out var hasPickedUpCardonKey2LocationDataCB) &&
+                                //        DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationDataCB)
+                                //    )
+                                //    {
+                                //        bool hasPickedUpCardonKey1 = Memory.ReadBit(hasPickedUpCardonKey1LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey1LocationDataCB.CheckAddressData.BitNumber ?? 0);
+                                //        bool hasPickedUpCardonKey2 = Memory.ReadBit(hasPickedUpCardonKey2LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey2LocationDataCB.CheckAddressData.BitNumber ?? 1);
+                                //        bool hasPickedUpCardonKey3 = Memory.ReadBit(hasPickedUpCardonKey3LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey3LocationDataCB.CheckAddressData.BitNumber ?? 2);
+                                //        byte numCardonKeysPickedUp = (byte)new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
+                                //        byte yellowRefractorTerminalWriteVal;
+                                //        switch (numCardonKeysPickedUp)
+                                //        {
+                                //            case (0):
+                                //                yellowRefractorTerminalWriteVal = 0x00;
+                                //                break;
+                                //            case (1):
+                                //                yellowRefractorTerminalWriteVal = 0x40;
+                                //                break;
+                                //            case (2):
+                                //                yellowRefractorTerminalWriteVal = 0x60;
+                                //                break;
+                                //            case (3):
+                                //                yellowRefractorTerminalWriteVal = 0x30;
+                                //                break;
+                                //            default:
+                                //                yellowRefractorTerminalWriteVal = 0x00;
+                                //                break;
+                                //        }
+                                //        Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, yellowRefractorTerminalWriteVal);
+                                //    }
+                                //    break;
                                 default:
                                     break;
                             }
@@ -1074,6 +1208,41 @@ public partial class App : Application
                 TextData overwrittenText = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));
                 TextDataToWriteStack.Push(overwrittenText);
             }
+
+            //if (locationData.Id == 62)
+            //{
+            //    if (
+            //        DataDicts.LocationDataDict.TryGetValue(60, out var hasPickedUpCardonKey1LocationDataCB) &&
+            //        DataDicts.LocationDataDict.TryGetValue(61, out var hasPickedUpCardonKey2LocationDataCB) &&
+            //        DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationDataCB)
+            //    )
+            //    {
+            //        bool hasPickedUpCardonKey1 = Memory.ReadBit(hasPickedUpCardonKey1LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey1LocationDataCB.CheckAddressData.BitNumber ?? 0);
+            //        bool hasPickedUpCardonKey2 = Memory.ReadBit(hasPickedUpCardonKey2LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey2LocationDataCB.CheckAddressData.BitNumber ?? 1);
+            //        bool hasPickedUpCardonKey3 = Memory.ReadBit(hasPickedUpCardonKey3LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey3LocationDataCB.CheckAddressData.BitNumber ?? 2);
+            //        byte numCardonKeysPickedUp = (byte)new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
+            //        byte yellowRefractorTerminalWriteVal;
+            //        switch (numCardonKeysPickedUp)
+            //        {
+            //            case (0):
+            //                yellowRefractorTerminalWriteVal = 0x00;
+            //                break;
+            //            case (1):
+            //                yellowRefractorTerminalWriteVal = 0x40;
+            //                break;
+            //            case (2):
+            //                yellowRefractorTerminalWriteVal = 0x60;
+            //                break;
+            //            case (3):
+            //                yellowRefractorTerminalWriteVal = 0x30;
+            //                break;
+            //            default:
+            //                yellowRefractorTerminalWriteVal = 0x00;
+            //                break;
+            //        }
+            //        Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, yellowRefractorTerminalWriteVal);
+            //    }
+            //}
         }
         return;
     }

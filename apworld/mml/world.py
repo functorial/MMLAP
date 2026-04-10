@@ -22,7 +22,7 @@ class GameWorld(World):
     item_name_groups = items.ITEM_NAME_GROUPS
 
     # TODO: Remember to update this!
-    ap_world_version = "0.2.2"
+    ap_world_version = "0.3.0"
 
     origin_region_name = "Ocean Tower - Room 1"
 
