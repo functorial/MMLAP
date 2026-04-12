@@ -185,8 +185,9 @@ namespace MMLAP.Helpers
             return coloredEncoding;
         }
 
-        public static byte[] EncodeYouGotItemWindow(ItemData itemData, byte[]? suffix = null)
+        public static byte[] EncodeYouGotItemWindow(ItemData itemData, byte[]? prefix = null, byte[]? suffix = null, uint? guaranteedLength = null)
         {
+            prefix ??= [];
             suffix ??= endWindow;
             List<ItemCategory> displayedItemCategories =
             [
@@ -210,13 +211,30 @@ namespace MMLAP.Helpers
                     itemByteArray = redAPItem;
                     break;
             }
+            byte[] spaceFill = [];
+            if (guaranteedLength != null)
+            {
+                int minLength = prefix.Length + youGotSound.Length + youGot.Length + itemByteArray.Length + 1 + suffix.Length;
+                if (guaranteedLength < minLength)
+                {
+                    Serilog.Log.Logger.Warning("guaranteedLength ({GuaranteedLength}) is less than minimum encoded length ({MinLength}) in EncodeYouGotItemWindow.", guaranteedLength, minLength);
+                    guaranteedLength = null;
+                }
+
+                if (guaranteedLength != null)
+                {
+                    spaceFill = Enumerable.Repeat((byte)0x4F, (int)guaranteedLength - minLength).ToArray();
+                }
+            }
             List<byte[]> substrs =
             [
+                prefix,
                 youGotSound,
                 youGot,
                 itemByteArray,
                 [charDict['!']],
-                suffix
+                spaceFill,
+                suffix,
             ];
             return ConcatArrayList(substrs);
         }

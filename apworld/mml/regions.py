@@ -516,6 +516,15 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("City Hall - Amelia's Office")
                 ]
             ),
+        "City Hall - Amelia's Office (Get Class A License)": 
+            GameRegionData(
+                [
+                    "Earn the Class A License",
+                ],
+                [
+                    ExitData("City Hall - Amelia's Office")
+                ]
+            ),
         "City Hall - Police Station": 
             GameRegionData(
                 [
@@ -938,10 +947,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     "Marlwolf defeated"
                 ],
                 [
-                    ExitData("Clozer Woods - Bridge Area")
+                    ExitData("City Hall - Amelia's Office (Get Class A License)")
                 ]
             ),
-        "Outside Cardon Forest Sub-Gate": # TODO: A big wooden gate appears when pirates attack, and is destroyed by the car after. Ignoring at the moment. 
+        "Outside Cardon Forest Sub-Gate":
             GameRegionData(
                 [
                     

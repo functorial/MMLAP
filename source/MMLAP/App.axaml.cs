@@ -564,8 +564,8 @@ public partial class App : Application
 
                     // Task: This is for hijacking game code which is loaded and executed only once during loading screens
                     // Pause these loop actions if not in loading screen
-                    if (
-                        Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0)
+                    if (true
+                        //Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0)
                     )
                     {
                         switch (areaName)
@@ -643,20 +643,74 @@ public partial class App : Application
                         }
                         switch (levelName)
                         {
+                            case "Apple Market: Junk Shop":
+                                // Handle "Rescue the shop owner's husband" location
+                                if (
+                                    ScoutedLocationItemData != null &&
+                                    ScoutedLocationItemData.TryGetValue(104, out var rescueScoutedItemData) &&
+                                    DataDicts.LocationDataDict.TryGetValue(104, out var rescueLocationData) &&
+                                    rescueLocationData.Name == "Rescue the shop owner's husband" &&
+                                    rescueLocationData.TextBoxStartAddress != null
+                                )
+                                {
+                                    // Being careful about text box overflow. Replacing new text window from man -> "You got" with a newpage, which saves a bunch of bytes.
+                                    // Not bothering to restore this text
+                                    byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, prefix: TextHelpers.newPage, suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]);
+                                    Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, writeTextArr);
+                                }
+                                break;
                             case "City Hall: Amelia's Office":
-                                bool hasEarnedClassBLicense = Memory.ReadBit(Addresses.HasEarnedClassBLicense.Address, Addresses.HasEarnedClassBLicense.BitNumber ?? 4);
-                                Log.Logger.Information($"ScoutedLocationItemData is not null: {ScoutedLocationItemData != null}, {ScoutedLocationItemData != null && ScoutedLocationItemData.TryGetValue(131, out var asdf)}");
                                 if (
                                     ScoutedLocationItemData != null &&
                                     ScoutedLocationItemData.TryGetValue(131, out var classBScoutedItemData)
                                 )
                                 {
-                                    Log.Logger.Information("asdfasdf");
-                                    byte[] hasEarnedClassBLicenseTextOverwrite = TextHelpers.ConcatArrays(
-                                        TextHelpers.newPage,
-                                        TextHelpers.EncodeYouGotItemWindow(classBScoutedItemData)
-                                    );
-                                    Memory.WriteByteArray(0x154500, hasEarnedClassBLicenseTextOverwrite);
+                                    uint textStartAddress = 0x154500;
+                                    uint textEndAddress = 0x154521;
+                                    byte[] hasEarnedClassBLicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(classBScoutedItemData, prefix: TextHelpers.newPage, guaranteedLength: textEndAddress - textStartAddress);
+                                    Memory.WriteByteArray(textStartAddress, hasEarnedClassBLicenseTextOverwrite);
+                                }
+                                if (
+                                    ScoutedLocationItemData != null &&
+                                    ScoutedLocationItemData.TryGetValue(132, out var classAScoutedItemData)
+                                )
+                                {
+                                    //uint textStartAddress = 0x154E10;
+                                    //uint textEndAddress = 0x154E34;
+                                    //byte[] prefix = [0x8C, 0x40, 0x00, 0xA2, 0x00, 0x10, 0x03, 0x93, 0x00];
+                                    //byte[] hasEarnedClassALicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(classAScoutedItemData, prefix: prefix, guaranteedLength: textEndAddress - textStartAddress);
+                                    uint textStartAddress = 0x154E1D;
+                                    byte[] hasEarnedClassALicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(classAScoutedItemData);
+                                    Memory.WriteByteArray(textStartAddress, hasEarnedClassALicenseTextOverwrite);
+                                }
+                                break;
+                            case "Uptown: Ira's Room":
+                                // Handle "Cure Ira's illness" location
+                                if (
+                                    ScoutedLocationItemData != null &&
+                                    ScoutedLocationItemData.TryGetValue(111, out var iraScoutedItemData) &&
+                                    DataDicts.LocationDataDict.TryGetValue(111, out var iraLocationData) &&
+                                    iraLocationData.Name == "Cure Ira's illness" &&
+                                    iraLocationData.TextBoxStartAddress != null
+                                )
+                                {
+                                    TextDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData)));
+                                }
+                                break;
+                            case "Cardon Forest (Flutter Broken): City Entrance":
+                                // Handle the "Earning citizenship" location
+                                if (
+                                    ScoutedLocationItemData != null &&
+                                    ScoutedLocationItemData.TryGetValue(130, out var citizensCardScoutedItemData) &&
+                                    DataDicts.LocationDataDict.TryGetValue(130, out var citizensCardLocationData) &&
+                                    citizensCardLocationData.Name == "Earn citizenship in Kattelox City" &&
+                                    citizensCardLocationData.TextBoxStartAddress != null
+                                )
+                                {
+                                    // Being careful about text box overflow. Replacing new text window from man -> "You got" with a newpage, which saves a bunch of bytes.
+                                    // Not bothering to restore this text
+                                    byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(citizensCardScoutedItemData, prefix: TextHelpers.newPage, suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]);
+                                    Memory.WriteByteArray(citizensCardLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                                 }
                                 break;
                             default:
@@ -873,51 +927,6 @@ public partial class App : Application
                             // Do room-based writes second
                             switch (levelName)
                             {
-                                case "Uptown: Ira's Room":
-                                    // Handle "Cure Ira's illness" location
-                                    if (
-                                        ScoutedLocationItemData != null &&
-                                        ScoutedLocationItemData.TryGetValue(111, out var iraScoutedItemData) &&
-                                        DataDicts.LocationDataDict.TryGetValue(111, out var iraLocationData) &&
-                                        iraLocationData.Name == "Cure Ira's illness" &&
-                                        iraLocationData.TextBoxStartAddress != null
-                                    )
-                                    {
-                                        TextDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData)));
-                                    }
-                                    break;
-                                case "Apple Market: Junk Shop":
-                                    // Handle "Rescue the shop owner's husband" location
-                                    if (
-                                        ScoutedLocationItemData != null &&
-                                        ScoutedLocationItemData.TryGetValue(104, out var rescueScoutedItemData) &&
-                                        DataDicts.LocationDataDict.TryGetValue(104, out var rescueLocationData) &&
-                                        rescueLocationData.Name == "Rescue the shop owner's husband" &&
-                                        rescueLocationData.TextBoxStartAddress != null
-                                    )
-                                    {
-                                        // Being careful about text box overflow. Replacing new text window from man -> "You got" with a newpage, which saves a bunch of bytes.
-                                        // Not bothering to restore this text
-                                        byte[] writeTextArr = TextHelpers.ConcatArrays(TextHelpers.newPage, TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
-                                        Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, writeTextArr);
-                                    }
-                                    break;
-                                case "Cardon Forest (Flutter Broken): City Entrance":
-                                    // Handle the "Earning citizenship" location
-                                    if (
-                                        ScoutedLocationItemData != null &&
-                                        ScoutedLocationItemData.TryGetValue(130, out var citizensCardScoutedItemData) &&
-                                        DataDicts.LocationDataDict.TryGetValue(130, out var citizensCardLocationData) &&
-                                        citizensCardLocationData.Name == "Earn citizenship in Kattelox City" &&
-                                        citizensCardLocationData.TextBoxStartAddress != null
-                                    )
-                                    {
-                                        // Being careful about text box overflow. Replacing new text window from man -> "You got" with a newpage, which saves a bunch of bytes.
-                                        // Not bothering to restore this text
-                                        byte[] writeTextArr = TextHelpers.ConcatArrays(TextHelpers.newPage, TextHelpers.EncodeYouGotItemWindow(citizensCardScoutedItemData, [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]));
-                                        Memory.WriteByteArray(citizensCardLocationData.TextBoxStartAddress ?? 0, writeTextArr);
-                                    }
-                                    break;
                                 case "City Hall: City Hall Outdoors":
                                     // Handle worker dialogue for Pick
                                     // Currently talking to this guy is not a location, but the Pick item is randomized in the pool

@@ -718,8 +718,8 @@ namespace MMLAP.Helpers
             { 128, new LocationData(128, "Take the yellow refractor",                                     LocationCategory.Quest,     LevelDataDict[0x0E00], ItemDataDict[0x0228], Addresses.HasTakenYellowRefractor, null, false, null,    null)     },
             { 129, new LocationData(129, "Take the red refractor",                                        LocationCategory.Quest,     LevelDataDict[0x1404], ItemDataDict[0x0229], new AddressData(0xBE37C, 0, null), null, false, null,    null)     },
             { 130, new LocationData(130, "Earn citizenship in Kattelox City",                             LocationCategory.Quest,     LevelDataDict[0x0302], ItemDataDict[0x022A], new AddressData(0xBE37C, 4, null), null, false, null,    0x155DC1) },
-            { 131, new LocationData(131, "Earn the Class B License",                                      LocationCategory.Quest,     LevelDataDict[0x0601], ItemDataDict[0x022C], Addresses.HasEarnedClassBLicense, null, false, null,    0x15450A) },
-          //{ 132, new LocationData(132, "Earn the Class A License",                                      LocationCategory.Quest,     LevelDataDict[asdf], ItemDataDict[0x022B], new AddressData(sdfg, 2, null), null, false, null,    sdfg) },
+            { 131, new LocationData(131, "Earn the Class B License",                                      LocationCategory.Quest,     LevelDataDict[0x0601], ItemDataDict[0x022C], Addresses.HasEarnedClassBLicense,  null, false, null,    0x15450A) },
+            { 132, new LocationData(132, "Earn the Class A License",                                      LocationCategory.Quest,     LevelDataDict[0x0601], ItemDataDict[0x022B], Addresses.HasEarnedClassALicense,  null, false, null,    0x154E1D) },
           //{ 6543, new LocationData(128, "Gai-nee Tooren defeated",                                       LocationCategory.Combat,    LevelDataDict[0x1D02], ItemDataDict[0x00FF], new AddressData(0xBE386, 6, null), null, false, null,    null)     },
         };
         
