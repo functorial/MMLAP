@@ -82,9 +82,9 @@ LOCATION_DATA_DICT = {
     "Cardon Forest Sub-Gate, Bottom conveyor hole"                  : LocationData(57,  LocationCategory.CONTAINER, False),
     "Cardon Forest Sub-Gate, Middle conveyor hole"                  : LocationData(58,  LocationCategory.CONTAINER, False),
     "Cardon Forest Sub-Gate, Middle switch chest"                   : LocationData(59,  LocationCategory.CONTAINER, False),
-    "Cardon Forest Sub-Gate, Jakko nest starter key get"            : LocationData(60,  LocationCategory.PICKUP,    False),
-    "Cardon Forest Sub-Gate, Conveyor chest starter key get"        : LocationData(61,  LocationCategory.PICKUP,    False),
-    "Cardon Forest Sub-Gate, Three switch starter key get"          : LocationData(62,  LocationCategory.PICKUP,    False),
+    "Cardon Forest Sub-Gate, Jakko nest starter key pickup"         : LocationData(60,  LocationCategory.PICKUP,    False),
+    "Cardon Forest Sub-Gate, Conveyor chest starter key pickup"     : LocationData(61,  LocationCategory.PICKUP,    False),
+    "Cardon Forest Sub-Gate, Three switch starter key pickup"       : LocationData(62,  LocationCategory.PICKUP,    False),
     "Lake Jyun Sub-Gate, Entrance right hole"                       : LocationData(63,  LocationCategory.CONTAINER, False),
     "Lake Jyun Sub-Gate, Entrance left hole"                        : LocationData(64,  LocationCategory.CONTAINER, False),
     "Lake Jyun Sub-Gate, Entrance chest"                            : LocationData(65,  LocationCategory.CONTAINER, False),
@@ -150,7 +150,7 @@ LOCATION_DATA_DICT = {
     "Gift Music Box to Roll"                                        : LocationData(125, LocationCategory.QUEST,     False),
     "Gift Ring to Roll"                                             : LocationData(126, LocationCategory.QUEST,     False),
     "Turn in missing bag"                                           : LocationData(127, LocationCategory.QUEST,     False),
-    
+
     "Take the yellow refractor"                                     : LocationData(128, LocationCategory.QUEST,     False),
     "Take the red refractor"                                        : LocationData(129, LocationCategory.QUEST,     False),
     "Earn citizenship in Kattelox City"                             : LocationData(130, LocationCategory.QUEST,     False),

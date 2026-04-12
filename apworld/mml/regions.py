@@ -943,48 +943,46 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Support Car / R&D Room")
                 ]
             ),
-        "Cardon Forest Sub-Gate - Refractor Room (Lower)": 
+        "Cardon Forest Sub-Gate - Refractor Room (Upper)": 
             GameRegionData(
                 [
 
                 ],
                 [
+                    ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Sub-Gate Exit)"),
+                    ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower)"),
+                ]
+            ),
+        "Cardon Forest Sub-Gate - Refractor Room (Lower)": 
+            GameRegionData(
+                [
+                    
+                ],
+                [
                     ExitData("Outside Cardon Forest Sub-Gate"),
                     ExitData("Cardon Forest Sub-Gate - Refractor Room (Upper)", has_jump_springs()),
-                    ExitData("Cardon Forest Sub-Gate - Cliff Room"), # Door broken until defeated pirates
+                    ExitData("Cardon Forest Sub-Gate - Cliff Room (Lower)"),
                     ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower, Get Refractor)", has_cardon_forest_keys()),
                 ]
             ),
         "Cardon Forest Sub-Gate - Refractor Room (Lower, Get Refractor)": 
             GameRegionData(
                 [
-                    "Take the yellow refractor"
+                    "Take the yellow refractor",
                 ],
                 [
                     ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower)"),
                 ]
             ),
-        "Cardon Forest Sub-Gate - Refractor Room (Upper)": 
-            GameRegionData(
-                [
-                    #"Cardon Forest Sub-Gate, Jakko nest starter key get"
-                ],
-                [
-                    ExitData("Underground Ruins - Cardon Forest Sub-Gate Area (Cardon Forest Sub-Gate Exit)"),
-                    ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower)")
-                ]
-            ),
-        "Cardon Forest Sub-Gate - Cliff Room": 
+        "Cardon Forest Sub-Gate - Cliff Room (Lower)": 
             GameRegionData(
                 [
                     "Cardon Forest Sub-Gate, Sharukurusu floor hole",
-                    "Cardon Forest Sub-Gate, Cliff hole",
-                    "Cardon Forest Sub-Gate, Cliff chest",
-                    #"Cardon Forest Sub-Gate, Three switch starter key get"
+                    "Cardon Forest Sub-Gate, Jakko nest starter key pickup",
                 ],
                 [
                     ExitData("Cardon Forest Sub-Gate - Refractor Room (Lower)"),
-                    ExitData("Cardon Forest Sub-Gate - Conveyor Belts")
+                    ExitData("Cardon Forest Sub-Gate - Conveyor Belts"),
                 ]
             ),
         "Cardon Forest Sub-Gate - Conveyor Belts": 
@@ -993,10 +991,33 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     "Cardon Forest Sub-Gate, Bottom conveyor hole",
                     "Cardon Forest Sub-Gate, Middle conveyor hole",
                     "Cardon Forest Sub-Gate, Middle switch chest",
-                    #"Cardon Forest Sub-Gate, Conveyor chest starter key get"
+                    "Cardon Forest Sub-Gate, Conveyor chest starter key pickup",
                 ],
                 [
-                    ExitData("Cardon Forest Sub-Gate - Cliff Room") # Technically three exits
+                    ExitData("Cardon Forest Sub-Gate - Cliff Room (Lower)"),
+                    ExitData("Cardon Forest Sub-Gate - Cliff Room (Upper)"),
+                ]
+            ),
+        "Cardon Forest Sub-Gate - Cliff Room (Upper)":
+            GameRegionData(
+                [
+                    "Cardon Forest Sub-Gate, Cliff hole",
+                    "Cardon Forest Sub-Gate, Cliff chest",
+                ],
+                [
+                    ExitData("Cardon Forest Sub-Gate - Cliff Room (Lower)"),
+                    ExitData("Cardon Forest Sub-Gate - Conveyor Belts"),
+                    ExitData("Cardon Forest Sub-Gate - Switch Room"),
+                ]
+            ),
+        "Cardon Forest Sub-Gate - Switch Room":
+            GameRegionData(
+                [
+                    "Cardon Forest Sub-Gate, Three switch starter key pickup",
+                ],
+                [
+                    ExitData("Cardon Forest Sub-Gate - Cliff Room (Upper)"),
+                    ExitData("Cardon Forest Sub-Gate - Cliff Room (Lower)"),
                 ]
             ),
         "Lake Jyun - Boss Fight": 

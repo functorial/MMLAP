@@ -9,14 +9,15 @@ namespace MMLAP
 {
     public class Cheats
     {
-        public static OpCode[] FastForwardCardonSubgate(byte minProgressionCounter)
+        public static OpCode[] FastForwardCardonSubgate(bool hasTakenYellowRefractor)
         {
             // May be written slowly as it is checked during in-game loop
+            int progressionCounter = hasTakenYellowRefractor ? 0x04 : 0x03;
             return
             [
-                LoadHalfImmediate(0x00100320, MMLEnums.Register.v1, Math.Max((byte)0x03, minProgressionCounter)),
-                LoadHalfImmediate(0x0010E7FC, MMLEnums.Register.v1, Math.Max((byte)0x03, minProgressionCounter)),
-                LoadHalfImmediate(0x0010E8B8, MMLEnums.Register.v1, Math.Max((byte)0x03, minProgressionCounter)),
+                LoadHalfImmediate(0x00100320, MMLEnums.Register.v1, (byte)progressionCounter),
+                LoadHalfImmediate(0x0010E7FC, MMLEnums.Register.v1, (byte)progressionCounter),
+                LoadHalfImmediate(0x0010E8B8, MMLEnums.Register.v1, (byte)progressionCounter),
             ];
         }
 
@@ -248,7 +249,11 @@ namespace MMLAP
                 // Jk, too hard. Key pickups also read/write here, so move those instead
                 //LoadHalfImmediate(0x00108F94, MMLEnums.Register.a0, jakkoRefractorTerminalVirtualOffset),
 
-
+                // If the yellow refractor has been picked up, then the game decides not to load a bunch of assets
+                // such as the keys and the yellow refractor itself. 
+                // Nop out this check so that it loads the assets regardless
+                // We can conditionally remove the yellow refractor assets in the fast game loop
+                Nop(0x0010C77C),
             ];
         }
 

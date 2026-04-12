@@ -577,10 +577,13 @@ public partial class App : Application
                                 MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(CurrentProgressionCounter));
                                 break;
                             case "Outside Cardon Forest Sub-Gate":
-                                MemoryHelpers.WriteCode(Cheats.EnableDoorsOutsideCardonSubgate(CurrentProgressionCounter));
+                                bool hasDefeatedFerdinand = Memory.ReadBit(Addresses.HasDefeatedFerdinand.Address, Addresses.HasDefeatedFerdinand.BitNumber ?? 6);
+                                bool hasCompletedCardonTankEvent = Memory.ReadBit(Addresses.HasCompletedCardonTankEvent.Address, Addresses.HasCompletedCardonTankEvent.BitNumber ?? 7);
+                                MemoryHelpers.WriteCode(Cheats.EnableDoorsOutsideCardonSubgate(CurrentProgressionCounter, hasDefeatedFerdinand, hasCompletedCardonTankEvent));
                                 break;
                             case "Cardon Forest Sub-Gate":
-                                MemoryHelpers.WriteCode(Cheats.FastForwardCardonSubgate(CurrentProgressionCounter));
+                                bool hasTakenYellowRefractor = Memory.ReadBit(Addresses.HasTakenYellowRefractor.Address, Addresses.HasTakenYellowRefractor.BitNumber ?? 1);
+                                MemoryHelpers.WriteCode(Cheats.FastForwardCardonSubgate(hasTakenYellowRefractor));
                                 MemoryHelpers.WriteCode(Cheats.DecoupleCardonForestSubGateKeys());
                                 break;
                             case "Apple Market":
@@ -634,50 +637,70 @@ public partial class App : Application
                                 // Handle yellow refractor terminal
                                 // Basically we want this byte to reflect key in inventory when interacting with terminal and key sprites picked up elsewhere
                                 // This byte is used for multiple things in the subgate which makes it a big pain in the ass to do with MIPS edits. But this seems to win the race condition in the fast game loop, so whatever
-                                byte focusedCount = 0x00;
-                                byte yellowRefractorTerminalVal = 0x00;
-                                if (Memory.ReadBit(Addresses.YellowRefractorTerminal.Address, 7)) // This bit is flipped when interacting with terminal and also, for a split second(?), when picking up keys. Small sleep seems to get around distinction.
+                                bool terminalInteractionBitSet = Memory.ReadBit(Addresses.YellowRefractorTerminal.Address, 7);
+                                bool hasPickedUpYellowRefractor = Memory.ReadBit(Addresses.HasTakenYellowRefractor.Address, Addresses.HasTakenYellowRefractor.BitNumber ?? 1);
+                                bool shouldUseTerminalInteractionPath = terminalInteractionBitSet && !hasPickedUpYellowRefractor;
+
+                                if (shouldUseTerminalInteractionPath) // This bit is flipped when interacting with terminal and also, for a split second(?), when picking up keys. Small sleep seems to get around distinction.
                                 {
                                     System.Threading.Thread.Sleep(1);
-                                    yellowRefractorTerminalVal = Memory.ReadByte(Addresses.YellowRefractorTerminal.Address);
-                                    if (
-                                        DataDicts.ItemDataDict.TryGetValue(0x022E, out var cardonKey1Data) &&
-                                        DataDicts.ItemDataDict.TryGetValue(0x022F, out var cardonKey2Data) &&
-                                        DataDicts.ItemDataDict.TryGetValue(0x0230, out var cardonKey3Data) &&
-                                        cardonKey1Data.InventoryAddressData != null &&
-                                        cardonKey2Data.InventoryAddressData != null &&
-                                        cardonKey3Data.InventoryAddressData != null
-                                    )
-                                    {
-                                        bool hasCardonKey1 = Memory.ReadBit(cardonKey1Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? 1);
-                                        bool hasCardonKey2 = Memory.ReadBit(cardonKey2Data.InventoryAddressData.Address, cardonKey2Data.InventoryAddressData.BitNumber ?? 0);
-                                        bool hasCardonKey3 = Memory.ReadBit(cardonKey3Data.InventoryAddressData.Address, cardonKey3Data.InventoryAddressData.BitNumber ?? 7);
-                                        focusedCount = (byte)new[] { hasCardonKey1, hasCardonKey2, hasCardonKey3 }.Count(t => t);
-                                    }
                                 }
-                                else
+
+                                byte yellowRefractorTerminalVal = Memory.ReadByte(Addresses.YellowRefractorTerminal.Address);
+                                int terminalMask = shouldUseTerminalInteractionPath ? 0x8F : 0x0F;
+                                int focusedKeyCount = 0;
+
+                                if (
+                                    shouldUseTerminalInteractionPath &&
+                                    DataDicts.ItemDataDict.TryGetValue(0x022E, out var cardonKey1Data) &&
+                                    DataDicts.ItemDataDict.TryGetValue(0x022F, out var cardonKey2Data) &&
+                                    DataDicts.ItemDataDict.TryGetValue(0x0230, out var cardonKey3Data) &&
+                                    cardonKey1Data.InventoryAddressData != null &&
+                                    cardonKey2Data.InventoryAddressData != null &&
+                                    cardonKey3Data.InventoryAddressData != null
+                                )
                                 {
-                                    if (
-                                        DataDicts.LocationDataDict.TryGetValue(60, out var hasPickedUpCardonKey1LocationData) &&
-                                        DataDicts.LocationDataDict.TryGetValue(61, out var hasPickedUpCardonKey2LocationData) &&
-                                        DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationData)
-                                    )
-                                    {
-                                        yellowRefractorTerminalVal = Memory.ReadByte(Addresses.YellowRefractorTerminal.Address);
-                                        bool hasPickedUpCardonKey1 = Memory.ReadBit(hasPickedUpCardonKey1LocationData.CheckAddressData.Address, hasPickedUpCardonKey1LocationData.CheckAddressData.BitNumber ?? 0);
-                                        bool hasPickedUpCardonKey2 = Memory.ReadBit(hasPickedUpCardonKey2LocationData.CheckAddressData.Address, hasPickedUpCardonKey2LocationData.CheckAddressData.BitNumber ?? 1);
-                                        bool hasPickedUpCardonKey3 = Memory.ReadBit(hasPickedUpCardonKey3LocationData.CheckAddressData.Address, hasPickedUpCardonKey3LocationData.CheckAddressData.BitNumber ?? 2);
-                                        focusedCount = (byte)new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
-                                    }
+                                    bool hasCardonKey1 = Memory.ReadBit(cardonKey1Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? 1);
+                                    bool hasCardonKey2 = Memory.ReadBit(cardonKey2Data.InventoryAddressData.Address, cardonKey2Data.InventoryAddressData.BitNumber ?? 0);
+                                    bool hasCardonKey3 = Memory.ReadBit(cardonKey3Data.InventoryAddressData.Address, cardonKey3Data.InventoryAddressData.BitNumber ?? 7);
+                                    focusedKeyCount = new[] { hasCardonKey1, hasCardonKey2, hasCardonKey3 }.Count(t => t);
                                 }
-                                int yellowRefractorTerminalValOverwrite = focusedCount switch
+                                else if (
+                                    DataDicts.LocationDataDict.TryGetValue(60, out var hasPickedUpCardonKey1LocationData) &&
+                                    DataDicts.LocationDataDict.TryGetValue(61, out var hasPickedUpCardonKey2LocationData) &&
+                                    DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationData)
+                                )
                                 {
-                                    1 => (yellowRefractorTerminalVal & 0x8F) | 0x40,
-                                    2 => (yellowRefractorTerminalVal & 0x8F) | 0x60,
-                                    3 => (yellowRefractorTerminalVal & 0x8F) | 0x70,
-                                    _ => (yellowRefractorTerminalVal & 0x8F) | 0x00,
+                                    bool hasPickedUpCardonKey1 = Memory.ReadBit(hasPickedUpCardonKey1LocationData.CheckAddressData.Address, hasPickedUpCardonKey1LocationData.CheckAddressData.BitNumber ?? 0);
+                                    bool hasPickedUpCardonKey2 = Memory.ReadBit(hasPickedUpCardonKey2LocationData.CheckAddressData.Address, hasPickedUpCardonKey2LocationData.CheckAddressData.BitNumber ?? 1);
+                                    bool hasPickedUpCardonKey3 = Memory.ReadBit(hasPickedUpCardonKey3LocationData.CheckAddressData.Address, hasPickedUpCardonKey3LocationData.CheckAddressData.BitNumber ?? 2);
+                                    focusedKeyCount = new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
+                                }
+
+                                int yellowRefractorTerminalValOverwrite = focusedKeyCount switch
+                                {
+                                    1 => (yellowRefractorTerminalVal & terminalMask) | 0x40,
+                                    2 => (yellowRefractorTerminalVal & terminalMask) | 0x60,
+                                    3 => (yellowRefractorTerminalVal & terminalMask) | 0x70,
+                                    _ => (yellowRefractorTerminalVal & terminalMask) | 0x00,
                                 };
                                 Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, (byte)yellowRefractorTerminalValOverwrite);
+
+                                // Manually unload the assets showing the yellow refractor if it has already been picked up
+                                // The DecoupleCardonForestSubGateKeys requires explicitly not checking hasPickedUpYellowRefractor and loading stuff anyway
+                                if (hasPickedUpYellowRefractor)
+                                {
+                                    Memory.WriteByte(0xBF4D8, 0x00); // Shield 
+                                    Memory.WriteByte(0xBF988, 0x00); // Refractor transparent glow
+                                    Memory.WriteByte(0xBF9D8, 0x00); // Refractor 
+                                    Memory.WriteByte(0xA3B40, 0x00); // Sparkles 
+                                    Memory.WriteByte(0xA3B88, 0x00); // Sparkles 
+                                    Memory.WriteByte(0xA3BD0, 0x00); // Sparkles
+                                    Memory.WriteByte(0xA3C18, 0x00); // Sparkles 
+                                    Memory.WriteByte(0xA3C60, 0x00); // Sparkles 
+                                    Memory.WriteByte(0xA3CA8, 0x00); // Sparkles 
+                                    Memory.WriteByte(0xA3CF0, 0x00); // Sparkles 
+                                }
                                 break;
                             default:
                                 break;
@@ -756,6 +779,11 @@ public partial class App : Application
                             {
                                 case "Cardon Forest Sub-Gate":
                                     //MemoryHelpers.WriteCode(Cheats.FastForwardCardonSubgate(CurrentProgressionCounter));
+                                    bool hasInteractedWithYellowTerminalOnce = Memory.ReadBit(Addresses.HasInteractedWithYellowTerminalOnce.Address, Addresses.HasInteractedWithYellowTerminalOnce.BitNumber ?? 4);
+                                    if (!hasInteractedWithYellowTerminalOnce)
+                                    {
+                                        Memory.WriteBit(Addresses.HasInteractedWithYellowTerminalOnce.Address, Addresses.HasInteractedWithYellowTerminalOnce.BitNumber ?? 4, true);
+                                    }
                                     break;
                                 case "Lake Jyun Sub-Gate":
                                     MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideJyunSubgate(CurrentProgressionCounter));
