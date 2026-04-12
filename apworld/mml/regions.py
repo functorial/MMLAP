@@ -482,10 +482,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "City Hall - Outside (Boss Fight)": 
             GameRegionData(
                 [
-                    "Bon Bonne defeated"
+                    "Bon Bonne defeated",
                 ],
                 [
-                    ExitData("City Hall - Amelia's Office")
+                    ExitData("City Hall - Amelia's Office (Get Class B License)")
                 ]
             ),
         "City Hall - City Hall 1st Floor": 
@@ -505,6 +505,15 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("City Hall - City Hall 1st Floor")
+                ]
+            ),
+        "City Hall - Amelia's Office (Get Class B License)": 
+            GameRegionData(
+                [
+                    "Earn the Class B License",
+                ],
+                [
+                    ExitData("City Hall - Amelia's Office")
                 ]
             ),
         "City Hall - Police Station": 

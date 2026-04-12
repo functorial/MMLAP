@@ -300,10 +300,10 @@ namespace MMLAP.Helpers
             { 0x0B04, new LevelData("Lake Jyun",                      "Inside Bonne Robot",               0x0B, 0x04) },
             { 0x0B05, new LevelData("Lake Jyun",                      "Empty?",                           0x0B, 0x05) },
             { 0x0B06, new LevelData("Lake Jyun",                      "Door Opening Mechanism",           0x0B, 0x06) },
-            { 0x0B07, new LevelData("Lake Jyun",                      "Sub-Gate With Open Door",           0x0B, 0x07) },
+            { 0x0B07, new LevelData("Lake Jyun",                      "Sub-Gate With Open Door",          0x0B, 0x07) },
             { 0x0C00, new LevelData("Outside Cardon Forest Sub-Gate", "Outside",                          0x0C, 0x00) },
             { 0x0C01, new LevelData("Outside Cardon Forest Sub-Gate", "Door Opening Mechanism",           0x0C, 0x01) },
-            { 0x0C02, new LevelData("Outside Cardon Forest Sub-Gate", "Sub-Gate With Open Door",           0x0C, 0x02) },
+            { 0x0C02, new LevelData("Outside Cardon Forest Sub-Gate", "Sub-Gate With Open Door",          0x0C, 0x02) },
             { 0x0C03, new LevelData("Outside Cardon Forest Sub-Gate", "Small Piece of Ground",            0x0C, 0x03) },
             { 0x0D00, new LevelData("Wily's Boat",                    "Outside Boat Shop",                0x0D, 0x00) },
             { 0x0D01, new LevelData("Wily's Boat",                    "Inside Boat Shop",                 0x0D, 0x01) },
@@ -718,8 +718,8 @@ namespace MMLAP.Helpers
             { 128, new LocationData(128, "Take the yellow refractor",                                     LocationCategory.Quest,     LevelDataDict[0x0E00], ItemDataDict[0x0228], Addresses.HasTakenYellowRefractor, null, false, null,    null)     },
             { 129, new LocationData(129, "Take the red refractor",                                        LocationCategory.Quest,     LevelDataDict[0x1404], ItemDataDict[0x0229], new AddressData(0xBE37C, 0, null), null, false, null,    null)     },
             { 130, new LocationData(130, "Earn citizenship in Kattelox City",                             LocationCategory.Quest,     LevelDataDict[0x0302], ItemDataDict[0x022A], new AddressData(0xBE37C, 4, null), null, false, null,    0x155DC1) },
-          //{ 132, new LocationData(132, "Earn the Class B License",                                      LocationCategory.Quest,     LevelDataDict[asdf], ItemDataDict[0x022B], new AddressData(sdfg, 2, null), null, false, null,    sdfg) },
-          //{ 133, new LocationData(133, "Earn the Class A License",                                      LocationCategory.Quest,     LevelDataDict[asdf], ItemDataDict[0x022A], new AddressData(sdfg, 2, null), null, false, null,    sdfg) },
+            { 131, new LocationData(131, "Earn the Class B License",                                      LocationCategory.Quest,     LevelDataDict[0x0601], ItemDataDict[0x022C], Addresses.HasEarnedClassBLicense, null, false, null,    0x15450A) },
+          //{ 132, new LocationData(132, "Earn the Class A License",                                      LocationCategory.Quest,     LevelDataDict[asdf], ItemDataDict[0x022B], new AddressData(sdfg, 2, null), null, false, null,    sdfg) },
           //{ 6543, new LocationData(128, "Gai-nee Tooren defeated",                                       LocationCategory.Combat,    LevelDataDict[0x1D02], ItemDataDict[0x00FF], new AddressData(0xBE386, 6, null), null, false, null,    null)     },
         };
         

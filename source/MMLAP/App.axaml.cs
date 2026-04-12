@@ -585,6 +585,22 @@ public partial class App : Application
                                 bool hasTakenYellowRefractor = Memory.ReadBit(Addresses.HasTakenYellowRefractor.Address, Addresses.HasTakenYellowRefractor.BitNumber ?? 1);
                                 MemoryHelpers.WriteCode(Cheats.FastForwardCardonSubgate(hasTakenYellowRefractor));
                                 MemoryHelpers.WriteCode(Cheats.DecoupleCardonForestSubGateKeys());
+
+                                // Manually unload the assets showing the yellow refractor if it has already been picked up
+                                // The DecoupleCardonForestSubGateKeys requires explicitly not checking hasTakenYellowRefractor and loading stuff anyway
+                                if (hasTakenYellowRefractor)
+                                {
+                                    Memory.WriteByte(0xBF4D8, 0x00); // Shield 
+                                    Memory.WriteByte(0xBF988, 0x00); // Refractor transparent glow
+                                    Memory.WriteByte(0xBF9D8, 0x00); // Refractor 
+                                    Memory.WriteByte(0xA3B40, 0x00); // Sparkles 
+                                    Memory.WriteByte(0xA3B88, 0x00); // Sparkles 
+                                    Memory.WriteByte(0xA3BD0, 0x00); // Sparkles
+                                    Memory.WriteByte(0xA3C18, 0x00); // Sparkles 
+                                    Memory.WriteByte(0xA3C60, 0x00); // Sparkles 
+                                    Memory.WriteByte(0xA3CA8, 0x00); // Sparkles 
+                                    Memory.WriteByte(0xA3CF0, 0x00); // Sparkles 
+                                }
                                 break;
                             case "Apple Market":
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsAppleMarket(CurrentProgressionCounter));
@@ -625,10 +641,32 @@ public partial class App : Application
                             default:
                                 break;
                         }
+                        switch (levelName)
+                        {
+                            case "City Hall: Amelia's Office":
+                                bool hasEarnedClassBLicense = Memory.ReadBit(Addresses.HasEarnedClassBLicense.Address, Addresses.HasEarnedClassBLicense.BitNumber ?? 4);
+                                Log.Logger.Information($"ScoutedLocationItemData is not null: {ScoutedLocationItemData != null}, {ScoutedLocationItemData != null && ScoutedLocationItemData.TryGetValue(131, out var asdf)}");
+                                if (
+                                    ScoutedLocationItemData != null &&
+                                    ScoutedLocationItemData.TryGetValue(131, out var classBScoutedItemData)
+                                )
+                                {
+                                    Log.Logger.Information("asdfasdf");
+                                    byte[] hasEarnedClassBLicenseTextOverwrite = TextHelpers.ConcatArrays(
+                                        TextHelpers.newPage,
+                                        TextHelpers.EncodeYouGotItemWindow(classBScoutedItemData)
+                                    );
+                                    Memory.WriteByteArray(0x154500, hasEarnedClassBLicenseTextOverwrite);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
                     // Run these after loading
                     // These will happen before AND after slow game loop, so be mindful
                     // and only put stuff here that needs to be fast and doesn't interact with slow game loop
+                    // (e.g. overwriting things happening in the internal game loop)
                     else
                     {
                         switch (areaName)
@@ -638,8 +676,8 @@ public partial class App : Application
                                 // Basically we want this byte to reflect key in inventory when interacting with terminal and key sprites picked up elsewhere
                                 // This byte is used for multiple things in the subgate which makes it a big pain in the ass to do with MIPS edits. But this seems to win the race condition in the fast game loop, so whatever
                                 bool terminalInteractionBitSet = Memory.ReadBit(Addresses.YellowRefractorTerminal.Address, 7);
-                                bool hasPickedUpYellowRefractor = Memory.ReadBit(Addresses.HasTakenYellowRefractor.Address, Addresses.HasTakenYellowRefractor.BitNumber ?? 1);
-                                bool shouldUseTerminalInteractionPath = terminalInteractionBitSet && !hasPickedUpYellowRefractor;
+                                bool hasTakenYellowRefractor = Memory.ReadBit(Addresses.HasTakenYellowRefractor.Address, Addresses.HasTakenYellowRefractor.BitNumber ?? 1);
+                                bool shouldUseTerminalInteractionPath = terminalInteractionBitSet && !hasTakenYellowRefractor;
 
                                 if (shouldUseTerminalInteractionPath) // This bit is flipped when interacting with terminal and also, for a split second(?), when picking up keys. Small sleep seems to get around distinction.
                                 {
@@ -685,22 +723,6 @@ public partial class App : Application
                                     _ => (yellowRefractorTerminalVal & terminalMask) | 0x00,
                                 };
                                 Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, (byte)yellowRefractorTerminalValOverwrite);
-
-                                // Manually unload the assets showing the yellow refractor if it has already been picked up
-                                // The DecoupleCardonForestSubGateKeys requires explicitly not checking hasPickedUpYellowRefractor and loading stuff anyway
-                                if (hasPickedUpYellowRefractor)
-                                {
-                                    Memory.WriteByte(0xBF4D8, 0x00); // Shield 
-                                    Memory.WriteByte(0xBF988, 0x00); // Refractor transparent glow
-                                    Memory.WriteByte(0xBF9D8, 0x00); // Refractor 
-                                    Memory.WriteByte(0xA3B40, 0x00); // Sparkles 
-                                    Memory.WriteByte(0xA3B88, 0x00); // Sparkles 
-                                    Memory.WriteByte(0xA3BD0, 0x00); // Sparkles
-                                    Memory.WriteByte(0xA3C18, 0x00); // Sparkles 
-                                    Memory.WriteByte(0xA3C60, 0x00); // Sparkles 
-                                    Memory.WriteByte(0xA3CA8, 0x00); // Sparkles 
-                                    Memory.WriteByte(0xA3CF0, 0x00); // Sparkles 
-                                }
                                 break;
                             default:
                                 break;
@@ -898,6 +920,7 @@ public partial class App : Application
                                     break;
                                 case "City Hall: City Hall Outdoors":
                                     // Handle worker dialogue for Pick
+                                    // Currently talking to this guy is not a location, but the Pick item is randomized in the pool
                                     List<byte[]> substrs =
                                         [
                                             TextHelpers.EncodeSimpleString("Huh? A pick?"),
@@ -942,110 +965,6 @@ public partial class App : Application
                                         MemoryHelpers.WriteCode(Cheats.EnableFixBoatCallRoll());
                                     }
                                     break;
-                                //case "Cardon Forest Sub-Gate: Refractor Room":
-                                //    // Handle the yellow refractor terminal as a part of decoupling keys from key pickups
-                                //    if (
-                                //        DataDicts.ItemDataDict.TryGetValue(0x022E, out var cardonKey1Data) &&
-                                //        DataDicts.ItemDataDict.TryGetValue(0x022F, out var cardonKey2Data) &&
-                                //        DataDicts.ItemDataDict.TryGetValue(0x0230, out var cardonKey3Data) &&
-                                //        cardonKey1Data.InventoryAddressData != null &&
-                                //        cardonKey2Data.InventoryAddressData != null &&
-                                //        cardonKey3Data.InventoryAddressData != null
-                                //    )
-                                //    {
-                                //        bool hasCardonKey1 = Memory.ReadBit(cardonKey1Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? /1);
-                                //        bool hasCardonKey2 = Memory.ReadBit(cardonKey2Data.InventoryAddressData.Address, cardonKey2Data.InventoryAddressData.BitNumber ?? /0);
-                                //        bool hasCardonKey3 = Memory.ReadBit(cardonKey3Data.InventoryAddressData.Address, cardonKey3Data.InventoryAddressData.BitNumber ?? /7);
-                                //        byte numCardonKeysReceived = (byte)new[] { hasCardonKey1, hasCardonKey2, hasCardonKey3 }.Count(t => t);
-                                //        int yellowRefractorTerminalWriteVal = Memory.ReadByte(Addresses.YellowRefractorTerminalVirtual.Address);
-                                //        switch (numCardonKeysReceived)
-                                //        {
-                                //            case (0):
-                                //                yellowRefractorTerminalWriteVal = yellowRefractorTerminalWriteVal | 0x00;
-                                //                break;
-                                //            case (1):
-                                //                yellowRefractorTerminalWriteVal = yellowRefractorTerminalWriteVal | 0x40;
-                                //                break;
-                                //            case (2):
-                                //                yellowRefractorTerminalWriteVal = yellowRefractorTerminalWriteVal | 0x60;
-                                //                break;
-                                //            case (3):
-                                //                yellowRefractorTerminalWriteVal = yellowRefractorTerminalWriteVal | 0x30;
-                                //                break;
-                                //            default:
-                                //                yellowRefractorTerminalWriteVal = yellowRefractorTerminalWriteVal | 0x00;
-                                //                break;
-                                //        }
-                                //        //Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, yellowRefractorTerminalWriteVal);
-                                //        Memory.WriteByte(Addresses.YellowRefractorTerminalVirtual.Address, (byte)yellowRefractorTerminalWriteVal);
-                                //    }
-                                //    break;
-                                //case "Cardon Forest Sub-Gate: Cliff Room":
-                                //    if (
-                                //        DataDicts.LocationDataDict.TryGetValue(60, out var hasPickedUpCardonKey1LocationDataCR) &&
-                                //        DataDicts.LocationDataDict.TryGetValue(61, out var hasPickedUpCardonKey2LocationDataCR) &&
-                                //        DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationDataCR)
-                                //    )
-                                //    {
-                                //        bool hasPickedUpCardonKey1 = Memory.ReadBit(hasPickedUpCardonKey1LocationDataCR.CheckAddressData.Address, hasPickedUpCardonKey1LocationDataCR.CheckAddressData.BitNumber ?? 0);
-                                //        bool hasPickedUpCardonKey2 = Memory.ReadBit(hasPickedUpCardonKey2LocationDataCR.CheckAddressData.Address, hasPickedUpCardonKey2LocationDataCR.CheckAddressData.BitNumber ?? 1);
-                                //        bool hasPickedUpCardonKey3 = Memory.ReadBit(hasPickedUpCardonKey3LocationDataCR.CheckAddressData.Address, hasPickedUpCardonKey3LocationDataCR.CheckAddressData.BitNumber ?? 2);
-                                //        byte numCardonKeysPickedUp = (byte)new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
-                                //        byte yellowRefractorTerminalWriteVal;
-                                //        switch (numCardonKeysPickedUp)
-                                //        {
-                                //            case (0):
-                                //                yellowRefractorTerminalWriteVal = 0x00;
-                                //                break;
-                                //            case (1):
-                                //                yellowRefractorTerminalWriteVal = 0x40;
-                                //                break;
-                                //            case (2):
-                                //                yellowRefractorTerminalWriteVal = 0x60;
-                                //                break;
-                                //            case (3):
-                                //                yellowRefractorTerminalWriteVal = 0x30;
-                                //                break;
-                                //            default:
-                                //                yellowRefractorTerminalWriteVal = 0x00;
-                                //                break;
-                                //        }
-                                //        Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, yellowRefractorTerminalWriteVal);
-                                //    }
-                                //    break;
-                                //case "Cardon Forest Sub-Gate: Conveyor Belts":
-                                //    if (
-                                //        DataDicts.LocationDataDict.TryGetValue(60, out var hasPickedUpCardonKey1LocationDataCB) &&
-                                //        DataDicts.LocationDataDict.TryGetValue(61, out var hasPickedUpCardonKey2LocationDataCB) &&
-                                //        DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationDataCB)
-                                //    )
-                                //    {
-                                //        bool hasPickedUpCardonKey1 = Memory.ReadBit(hasPickedUpCardonKey1LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey1LocationDataCB.CheckAddressData.BitNumber ?? 0);
-                                //        bool hasPickedUpCardonKey2 = Memory.ReadBit(hasPickedUpCardonKey2LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey2LocationDataCB.CheckAddressData.BitNumber ?? 1);
-                                //        bool hasPickedUpCardonKey3 = Memory.ReadBit(hasPickedUpCardonKey3LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey3LocationDataCB.CheckAddressData.BitNumber ?? 2);
-                                //        byte numCardonKeysPickedUp = (byte)new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
-                                //        byte yellowRefractorTerminalWriteVal;
-                                //        switch (numCardonKeysPickedUp)
-                                //        {
-                                //            case (0):
-                                //                yellowRefractorTerminalWriteVal = 0x00;
-                                //                break;
-                                //            case (1):
-                                //                yellowRefractorTerminalWriteVal = 0x40;
-                                //                break;
-                                //            case (2):
-                                //                yellowRefractorTerminalWriteVal = 0x60;
-                                //                break;
-                                //            case (3):
-                                //                yellowRefractorTerminalWriteVal = 0x30;
-                                //                break;
-                                //            default:
-                                //                yellowRefractorTerminalWriteVal = 0x00;
-                                //                break;
-                                //        }
-                                //        Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, yellowRefractorTerminalWriteVal);
-                                //    }
-                                //    break;
                                 default:
                                     break;
                             }

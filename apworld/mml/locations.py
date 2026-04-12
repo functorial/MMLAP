@@ -154,6 +154,8 @@ LOCATION_DATA_DICT = {
     "Take the yellow refractor"                                     : LocationData(128, LocationCategory.QUEST,     False),
     "Take the red refractor"                                        : LocationData(129, LocationCategory.QUEST,     False),
     "Earn citizenship in Kattelox City"                             : LocationData(130, LocationCategory.QUEST,     False),
+    "Earn the Class B License"                                      : LocationData(131, LocationCategory.QUEST,     False),
+    "Earn the Class A License"                                      : LocationData(132, LocationCategory.QUEST,     False),
     # Goals
     "Juno Defeated"                                                 : LocationData(999, LocationCategory.COMBAT,    False),
 }

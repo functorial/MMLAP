@@ -29,6 +29,8 @@ ITEM_DATA_DICT = {
     "Yellow Refractor"                  : ItemData(0x0228, ItemClassification.progression,                             None                        ),
     "Red Refractor"                     : ItemData(0x0229, ItemClassification.progression,                             None                        ),
     "Citizen's Card"                    : ItemData(0x022A, ItemClassification.progression,                             None                        ),
+    "Class A License"                   : ItemData(0x022B, ItemClassification.progression,                             None                        ),
+    "Class B License"                   : ItemData(0x022C, ItemClassification.progression,                             None                        ),
     "Cardon Forest Sub-Gate Key 1"      : ItemData(0x022E, ItemClassification.progression,                             "Cardon Forest Sub-Gate Key"),
     "Cardon Forest Sub-Gate Key 2"      : ItemData(0x022F, ItemClassification.progression,                             "Cardon Forest Sub-Gate Key"),
     "Cardon Forest Sub-Gate Key 3"      : ItemData(0x0230, ItemClassification.progression,                             "Cardon Forest Sub-Gate Key"),

@@ -12,12 +12,12 @@ namespace MMLAP
         public static OpCode[] FastForwardCardonSubgate(bool hasTakenYellowRefractor)
         {
             // May be written slowly as it is checked during in-game loop
-            int progressionCounter = hasTakenYellowRefractor ? 0x04 : 0x03;
+            int fastForwardState = hasTakenYellowRefractor ? 0x04 : 0x03;
             return
             [
-                LoadHalfImmediate(0x00100320, MMLEnums.Register.v1, (byte)progressionCounter),
-                LoadHalfImmediate(0x0010E7FC, MMLEnums.Register.v1, (byte)progressionCounter),
-                LoadHalfImmediate(0x0010E8B8, MMLEnums.Register.v1, (byte)progressionCounter),
+                LoadHalfImmediate(0x00100320, MMLEnums.Register.v1, (byte)fastForwardState),
+                LoadHalfImmediate(0x0010E7FC, MMLEnums.Register.v1, (byte)fastForwardState),
+                LoadHalfImmediate(0x0010E8B8, MMLEnums.Register.v1, (byte)fastForwardState),
             ];
         }
 
@@ -39,9 +39,10 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] EnableDoorsOutsideCardonSubgate(byte minProgressionCounter)
+        public static OpCode[] EnableDoorsOutsideCardonSubgate(byte minProgressionCounter, bool hasDefeatedFerdinand, bool hasCompletedCardonTankEvent)
         {
             // Needs to be written fast during loading screen
+            int fastForwardState = !hasDefeatedFerdinand ? 0x00 : (hasCompletedCardonTankEvent ? 0x04 : 0x03);
             return
             [
                 LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, Math.Max((byte)0x04, minProgressionCounter))

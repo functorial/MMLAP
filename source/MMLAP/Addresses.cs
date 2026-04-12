@@ -35,6 +35,7 @@ namespace MMLAP
         public static readonly AddressData HasStartedPirateAttackEvent = new(0xBE378, 1, null); // Flipped after talking to roll by the car
         public static readonly AddressData HasStartedBlumebearFight = new(0xBE379, 6, null); // Flipped after policemen cutscene
         public static readonly AddressData HasDefeatedFerdinand = new(0xBE383, 6, null);
+        public static readonly AddressData HasEarnedClassBLicense = new(0xBE3EA, 4, null);
         public static readonly AddressData HasCompletedCardonTankEvent = new(0xBE37E, 7, null);
         public static readonly AddressData HasInteractedWithYellowTerminalOnce = new(0xBE380, 4, null);
         public static readonly AddressData HasTakenYellowRefractor = new(0xBE37B, 1, null);
