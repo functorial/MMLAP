@@ -564,8 +564,8 @@ public partial class App : Application
 
                     // Task: This is for hijacking game code which is loaded and executed only once during loading screens
                     // Pause these loop actions if not in loading screen
-                    if (true
-                        //Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0)
+                    if (
+                        MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag)
                     )
                     {
                         switch (areaName)
@@ -577,12 +577,12 @@ public partial class App : Application
                                 MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(CurrentProgressionCounter));
                                 break;
                             case "Outside Cardon Forest Sub-Gate":
-                                bool hasDefeatedFerdinand = Memory.ReadBit(Addresses.HasDefeatedFerdinand.Address, Addresses.HasDefeatedFerdinand.BitNumber ?? 6);
-                                bool hasCompletedCardonTankEvent = Memory.ReadBit(Addresses.HasCompletedCardonTankEvent.Address, Addresses.HasCompletedCardonTankEvent.BitNumber ?? 7);
+                                bool hasDefeatedFerdinand = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand);
+                                bool hasCompletedCardonTankEvent = MemoryHelpers.ReadAddressDataBit(Addresses.HasCompletedCardonTankEvent);
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsOutsideCardonSubgate(CurrentProgressionCounter, hasDefeatedFerdinand, hasCompletedCardonTankEvent));
                                 break;
                             case "Cardon Forest Sub-Gate":
-                                bool hasTakenYellowRefractor = Memory.ReadBit(Addresses.HasTakenYellowRefractor.Address, Addresses.HasTakenYellowRefractor.BitNumber ?? 1);
+                                bool hasTakenYellowRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenYellowRefractor);
                                 MemoryHelpers.WriteCode(Cheats.FastForwardCardonSubgate(hasTakenYellowRefractor));
                                 MemoryHelpers.WriteCode(Cheats.DecoupleCardonForestSubGateKeys());
 
@@ -606,11 +606,11 @@ public partial class App : Application
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsAppleMarket(CurrentProgressionCounter));
                                 break;
                             case "Downtown":
-                                bool subCitiesAreSurfacedDowntown = Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1);
+                                bool subCitiesAreSurfacedDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.SubCitiesAreSurfaced);
                                 MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(CurrentProgressionCounter, subCitiesAreSurfacedDowntown));
                                 break;
                             case "Uptown":
-                                bool subCitiesAreSurfacedUptown = Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1);
+                                bool subCitiesAreSurfacedUptown = MemoryHelpers.ReadAddressDataBit(Addresses.SubCitiesAreSurfaced);
                                 MemoryHelpers.WriteCode(Cheats.FastForwardUptown(CurrentProgressionCounter, subCitiesAreSurfacedUptown));
                                 break;
                             case "Old City":
@@ -620,19 +620,31 @@ public partial class App : Application
                             case "City Hall":
                                 MemoryHelpers.WriteCode(Cheats.EnableDoorsCityHall(CurrentProgressionCounter));
                                 break;
+                            case "Yass Plains":
+                                bool hasEarnedClassBLicenseYass = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
+                                bool hasEarnedClassALicenseYass = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
+                                MemoryHelpers.WriteCode(Cheats.FastForwardYassPlains(CurrentProgressionCounter, hasEarnedClassBLicenseYass, hasEarnedClassALicenseYass));
+                                break;
+                            case "Clozer Woods With Bridge":
+                                bool hasEarnedClassBLicenseClozerBridge = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
+                                bool hasEarnedClassALicenseClozerBridge = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
+                                MemoryHelpers.WriteCode(Cheats.FastForwardClozerWoodsWithBridge(CurrentProgressionCounter, hasEarnedClassBLicenseClozerBridge, hasEarnedClassALicenseClozerBridge));
+                                break;
                             case "Clozer Woods":
-                                MemoryHelpers.WriteCode(Cheats.EnableDoorsOutsideClozerSubgate(CurrentProgressionCounter));
+                                bool hasEarnedClassBLicenseClozer = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
+                                bool hasEarnedClassALicenseClozer = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
+                                MemoryHelpers.WriteCode(Cheats.FastForwardClozerWoods(CurrentProgressionCounter, hasEarnedClassBLicenseClozer, hasEarnedClassALicenseClozer));
                                 break;
                             case "Wily's Boat":
-                                if (Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7))
+                                if (MemoryHelpers.ReadAddressDataBit(Addresses.HasYellowRefractor))
                                 {
-                                    bool boatIsFixed = Memory.ReadBit(Addresses.BoatIsFixed.Address, Addresses.BoatIsFixed.BitNumber ?? 6);
-                                    bool hasDefeatedBalkonGeratWily = Memory.ReadBit(Addresses.HasDefeatedBalkonGerat.Address, Addresses.HasDefeatedBalkonGerat.BitNumber ?? 2);
+                                    bool boatIsFixed = MemoryHelpers.ReadAddressDataBit(Addresses.BoatIsFixed);
+                                    bool hasDefeatedBalkonGeratWily = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
                                     MemoryHelpers.WriteCode(Cheats.FastForwardWilysBoat(CurrentProgressionCounter, boatIsFixed, hasDefeatedBalkonGeratWily));
                                 }
                                 break;
                             case "Lake Jyun":
-                                bool hasDefeatedBalkonGeratLake = Memory.ReadBit(Addresses.HasDefeatedBalkonGerat.Address, Addresses.HasDefeatedBalkonGerat.BitNumber ?? 2);
+                                bool hasDefeatedBalkonGeratLake = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
                                 MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyun(hasDefeatedBalkonGeratLake));
                                 break;
                             case "Flutter Takeoff":
@@ -644,7 +656,7 @@ public partial class App : Application
                         switch (levelName)
                         {
                             case "Apple Market: Junk Shop":
-                                // Handle "Rescue the shop owner's husband" location
+                                // "Rescue the shop owner's husband" location text handling
                                 if (
                                     ScoutedLocationItemData != null &&
                                     ScoutedLocationItemData.TryGetValue(104, out var rescueScoutedItemData) &&
@@ -660,9 +672,11 @@ public partial class App : Application
                                 }
                                 break;
                             case "City Hall: Amelia's Office":
+                                // Class B License text handling
                                 if (
                                     ScoutedLocationItemData != null &&
-                                    ScoutedLocationItemData.TryGetValue(131, out var classBScoutedItemData)
+                                    ScoutedLocationItemData.TryGetValue(131, out var classBScoutedItemData) &&
+                                    !MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense)
                                 )
                                 {
                                     uint textStartAddress = 0x154500;
@@ -670,22 +684,20 @@ public partial class App : Application
                                     byte[] hasEarnedClassBLicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(classBScoutedItemData, prefix: TextHelpers.newPage, guaranteedLength: textEndAddress - textStartAddress);
                                     Memory.WriteByteArray(textStartAddress, hasEarnedClassBLicenseTextOverwrite);
                                 }
+                                // Class A License text handling
                                 if (
                                     ScoutedLocationItemData != null &&
-                                    ScoutedLocationItemData.TryGetValue(132, out var classAScoutedItemData)
+                                    ScoutedLocationItemData.TryGetValue(132, out var classAScoutedItemData) &&
+                                    !MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense)
                                 )
                                 {
-                                    //uint textStartAddress = 0x154E10;
-                                    //uint textEndAddress = 0x154E34;
-                                    //byte[] prefix = [0x8C, 0x40, 0x00, 0xA2, 0x00, 0x10, 0x03, 0x93, 0x00];
-                                    //byte[] hasEarnedClassALicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(classAScoutedItemData, prefix: prefix, guaranteedLength: textEndAddress - textStartAddress);
                                     uint textStartAddress = 0x154E1D;
                                     byte[] hasEarnedClassALicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(classAScoutedItemData);
                                     Memory.WriteByteArray(textStartAddress, hasEarnedClassALicenseTextOverwrite);
                                 }
                                 break;
                             case "Uptown: Ira's Room":
-                                // Handle "Cure Ira's illness" location
+                                // "Cure Ira's illness" location text handling
                                 if (
                                     ScoutedLocationItemData != null &&
                                     ScoutedLocationItemData.TryGetValue(111, out var iraScoutedItemData) &&
@@ -698,7 +710,7 @@ public partial class App : Application
                                 }
                                 break;
                             case "Cardon Forest (Flutter Broken): City Entrance":
-                                // Handle the "Earning citizenship" location
+                                // "Earning citizenship" location text handling
                                 if (
                                     ScoutedLocationItemData != null &&
                                     ScoutedLocationItemData.TryGetValue(130, out var citizensCardScoutedItemData) &&
@@ -730,7 +742,7 @@ public partial class App : Application
                                 // Basically we want this byte to reflect key in inventory when interacting with terminal and key sprites picked up elsewhere
                                 // This byte is used for multiple things in the subgate which makes it a big pain in the ass to do with MIPS edits. But this seems to win the race condition in the fast game loop, so whatever
                                 bool terminalInteractionBitSet = Memory.ReadBit(Addresses.YellowRefractorTerminal.Address, 7);
-                                bool hasTakenYellowRefractor = Memory.ReadBit(Addresses.HasTakenYellowRefractor.Address, Addresses.HasTakenYellowRefractor.BitNumber ?? 1);
+                                bool hasTakenYellowRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenYellowRefractor);
                                 bool shouldUseTerminalInteractionPath = terminalInteractionBitSet && !hasTakenYellowRefractor;
 
                                 if (shouldUseTerminalInteractionPath) // This bit is flipped when interacting with terminal and also, for a split second(?), when picking up keys. Small sleep seems to get around distinction.
@@ -752,9 +764,9 @@ public partial class App : Application
                                     cardonKey3Data.InventoryAddressData != null
                                 )
                                 {
-                                    bool hasCardonKey1 = Memory.ReadBit(cardonKey1Data.InventoryAddressData.Address, cardonKey1Data.InventoryAddressData.BitNumber ?? 1);
-                                    bool hasCardonKey2 = Memory.ReadBit(cardonKey2Data.InventoryAddressData.Address, cardonKey2Data.InventoryAddressData.BitNumber ?? 0);
-                                    bool hasCardonKey3 = Memory.ReadBit(cardonKey3Data.InventoryAddressData.Address, cardonKey3Data.InventoryAddressData.BitNumber ?? 7);
+                                    bool hasCardonKey1 = MemoryHelpers.ReadAddressDataBit(cardonKey1Data.InventoryAddressData);
+                                    bool hasCardonKey2 = MemoryHelpers.ReadAddressDataBit(cardonKey2Data.InventoryAddressData);
+                                    bool hasCardonKey3 = MemoryHelpers.ReadAddressDataBit(cardonKey3Data.InventoryAddressData);
                                     focusedKeyCount = new[] { hasCardonKey1, hasCardonKey2, hasCardonKey3 }.Count(t => t);
                                 }
                                 else if (
@@ -763,9 +775,9 @@ public partial class App : Application
                                     DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationData)
                                 )
                                 {
-                                    bool hasPickedUpCardonKey1 = Memory.ReadBit(hasPickedUpCardonKey1LocationData.CheckAddressData.Address, hasPickedUpCardonKey1LocationData.CheckAddressData.BitNumber ?? 0);
-                                    bool hasPickedUpCardonKey2 = Memory.ReadBit(hasPickedUpCardonKey2LocationData.CheckAddressData.Address, hasPickedUpCardonKey2LocationData.CheckAddressData.BitNumber ?? 1);
-                                    bool hasPickedUpCardonKey3 = Memory.ReadBit(hasPickedUpCardonKey3LocationData.CheckAddressData.Address, hasPickedUpCardonKey3LocationData.CheckAddressData.BitNumber ?? 2);
+                                    bool hasPickedUpCardonKey1 = MemoryHelpers.ReadAddressDataBit(hasPickedUpCardonKey1LocationData.CheckAddressData);
+                                    bool hasPickedUpCardonKey2 = MemoryHelpers.ReadAddressDataBit(hasPickedUpCardonKey2LocationData.CheckAddressData);
+                                    bool hasPickedUpCardonKey3 = MemoryHelpers.ReadAddressDataBit(hasPickedUpCardonKey3LocationData.CheckAddressData);
                                     focusedKeyCount = new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
                                 }
 
@@ -815,7 +827,7 @@ public partial class App : Application
                 // Pause loop actions if in title menu or save menu
                 if (
                     MemoryHelpers.IsOutOfTitleScreen() &&
-                    !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber ?? 0)
+                    !MemoryHelpers.ReadAddressDataBit(Addresses.SaveDataMenuFlag)
                 )
                 {
                     // Task 1: Read useful memory
@@ -834,8 +846,8 @@ public partial class App : Application
 
                     // Wait until loading and screen wipe flags are false (to avoid racing with the game loading assets), then do stuff
                     if (
-                        !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber ?? 0) &&
-                        !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber ?? 0) &&
+                        !MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag) &&
+                        !MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag) &&
                         DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
                     )
                     {
@@ -847,7 +859,7 @@ public partial class App : Application
                         // Task 2.b: Based on current level, do things like overwrite text, write code
                         if (
                             IsManagingLevelChange &&
-                            !Memory.ReadBit(Addresses.CameraAlteredFlag.Address, Addresses.CameraAlteredFlag.BitNumber ?? 0)
+                            !MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag)
                         )
                         {
                             // Do area-based writes first
@@ -855,10 +867,10 @@ public partial class App : Application
                             {
                                 case "Cardon Forest Sub-Gate":
                                     //MemoryHelpers.WriteCode(Cheats.FastForwardCardonSubgate(CurrentProgressionCounter));
-                                    bool hasInteractedWithYellowTerminalOnce = Memory.ReadBit(Addresses.HasInteractedWithYellowTerminalOnce.Address, Addresses.HasInteractedWithYellowTerminalOnce.BitNumber ?? 4);
+                                    bool hasInteractedWithYellowTerminalOnce = MemoryHelpers.ReadAddressDataBit(Addresses.HasInteractedWithYellowTerminalOnce);
                                     if (!hasInteractedWithYellowTerminalOnce)
                                     {
-                                        Memory.WriteBit(Addresses.HasInteractedWithYellowTerminalOnce.Address, Addresses.HasInteractedWithYellowTerminalOnce.BitNumber ?? 4, true);
+                                        MemoryHelpers.WriteAddressDataBit(Addresses.HasInteractedWithYellowTerminalOnce, true);
                                     }
                                     break;
                                 case "Lake Jyun Sub-Gate":
@@ -871,7 +883,7 @@ public partial class App : Application
                                     // Handle Flutter Fixed <> Flutter Broken distinction
                                     if (DataDicts.ExitDataDict.TryGetValue("Apple Market -> Cardon Forest", out ExitData? exitDataAppleToCardon))
                                     {
-                                        if (Memory.ReadBit(Addresses.HasShownRollRedRefractor.Address, Addresses.HasShownRollRedRefractor.BitNumber ?? 5))
+                                        if (MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor))
                                         {
                                             Memory.WriteByte(exitDataAppleToCardon.TargetAreaAddress, 0x1B);
                                         }
@@ -885,7 +897,7 @@ public partial class App : Application
                                     // Handle Flutter Fixed <> Flutter Broken distinction
                                     if (DataDicts.ExitDataDict.TryGetValue("Outside Cardon Forest Sub-Gate -> Cardon Forest", out ExitData? exitDataSubgateToCardon))
                                     {
-                                        if (Memory.ReadBit(Addresses.HasShownRollRedRefractor.Address, Addresses.HasShownRollRedRefractor.BitNumber ?? 5))
+                                        if (MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor))
                                         {
                                             Memory.WriteByte(exitDataSubgateToCardon.TargetAreaAddress, 0x1B);
                                         }
@@ -899,7 +911,7 @@ public partial class App : Application
                                     // Handle Flutter Fixed <> Flutter Broken distinction. 
                                     if (DataDicts.ExitDataDict.TryGetValue("Underground Ruins, Room 1 (Junk Store Man Area) -> Cardon Forest", out ExitData? exitDataRuins1ToCardon))
                                     {
-                                        if (Memory.ReadBit(Addresses.HasShownRollRedRefractor.Address, Addresses.HasShownRollRedRefractor.BitNumber ?? 5))
+                                        if (MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor))
                                         {
                                             Memory.WriteByte(exitDataRuins1ToCardon.TargetAreaAddress, 0x1B);
                                         }
@@ -910,7 +922,7 @@ public partial class App : Application
                                     }
                                     if (DataDicts.ExitDataDict.TryGetValue("Underground Ruins, Room 2 -> Cardon Forest", out ExitData? exitDataRuins2ToCardon))
                                     {
-                                        if (Memory.ReadBit(Addresses.HasShownRollRedRefractor.Address, Addresses.HasShownRollRedRefractor.BitNumber ?? 5))
+                                        if (MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor))
                                         {
                                             Memory.WriteByte(exitDataRuins2ToCardon.TargetAreaAddress, 0x1B);
                                         }
@@ -945,21 +957,21 @@ public partial class App : Application
                                 case "Downtown: Downtown":
                                     // Handle library pail in case player can't trigger worker dialogue because they already have the Saw
                                     if (
-                                        Memory.ReadBit(Addresses.SawWorkerDialogueIsReady.Address, Addresses.SawWorkerDialogueIsReady.BitNumber ?? 0) ||
-                                        Memory.ReadBit(Addresses.TurnedInSaw.Address, Addresses.TurnedInSaw.BitNumber ?? 5)
+                                        MemoryHelpers.ReadAddressDataBit(Addresses.SawWorkerDialogueIsReady) ||
+                                        MemoryHelpers.ReadAddressDataBit(Addresses.TurnedInSaw)
                                     )
                                     {
-                                        Memory.WriteBit(Addresses.SawPailIsReady.Address, Addresses.SawPailIsReady.BitNumber ?? 7, true);
+                                        MemoryHelpers.WriteAddressDataBit(Addresses.SawPailIsReady, true);
                                     }
                                     // Handle center pail in case player can't enable dialogue chain because they already have the Bag
                                     if (Memory.ReadBit(0xBE3BA, 6))
                                     {
-                                        Memory.WriteBit(Addresses.BagPailIsReady.Address, Addresses.BagPailIsReady.BitNumber ?? 7, true);
+                                        MemoryHelpers.WriteAddressDataBit(Addresses.BagPailIsReady, true);
                                     }
                                     break;
                                 case "Old City: Old City (dogs, no weapons)":
                                     // Prevent warehouse soft-lock by moving (invisible) warehouse double doors z-axis
-                                    if (!Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1))
+                                    if (!MemoryHelpers.ReadAddressDataBit(Addresses.SubCitiesAreSurfaced))
                                     {
                                         Memory.WriteByte(0x1169D4, 0xFF);
                                         Memory.WriteByte(0x1169EB, 0xFF);
@@ -967,8 +979,8 @@ public partial class App : Application
                                     break;
                                 case "Wily's Boat: Outside Boat Shop":
                                     if (
-                                        Memory.ReadBit(Addresses.HasYellowRefractor.Address, Addresses.HasYellowRefractor.BitNumber ?? 7) &&
-                                        !Memory.ReadBit(Addresses.HasCalledRollToFixBoat.Address, Addresses.HasCalledRollToFixBoat.BitNumber ?? 5)
+                                        MemoryHelpers.ReadAddressDataBit(Addresses.HasYellowRefractor) &&
+                                        !MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat)
                                     )
                                     {
                                         MemoryHelpers.WriteCode(Cheats.EnableFixBoatCallRoll());
@@ -982,7 +994,7 @@ public partial class App : Application
 
                         // Task 3: Restore overwritten memory
                         // Task 3.a: If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
-                        if (!Memory.ReadBit(Addresses.TextBoxOpenFlag.Address, Addresses.TextBoxOpenFlag.BitNumber ?? 7))
+                        if (!MemoryHelpers.ReadAddressDataBit(Addresses.TextBoxOpenFlag))
                         {
                             while (TextDataToWriteStack.TryPop(out var overwrittenTextData))
                             {
@@ -994,7 +1006,7 @@ public partial class App : Application
                         if (
                             levelName != "Wily's Boat: Outside Boat Shop" &&
                             Memory.ReadUInt(Addresses.FixBoatCallRollUtil.Address) == 0x00000000 &&
-                            Memory.ReadBit(Addresses.HasCalledRollToFixBoat.Address, Addresses.HasCalledRollToFixBoat.BitNumber ?? 5)
+                            MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat)
                         )
                         {
                             MemoryHelpers.WriteCode(Cheats.RestoreFixBoatCallRoll());
@@ -1004,7 +1016,7 @@ public partial class App : Application
                         if (
                             levelName != "Lake Jyun: On the Lake" &&
                             levelName != "Lake Jyun: Side River" &&
-                            Memory.ReadBit(Addresses.HasDefeatedBalkonGerat.Address, Addresses.HasDefeatedBalkonGerat.BitNumber ?? 2) &&
+                            MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat) &&
                             Memory.ReadUInt(0x0001FBCC) == 0x00000000
                         )
                         {
@@ -1048,7 +1060,7 @@ public partial class App : Application
                                 {
                                     if (locationData.CheckAddressData.BitNumber != null)
                                     {
-                                        Memory.WriteBit(locationData.CheckAddressData.Address, locationData.CheckAddressData.BitNumber ?? 0, true);
+                                        MemoryHelpers.WriteAddressDataBit(locationData.CheckAddressData, true);
                                     }
                                     else
                                     {
@@ -1113,7 +1125,7 @@ public partial class App : Application
                 int goalValue = goalValueObj as int? ?? 0;
                 bool isGoalComplete = (CompletionGoal)goalValue switch
                 {
-                    CompletionGoal.Juno => Memory.ReadBit(Addresses.GoalJunoFlag.Address, Addresses.GoalJunoFlag.BitNumber ?? 0),
+                    CompletionGoal.Juno => MemoryHelpers.ReadAddressDataBit(Addresses.GoalJunoFlag),
                     _ => false
                 };
                 if (isGoalComplete)
@@ -1130,9 +1142,9 @@ public partial class App : Application
     {
         bool[] conditions = [
             MemoryHelpers.IsOutOfTitleScreen(),
-            !Memory.ReadBit(Addresses.ScreenWipeFlag.Address, Addresses.ScreenWipeFlag.BitNumber ?? 0),
-            !Memory.ReadBit(Addresses.LoadingFlag.Address, Addresses.LoadingFlag.BitNumber??0),
-            !Memory.ReadBit(Addresses.SaveDataMenuFlag.Address, Addresses.SaveDataMenuFlag.BitNumber??0)
+            !MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag),
+            !MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag),
+            !MemoryHelpers.ReadAddressDataBit(Addresses.SaveDataMenuFlag)
         ];
         return conditions.All(value => value);
     }
@@ -1164,41 +1176,6 @@ public partial class App : Application
                 TextData overwrittenText = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));
                 TextDataToWriteStack.Push(overwrittenText);
             }
-
-            //if (locationData.Id == 62)
-            //{
-            //    if (
-            //        DataDicts.LocationDataDict.TryGetValue(60, out var hasPickedUpCardonKey1LocationDataCB) &&
-            //        DataDicts.LocationDataDict.TryGetValue(61, out var hasPickedUpCardonKey2LocationDataCB) &&
-            //        DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationDataCB)
-            //    )
-            //    {
-            //        bool hasPickedUpCardonKey1 = Memory.ReadBit(hasPickedUpCardonKey1LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey1LocationDataCB.CheckAddressData.BitNumber ?? 0);
-            //        bool hasPickedUpCardonKey2 = Memory.ReadBit(hasPickedUpCardonKey2LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey2LocationDataCB.CheckAddressData.BitNumber ?? 1);
-            //        bool hasPickedUpCardonKey3 = Memory.ReadBit(hasPickedUpCardonKey3LocationDataCB.CheckAddressData.Address, hasPickedUpCardonKey3LocationDataCB.CheckAddressData.BitNumber ?? 2);
-            //        byte numCardonKeysPickedUp = (byte)new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
-            //        byte yellowRefractorTerminalWriteVal;
-            //        switch (numCardonKeysPickedUp)
-            //        {
-            //            case (0):
-            //                yellowRefractorTerminalWriteVal = 0x00;
-            //                break;
-            //            case (1):
-            //                yellowRefractorTerminalWriteVal = 0x40;
-            //                break;
-            //            case (2):
-            //                yellowRefractorTerminalWriteVal = 0x60;
-            //                break;
-            //            case (3):
-            //                yellowRefractorTerminalWriteVal = 0x30;
-            //                break;
-            //            default:
-            //                yellowRefractorTerminalWriteVal = 0x00;
-            //                break;
-            //        }
-            //        Memory.WriteByte(Addresses.YellowRefractorTerminal.Address, yellowRefractorTerminalWriteVal);
-            //    }
-            //}
         }
         return;
     }

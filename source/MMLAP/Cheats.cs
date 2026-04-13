@@ -49,15 +49,6 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] EnableDoorsOutsideClozerSubgate(byte minProgressionCounter)
-        {
-            // Needs to be written fast during loading screen
-            return
-            [
-                LoadHalfImmediate(0x00100500, MMLEnums.Register.a1, Math.Max((byte)0x08, minProgressionCounter))
-            ];
-        }
-
         public static OpCode[] EnableDoorsCardonForestFlutterBroken(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
@@ -129,15 +120,61 @@ namespace MMLAP
         public static OpCode[] FastForwardWilysBoat(byte minProgressionCounter, bool boatIsFixed, bool hasDefeatedBalkonGerat)
         {
             // This could go in slow loop, but put in fast loop since NPCs spawn on progression check
-            byte fastForwardState = (byte)(hasDefeatedBalkonGerat ? 0x06 : (boatIsFixed ? 0x05 : 0x04));
+            byte fastForwardState = (byte)(hasDefeatedBalkonGerat ? minProgressionCounter : (boatIsFixed ? 0x05 : 0x04));
             return
             [
                 // Loads people into the zone (they were evacuated)
-                LoadHalfImmediate(0x001003A8, MMLEnums.Register.v1, Math.Max(fastForwardState, minProgressionCounter)),
+                LoadHalfImmediate(0x001003A8, MMLEnums.Register.v1, fastForwardState),
                 // 
-                LoadHalfImmediate(0x00100374, MMLEnums.Register.a1, Math.Max(fastForwardState, minProgressionCounter)),
+                LoadHalfImmediate(0x00100374, MMLEnums.Register.a1, fastForwardState),
                 // 
-                LoadHalfImmediate(0x0001FCA8, MMLEnums.Register.v1, Math.Max(fastForwardState, minProgressionCounter))
+                LoadHalfImmediate(0x0001FCA8, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardYassPlains(byte minProgressionCounter, bool hasEarnedClassBLicense, bool HasEarnedClassALicense)
+        {
+            byte fastForwardState = (byte)(HasEarnedClassALicense ? Math.Max((byte)0x02, minProgressionCounter) : (hasEarnedClassBLicense ? 0x01 : 0x00));
+            return
+            [
+                // Original tests v1 = 1
+                LoadHalfImmediate(0x0001FD40, MMLEnums.Register.v1, fastForwardState),
+                // ?
+                LoadHalfImmediate(0x0001FD5C, MMLEnums.Register.v1, fastForwardState),
+                // In internal game loop, loads tanks?
+                LoadHalfImmediate(0x00100754, MMLEnums.Register.v1, fastForwardState),
+                // ?
+                LoadHalfImmediate(0x001006D4, MMLEnums.Register.a1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardClozerWoodsWithBridge(byte minProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense)
+        {
+            byte fastForwardState = (byte)(hasEarnedClassALicense ? Math.Max((byte)0x02, minProgressionCounter) : (hasEarnedClassBLicense ? 0x01 : 0x00));
+            return
+            [
+                // ?
+                LoadHalfImmediate(0x0001FD94, MMLEnums.Register.v1, fastForwardState),
+                // ?
+                LoadHalfImmediate(0x0001FDB0, MMLEnums.Register.v1, fastForwardState),
+                // ?
+                LoadHalfImmediate(0x001002A0, MMLEnums.Register.a1, fastForwardState),
+                // In internal game loop
+                LoadHalfImmediate(0x00100328, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardClozerWoods(byte minProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense)
+        {
+            byte fastForwardState = (byte)(hasEarnedClassALicense ? Math.Max((byte)0x02, minProgressionCounter) : (hasEarnedClassBLicense ? 0x01 : 0x00));
+            return
+            [
+                // ?
+                LoadHalfImmediate(0x0001FB90, MMLEnums.Register.v1, fastForwardState),
+                // In internal game loop
+                LoadHalfImmediate(0x00100534, MMLEnums.Register.v1, fastForwardState),
+                // Enable sub-gate entrance door
+                LoadHalfImmediate(0x00100500, MMLEnums.Register.a1, Math.Max((byte)0x08, minProgressionCounter)),
             ];
         }
 

@@ -1,5 +1,6 @@
 ﻿using Archipelago.Core.Util;
 using MMLAP.Models;
+using Serilog;
 using System.Linq;
 
 namespace MMLAP.Helpers
@@ -36,6 +37,28 @@ namespace MMLAP.Helpers
             {
                 Memory.Write(op.StartAddress, op.Instruction);
             }
+        }
+
+        public static bool ReadAddressDataBit(AddressData addressData)
+        {
+            if (addressData.BitNumber == null)
+            {
+                Log.Logger.Warning($"AddressData at address 0x{addressData.Address:X} has null BitNumber.");
+                return false;
+            }
+
+            return Memory.ReadBit(addressData.Address, addressData.BitNumber.Value);
+        }
+
+        public static bool WriteAddressDataBit(AddressData addressData, bool value)
+        {
+            if (addressData.BitNumber == null)
+            {
+                Log.Logger.Warning($"AddressData at address 0x{addressData.Address:X} has null BitNumber.");
+                return false;
+            }
+
+            return Memory.WriteBit(addressData.Address, addressData.BitNumber.Value, value);
         }
     }
 }

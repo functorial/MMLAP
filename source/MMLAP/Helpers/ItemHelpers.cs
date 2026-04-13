@@ -76,13 +76,13 @@ namespace MMLAP.Helpers
 
         public static void ReceiveSpecialItem(ItemData itemData)
         {
-            _ = Memory.WriteBit(itemData.InventoryAddressData.Address, itemData.InventoryAddressData.BitNumber ?? 0, true);
+            _ = MemoryHelpers.WriteAddressDataBit(itemData.InventoryAddressData, true);
             return;
         }
 
         public static void ReceiveNormalItem(ItemData itemData)
         {
-            _ = Memory.WriteBit(itemData.InventoryAddressData.Address, itemData.InventoryAddressData.BitNumber ?? 0, true);
+            _ = MemoryHelpers.WriteAddressDataBit(itemData.InventoryAddressData, true);
             return;
         }
     }

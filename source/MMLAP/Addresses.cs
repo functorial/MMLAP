@@ -35,17 +35,19 @@ namespace MMLAP
         public static readonly AddressData HasStartedPirateAttackEvent = new(0xBE378, 1, null); // Flipped after talking to roll by the car
         public static readonly AddressData HasStartedBlumebearFight = new(0xBE379, 6, null); // Flipped after policemen cutscene
         public static readonly AddressData HasDefeatedFerdinand = new(0xBE383, 6, null);
-        public static readonly AddressData HasEarnedClassBLicense = new(0xBE37D, 3, null);
-        public static readonly AddressData HasEarnedClassALicense = new(0xBE37A, 4, null);
+        public static readonly AddressData HasEarnedClassBLicense = new(0xBE3EA, 4, null);
+        public static readonly AddressData HasStartedMarlwolf = new(0xBE3EA, 3, null);
+        public static readonly AddressData HasDefeatedMarlwolf = new(0xBE37A, 7, null);
+        public static readonly AddressData HasEarnedClassALicense = new(0xBE3EB, 5, null);
         public static readonly AddressData HasCompletedCardonTankEvent = new(0xBE37E, 7, null);
         public static readonly AddressData HasInteractedWithYellowTerminalOnce = new(0xBE380, 4, null);
         public static readonly AddressData HasTakenYellowRefractor = new(0xBE37B, 1, null);
-        public static readonly AddressData HasYellowRefractor = new(0xBE41D, 7, null); // TODO: Make these locations / item data
+        public static readonly AddressData HasYellowRefractor = new(0xBE41D, 7, null);
         public static readonly AddressData HasCalledRollToFixBoat = new(0xBE37E, 5, null);
         public static readonly AddressData BoatIsFixed = new(0xBE37A, 6, null);
         public static readonly AddressData HasDefeatedBalkonGerat = new(0xBE37B, 2, null);
         public static readonly AddressData HasShownRollRedRefractor = new(0xBE3B2, 6, null);
-        public static readonly AddressData HasRedRefractor = new(0xBE41D, 6, null); // TODO: Make these locations / item data
+        public static readonly AddressData HasRedRefractor = new(0xBE41D, 6, null);
         public static readonly AddressData SubCitiesAreSurfaced = new(0xBE382, 1, null);
         // Utility addresses for codes
         public static readonly AddressData FixBoatCallRollUtil = new(0x5545C, null, 4);
