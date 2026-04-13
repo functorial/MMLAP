@@ -226,6 +226,7 @@ public partial class App : Application
         Log.Logger.Information("Connecting...");
 
         // Refreshing subscriptions
+        ScoutedLocationItemData = null;
         if (APClient != null)
         {
             APClient.Connected -= Client_Connected;
@@ -308,17 +309,20 @@ public partial class App : Application
         APClient.CurrentSession.Locations.CheckedLocationsUpdated += CurrentSession_CheckedLocationsUpdated;
 
         // TODO: parse options
-        GameLocations = DataDicts.BuildLocationList(APClient.Options);
-        GameLocations = GameLocations.Where(x => x != null && !APClient.CurrentSession.Locations.AllLocationsChecked.Contains(x.Id)).ToList();
+        List<ILocation> allGameLocations = DataDicts.BuildLocationList(APClient.Options).Where(x => x != null).ToList();
+        GameLocations = allGameLocations.Where(x => !APClient.CurrentSession.Locations.AllLocationsChecked.Contains(x.Id)).ToList(); // Only unchecked locations?
 
         int slot = APClient.CurrentSession.ConnectionInfo.Slot;
 
         // Scout location item data for future use
-        long[] locationIds = GameLocations.Select(loc => (long)loc.Id).ToArray();
+        long[] locationIds = allGameLocations.Select(loc => (long)loc.Id).ToArray();
         ArchipelagoSession session = APClient.CurrentSession;
         Dictionary<long, ScoutedItemInfo> scoutedLocations = await session.Locations.ScoutLocationsAsync(locationIds);
         ScoutedLocationItemData = scoutedLocations.Keys.ToDictionary(
-            locationId => locationId, locationId => scoutedLocations[locationId].Player.Slot == slot ? DataDicts.ItemDataDict[scoutedLocations[locationId].ItemId] : DataDicts.ItemDataDict[0]
+            locationId => locationId, 
+            locationId => scoutedLocations[locationId].Player.Slot == slot ? 
+                DataDicts.ItemDataDict[scoutedLocations[locationId].ItemId] : 
+                DataDicts.ItemDataDict[0]
         );
 
         // Check apworld version compatibility with host and log results
@@ -402,6 +406,7 @@ public partial class App : Application
         SlowGameLoopTimer?.Enabled = false;
         FastGameLoopTimer?.Enabled = false;
         HasSubmittedGoal = false;
+        ScoutedLocationItemData = null;
         System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
         return;
     }
