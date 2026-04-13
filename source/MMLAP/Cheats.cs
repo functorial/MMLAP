@@ -105,7 +105,7 @@ namespace MMLAP
             return code;
         }
 
-        public static OpCode[] EnableDoorsCityHall(byte minProgressionCounter)
+        public static OpCode[] FastForwardCityHall(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return
@@ -117,7 +117,7 @@ namespace MMLAP
         public static OpCode[] FastForwardWilysBoat(byte minProgressionCounter, bool boatIsFixed, bool hasDefeatedBalkonGerat)
         {
             // This could go in slow loop, but put in fast loop since NPCs spawn on progression check
-            byte fastForwardState = (byte)(hasDefeatedBalkonGerat ? minProgressionCounter : (boatIsFixed ? 0x05 : 0x04));
+            byte fastForwardState = (byte)(hasDefeatedBalkonGerat ? Math.Max((byte)0x06, minProgressionCounter) : (boatIsFixed ? 0x05 : 0x04));
             return
             [
                 // Loads people into the zone (they were evacuated)
@@ -172,6 +172,18 @@ namespace MMLAP
                 LoadHalfImmediate(0x00100534, MMLEnums.Register.v1, fastForwardState),
                 // Enable sub-gate entrance door
                 LoadHalfImmediate(0x00100500, MMLEnums.Register.a1, Math.Max((byte)0x08, minProgressionCounter)),
+            ];
+        }
+
+        public static OpCode[] FastForwardGesselschaft(byte minProgressionCounter, bool hasTakenRedRefractor)
+        {
+            byte fastForwardState = (byte)(!hasTakenRedRefractor ? minProgressionCounter : 0x06);
+            return [
+                LoadHalfImmediate(0x0001FB28, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x00103F20, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x001002F0, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x001034A4, MMLEnums.Register.v1, fastForwardState),
+
             ];
         }
 

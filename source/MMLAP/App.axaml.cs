@@ -623,7 +623,7 @@ public partial class App : Application
                                 MemoryHelpers.WriteCode(Cheats.FastForwardOldCity(CurrentProgressionCounter));
                                 break;
                             case "City Hall":
-                                MemoryHelpers.WriteCode(Cheats.EnableDoorsCityHall(CurrentProgressionCounter));
+                                MemoryHelpers.WriteCode(Cheats.FastForwardCityHall(CurrentProgressionCounter));
                                 break;
                             case "Yass Plains":
                                 bool hasEarnedClassBLicenseYass = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
@@ -654,6 +654,12 @@ public partial class App : Application
                                 break;
                             case "Flutter Takeoff":
                                 MemoryHelpers.WriteCode(Cheats.EnableRedRefractorCutscene());
+                                break;
+                            case "Gesselschaft Interior":
+                                // This is for during Bonne cutscenes
+                                // Player is sent to Amelia if value is low, Wily's if 0x06
+                                bool hasTakenRedRefractorGesselschaft = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor); 
+                                MemoryHelpers.WriteCode(Cheats.FastForwardGesselschaft(CurrentProgressionCounter, hasTakenRedRefractorGesselschaft));
                                 break;
                             default:
                                 break;
