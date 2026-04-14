@@ -5,7 +5,7 @@ namespace MMLAP
     public static class Addresses
     {
         // Player status
-        public static readonly AddressData CurrentLevel = new(0xC356E, null, 2);
+        public static readonly AddressData CurrentLevel = new(0xC1B60, null, 2); // This was previously 0xC356E, but seems to be inaccurate in some cases (like cutscenes)
         public static readonly AddressData CurrentProgressionCounter = new(0xC1B63, null, 1);
         public static readonly AddressData CurrentZenny = new(0xC1B2C, null, 4);
         public static readonly AddressData UnequippedBusterInvStart = new(0xB5604, null, 34);

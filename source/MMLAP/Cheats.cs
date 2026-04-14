@@ -1,6 +1,7 @@
 ﻿using MMLAP.Helpers;
 using MMLAP.Models;
 using System;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MMLAP
 {
@@ -183,7 +184,14 @@ namespace MMLAP
                 LoadHalfImmediate(0x00103F20, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x001002F0, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x001034A4, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
 
+        public static OpCode[] FastForwardFlutterToSubGateCutscene()
+        {
+            byte fastForwardState = (byte)0x07;
+            return [
+                LoadHalfImmediate(0x00100284, MMLEnums.Register.v1, fastForwardState),
             ];
         }
 
