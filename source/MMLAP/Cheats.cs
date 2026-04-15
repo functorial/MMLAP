@@ -19,43 +19,45 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] EnableDoorsInsideJyunSubgate(byte minProgressionCounter)
+        public static OpCode[] FastForwardLakeJyunSubgate()
         {
             // May be written slowly as it is checked during in-game loop
+            int fastForwardState = 0x06;
             return
             [
-                LoadHalfImmediate(0x001003F8, MMLEnums.Register.v1, Math.Max((byte)0x06, minProgressionCounter))
+                LoadHalfImmediate(0x001003F8, MMLEnums.Register.v1, (byte)fastForwardState),
             ];
         }
 
-        public static OpCode[] EnableDoorsInsideClozerSubgate(byte minProgressionCounter)
+        public static OpCode[] FastForwardClozerWoodsSubgate()
         {
-            // May be written slowly as it is checked during in-game loop
+            int fastForwardState = 0x07;
             return
             [
-                LoadHalfImmediate(0x00100574, MMLEnums.Register.v1, Math.Max((byte)0x07, minProgressionCounter))
+                // Enables doors, spawns Flutter NPCs
+                LoadHalfImmediate(0x00100574, MMLEnums.Register.v1, (byte)fastForwardState),
             ];
         }
 
-        public static OpCode[] EnableDoorsOutsideCardonSubgate(byte minProgressionCounter, bool hasDefeatedFerdinand, bool hasCompletedCardonTankEvent)
+        public static OpCode[] FastForwardOutsideCardonSubgate(byte minProgressionCounter, bool hasDefeatedFerdinand, bool hasCompletedCardonTankEvent)
         {
             // Needs to be written fast during loading screen
             int fastForwardState = !hasDefeatedFerdinand ? 0x00 : (hasCompletedCardonTankEvent ? 0x04 : 0x03);
             return
             [
-                LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, Math.Max((byte)0x04, minProgressionCounter))
+                LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, Math.Max((byte)0x04, minProgressionCounter)),
             ];
         }
 
-        public static OpCode[] EnableDoorsCardonForestFlutterBroken(byte minProgressionCounter)
+        public static OpCode[] FastForwardCardonForestFlutterBroken(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return [
-                LoadHalfImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter))
+                LoadHalfImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter)),
             ];
         }
 
-        public static OpCode[] EnableDoorsAppleMarket(byte minProgressionCounter)
+        public static OpCode[] FastForwardAppleMarket(byte minProgressionCounter)
         {
             // Needs to be written fast during loading screen
             return [
@@ -89,7 +91,7 @@ namespace MMLAP
         {
             return 
             [
-                LoadHalfImmediate(0x001007D0, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter))
+                LoadHalfImmediate(0x001007D0, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter)),
             ];
         }
 
@@ -98,10 +100,10 @@ namespace MMLAP
             OpCode[] code = subCitiesAreSurfaced ?
             [
                 LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter)),
-                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter))
+                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter)),
             ] :
             [
-                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, Math.Max((byte)0x02, minProgressionCounter))
+                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, Math.Max((byte)0x02, minProgressionCounter)),
             ];
             return code;
         }
@@ -111,7 +113,7 @@ namespace MMLAP
             // Needs to be written fast during loading screen
             return
             [
-                LoadHalfImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter))
+                LoadHalfImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, minProgressionCounter)),
             ];
         }
 
@@ -191,7 +193,19 @@ namespace MMLAP
         {
             byte fastForwardState = (byte)0x07;
             return [
+                // Fixes cardon -> clozer cutscene and vice versa
                 LoadHalfImmediate(0x00100284, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardOutsideMainGate()//byte currentProgressionCounter, bool hasUnlockedMainGate)
+        {
+            //byte fastForwardState = (byte)(hasUnlockedMainGate ? 0x08 : Math.Min(currentProgressionCounter, 0x07);
+            return [
+                // Prevents unlocking main gate cutscene black screen
+                //LoadHalfImmediate(0x001007E0, MMLEnums.Register.v1, 0x07),
+                // ?
+                LoadHalfImmediate(0x00100420, MMLEnums.Register.v1, 0x07),
             ];
         }
 
@@ -202,7 +216,7 @@ namespace MMLAP
             // This is used by other stuff and can cause soft locks if not rewritten
             // An execution breakpoint here only hits once in this area, so it should be safe as long as it's restored later
             return [
-                Nop(Addresses.FixBoatCallRollUtil.Address)
+                Nop(Addresses.FixBoatCallRollUtil.Address),
             ];
         }
 
@@ -210,7 +224,7 @@ namespace MMLAP
         {
             // This is what is overwritten by EnableFixBoatCallRoll
             return [
-                new OpCode(Addresses.FixBoatCallRollUtil.Address, 0x10400006)  // beq v0, zero, 0x80055478
+                new OpCode(Addresses.FixBoatCallRollUtil.Address, 0x10400006),  // beq v0, zero, 0x80055478
             ];
         }
 
@@ -218,7 +232,7 @@ namespace MMLAP
         {
             return
             [
-                LoadHalfImmediate(0x001001EC, MMLEnums.Register.v1, 0x06)
+                LoadHalfImmediate(0x001001EC, MMLEnums.Register.v1, 0x06),
             ];
         }
 
@@ -229,7 +243,7 @@ namespace MMLAP
                 // Can re-enter flutter
                 LoadHalfImmediate(0x00100A3C, MMLEnums.Register.a1, Math.Max((byte)0x07, minProgressionCounter)),
                 // Flutter is there
-                LoadHalfImmediate(0x00100AE8, MMLEnums.Register.v1, Math.Max((byte)0x07, minProgressionCounter))
+                LoadHalfImmediate(0x00100AE8, MMLEnums.Register.v1, Math.Max((byte)0x07, minProgressionCounter)),
             ];
         }
 
@@ -244,7 +258,7 @@ namespace MMLAP
                 // Lets phase 1 load
                 //LoadHalfImmediate(0x0011674C, MMLEnums.Register.v1, 0x06),
                 // Lets after phase 2 load
-                LoadHalfImmediate(0x00101A70, MMLEnums.Register.v1, 0x01)
+                LoadHalfImmediate(0x00101A70, MMLEnums.Register.v1, 0x01),
             ] :
             [
                 // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
@@ -252,7 +266,7 @@ namespace MMLAP
                 // Prevents crash after starting phase 1
                 LoadHalfImmediate(0x0001FBCC, MMLEnums.Register.v1, 0x05),
                 // Lets phase 1 load
-                LoadHalfImmediate(0x0011674C, MMLEnums.Register.v1, 0x05)
+                LoadHalfImmediate(0x0011674C, MMLEnums.Register.v1, 0x05),
             ];
             return code;
         }

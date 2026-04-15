@@ -185,6 +185,20 @@ namespace MMLAP.Helpers
             return coloredEncoding;
         }
 
+        public static byte[] PlaySound(byte soundCode)
+        {
+            // 0X81 to 0x84 = menu
+            // 0x85 and 0x86 = "you got" sounds
+            // 0x8A = stop all music
+            // 0x8C to 0x9B = megaman
+            // 0x9C = reaverbot sounds
+            // 0x9D to 0x9E = enemy pickups
+            // 0x9F = ledge grab
+            // 0xA0 to 0xA4 = enemies getting hit
+            // 0xD0 = can
+            return [(byte)0x8E, soundCode, (byte)0x00];
+        }
+
         public static byte[] EncodeYouGotItemWindow(ItemData itemData, byte[]? prefix = null, byte[]? suffix = null, uint? guaranteedLength = null)
         {
             prefix ??= [];

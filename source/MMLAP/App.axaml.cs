@@ -581,8 +581,8 @@ public partial class App : Application
                         switch (areaName)
                         {
                             case "Cardon Forest (Flutter Broken)":
-                                LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode EnableDoorsCardonForestFlutterBroken");
-                                MemoryHelpers.WriteCode(Cheats.EnableDoorsCardonForestFlutterBroken(CurrentProgressionCounter));
+                                LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardCardonForestFlutterBroken");
+                                MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterBroken(CurrentProgressionCounter));
                                 break;
                             case "Cardon Forest (Flutter Fixed)":
                                 LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardCardonForestFlutterFixed");
@@ -591,8 +591,8 @@ public partial class App : Application
                             case "Outside Cardon Forest Sub-Gate":
                                 bool hasDefeatedFerdinand = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand);
                                 bool hasCompletedCardonTankEvent = MemoryHelpers.ReadAddressDataBit(Addresses.HasCompletedCardonTankEvent);
-                                LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode EnableDoorsOutsideCardonSubgate");
-                                MemoryHelpers.WriteCode(Cheats.EnableDoorsOutsideCardonSubgate(CurrentProgressionCounter, hasDefeatedFerdinand, hasCompletedCardonTankEvent));
+                                LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardOutsideCardonSubgate");
+                                MemoryHelpers.WriteCode(Cheats.FastForwardOutsideCardonSubgate(CurrentProgressionCounter, hasDefeatedFerdinand, hasCompletedCardonTankEvent));
                                 break;
                             case "Cardon Forest Sub-Gate":
                                 bool hasTakenYellowRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenYellowRefractor);
@@ -627,9 +627,17 @@ public partial class App : Application
                                     Memory.WriteByte(0xA3CF0, 0x00); // Sparkles 
                                 }
                                 break;
+                            case "Clozer Woods Sub-Gate":
+                                LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode EnableDoorsInsideClozerSubgate");
+                                MemoryHelpers.WriteCode(Cheats.FastForwardClozerWoodsSubgate());
+                                break;
+                            case "Outside Main Gate":
+                                LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardOutsideMainGate");
+                                MemoryHelpers.WriteCode(Cheats.FastForwardOutsideMainGate());
+                                break;
                             case "Apple Market":
-                                LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode EnableDoorsAppleMarket");
-                                MemoryHelpers.WriteCode(Cheats.EnableDoorsAppleMarket(CurrentProgressionCounter));
+                                LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardAppleMarket");
+                                MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(CurrentProgressionCounter));
                                 break;
                             case "Downtown":
                                 bool subCitiesAreSurfacedDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.SubCitiesAreSurfaced);
@@ -692,6 +700,10 @@ public partial class App : Application
                                 bool hasTakenRedRefractorGesselschaft = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor); 
                                 LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardGesselschaft");
                                 MemoryHelpers.WriteCode(Cheats.FastForwardGesselschaft(CurrentProgressionCounter, hasTakenRedRefractorGesselschaft));
+                                break;
+                            case "Flutter To Sub-Gate Cutscene":
+                                Log.Logger.Information("Applying Flutter to Sub-Gate Cutscene fast-forward.");
+                                MemoryHelpers.WriteCode(Cheats.FastForwardFlutterToSubGateCutscene());
                                 break;
                             default:
                                 break;
@@ -771,10 +783,6 @@ public partial class App : Application
                                     LogLoopWrite("FastGameLoop", $"Memory.WriteByteArray 0x{(citizensCardLocationData.TextBoxStartAddress ?? 0):X}");
                                     Memory.WriteByteArray(citizensCardLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                                 }
-                                break;
-                            case "Flutter To Sub-Gate Cutscene: Cutscene":
-                                Log.Logger.Information("Applying Flutter to Sub-Gate Cutscene fast-forward.");
-                                MemoryHelpers.WriteCode(Cheats.FastForwardFlutterToSubGateCutscene());
                                 break;
                             default:
                                 break;
@@ -927,12 +935,8 @@ public partial class App : Application
                                         }
                                         break;
                                     case "Lake Jyun Sub-Gate":
-                                        LogLoopWrite("SlowGameLoop", "MemoryHelpers.WriteCode EnableDoorsInsideJyunSubgate");
-                                        MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideJyunSubgate(CurrentProgressionCounter));
-                                        break;
-                                    case "Clozer Woods Sub-Gate":
-                                        LogLoopWrite("SlowGameLoop", "MemoryHelpers.WriteCode EnableDoorsInsideClozerSubgate");
-                                        MemoryHelpers.WriteCode(Cheats.EnableDoorsInsideClozerSubgate(CurrentProgressionCounter));
+                                        LogLoopWrite("SlowGameLoop", "MemoryHelpers.WriteCode FastForwardLakeJyunSubgate");
+                                        MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyunSubgate());
                                         break;
                                     case "Apple Market":
                                         // Handle Flutter Fixed <> Flutter Broken distinction

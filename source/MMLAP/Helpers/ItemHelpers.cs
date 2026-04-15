@@ -65,10 +65,10 @@ namespace MMLAP.Helpers
                     return;
                 }
             }
-            if (busterInvSlotWrite != null)
+            if (busterInvSlotWrite != null && itemData.ItemCode != null)
             {
                 // Offset of 1 is intended for buster part code conversion
-                Memory.Write(busterInvSlotWrite??0, (itemData.ItemCode??-1) + 1);
+                Memory.WriteByte(busterInvSlotWrite??0, itemData.ItemCode.Value);
             }
             // If buster inventory is full then do nothing
             return;
