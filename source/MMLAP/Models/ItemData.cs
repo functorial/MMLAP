@@ -5,8 +5,7 @@
         string name,
         uint quantity = 1,
         byte? itemCode = null,
-        AddressData? inventoryAddressData = null,
-        bool isFiller = false
+        AddressData? inventoryAddressData = null
     )
     {
         public MMLEnums.ItemCategory Category { get; set; } = category;
@@ -14,6 +13,5 @@
         public uint Quantity { get; set; } = quantity;
         public byte? ItemCode { get; set; } = itemCode;
         public AddressData? InventoryAddressData { get; set; } = inventoryAddressData;
-        public bool IsFiller { get; set; } = isFiller;
     }
 }

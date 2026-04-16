@@ -198,14 +198,15 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardOutsideMainGate()//byte currentProgressionCounter, bool hasUnlockedMainGate)
+        public static OpCode[] FastForwardOutsideMainGate(byte currentProgressionCounter, bool hasUnlockedMainGate, bool hasActivatedEmergencySystem, bool hasWatchedMainGateOpenCutscene)
         {
-            //byte fastForwardState = (byte)(hasUnlockedMainGate ? 0x08 : Math.Min(currentProgressionCounter, 0x07);
+            bool isInCutscene = hasActivatedEmergencySystem && !hasWatchedMainGateOpenCutscene;
+            byte fastForwardState = (byte)(isInCutscene ? 0x07 : hasUnlockedMainGate ? 0x08 : Math.Min(currentProgressionCounter, (byte)0x07));
             return [
                 // Prevents unlocking main gate cutscene black screen
-                //LoadHalfImmediate(0x001007E0, MMLEnums.Register.v1, 0x07),
+                LoadHalfImmediate(0x00100420, MMLEnums.Register.v1, fastForwardState),
                 // ?
-                LoadHalfImmediate(0x00100420, MMLEnums.Register.v1, 0x07),
+                LoadHalfImmediate(0x001007E0, MMLEnums.Register.v1, fastForwardState),
             ];
         }
 

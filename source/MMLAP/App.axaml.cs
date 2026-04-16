@@ -632,8 +632,11 @@ public partial class App : Application
                                 MemoryHelpers.WriteCode(Cheats.FastForwardClozerWoodsSubgate());
                                 break;
                             case "Outside Main Gate":
-                                LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardOutsideMainGate");
-                                MemoryHelpers.WriteCode(Cheats.FastForwardOutsideMainGate());
+                                bool hasUnlockedMainGate = ItemHelpers.HasReceivedItem(0x0001);
+                                bool hasActivatedEmergencySystem = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
+                                bool hasWatchedMainGateOpenCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedMainGateOpenCutscene);
+                                LogLoopWrite("FastGameLoop", $"MemoryHelpers.WriteCode FastForwardOutsideMainGate");
+                                MemoryHelpers.WriteCode(Cheats.FastForwardOutsideMainGate(CurrentProgressionCounter, hasUnlockedMainGate, hasActivatedEmergencySystem, hasWatchedMainGateOpenCutscene));
                                 break;
                             case "Apple Market":
                                 LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardAppleMarket");

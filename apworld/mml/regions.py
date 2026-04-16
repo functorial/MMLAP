@@ -1225,10 +1225,20 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Clozer Woods Sub-Gate - Control Room": 
             GameRegionData(
                 [
-
+                    
                 ],
                 [
-                    ExitData("Clozer Woods Sub-Gate - Entrance Elevator Room")
+                    ExitData("Clozer Woods Sub-Gate - Entrance Elevator Room"),
+                    ExitData("Clozer Woods Sub-Gate - Control Room (Activate The Emergency System)", has_clozer_woods_keys()),
+                ]
+            ),
+        "Clozer Woods Sub-Gate - Control Room (Activate The Emergency System)": 
+            GameRegionData(
+                [
+                    "Activate the emergency system",
+                ],
+                [
+                    ExitData("Clozer Woods Sub-Gate - Control Room"),
                 ]
             ),
         "Clozer Woods Sub-Gate - Sharukurusu Ambush": 

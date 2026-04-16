@@ -15,6 +15,7 @@ class ItemData(NamedTuple):
     itemNameGroup: str
 
 ITEM_DATA_DICT = {
+    "Unlock Main Gate"                  : ItemData(0x0001, ItemClassification.progression,                             None                        ),
     "Nothing"                           : ItemData(0x00FF, ItemClassification.filler,                                  None                        ),
     "Power Raiser"                      : ItemData(0x020D, ItemClassification.filler,                                  None                        ),
     "Buster Max"                        : ItemData(0x0210, ItemClassification.useful,                                  None                        ), # strong buster part -> useful

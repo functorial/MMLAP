@@ -1,10 +1,16 @@
 ﻿using Archipelago.Core.Util;
 using MMLAP.Models;
+using System.Linq;
 
 namespace MMLAP.Helpers
 {
     public class ItemHelpers
     {
+        public static bool HasReceivedItem(int itemId)
+        {
+            return App.APClient?.CurrentSession?.Items?.AllItemsReceived.Any(item => item.ItemId == itemId) ?? false;
+        }
+
         public static void ReceiveGenericItem(ItemData itemData)
         {
             switch (itemData.Category)

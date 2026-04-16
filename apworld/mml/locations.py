@@ -156,6 +156,7 @@ LOCATION_DATA_DICT = {
     "Earn citizenship in Kattelox City"                             : LocationData(130, LocationCategory.QUEST,     False),
     "Earn the Class B License"                                      : LocationData(131, LocationCategory.QUEST,     False),
     "Earn the Class A License"                                      : LocationData(132, LocationCategory.QUEST,     False),
+    "Activate the emergency system"                                 : LocationData(133, LocationCategory.QUEST,     False),
     # Goals
     "Juno Defeated"                                                 : LocationData(999, LocationCategory.COMBAT,    False),
 }

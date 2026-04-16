@@ -9,7 +9,8 @@
             Buster = 2,
             Special = 3,
             Normal = 4,
-            AP = 5
+            AP = 5,
+            Cheat = 6,
         }
 
         public enum LocationCategory
@@ -18,12 +19,12 @@
             Hole = 1,
             Combat = 2,
             Quest = 3,
-            Pickup = 4
+            Pickup = 4,
         }
 
         public enum CompletionGoal
         {
-            Juno = 0
+            Juno = 0,
         }
 
         public enum Register : byte
@@ -59,8 +60,7 @@
             gp   = 0x1C,
             sp   = 0x1D,
             fp   = 0x1E,
-            ra   = 0x1F
-
+            ra   = 0x1F,
         }
     }
 }
