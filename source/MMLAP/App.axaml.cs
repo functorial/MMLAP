@@ -643,19 +643,29 @@ public partial class App : Application
                                 MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(CurrentProgressionCounter));
                                 break;
                             case "Downtown":
-                                bool subCitiesAreSurfacedDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.SubCitiesAreSurfaced);
+                                bool hasUnlockedSubCitiesDowntown = ItemHelpers.HasReceivedItem(0x0002);
                                 LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardDowntown");
-                                MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(CurrentProgressionCounter, subCitiesAreSurfacedDowntown));
+                                MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(CurrentProgressionCounter, hasUnlockedSubCitiesDowntown));
                                 break;
                             case "Uptown":
-                                bool subCitiesAreSurfacedUptown = MemoryHelpers.ReadAddressDataBit(Addresses.SubCitiesAreSurfaced);
+                                bool hasUnlockedSubCitiesUptown = ItemHelpers.HasReceivedItem(0x0002);
                                 LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardUptown");
-                                MemoryHelpers.WriteCode(Cheats.FastForwardUptown(CurrentProgressionCounter, subCitiesAreSurfacedUptown));
+                                MemoryHelpers.WriteCode(Cheats.FastForwardUptown(CurrentProgressionCounter, hasUnlockedSubCitiesUptown));
                                 break;
                             case "Old City":
-                                //bool subCitiesAreSurfacedOldCity = Memory.ReadBit(Addresses.SubCitiesAreSurfaced.Address, Addresses.SubCitiesAreSurfaced.BitNumber ?? 1);
+                                //bool HasUnlockedSubCitiesOldCity = Memory.ReadBit(Addresses.HasUnlockedSubCities.Address, Addresses.HasUnlockedSubCities.BitNumber ?? 1);
                                 LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardOldCity");
                                 MemoryHelpers.WriteCode(Cheats.FastForwardOldCity(CurrentProgressionCounter));
+                                Log.Logger.Information("Asdf");
+                                // TODO: Actually delete sub city entrance model if not received unlock sub-cities
+                                if (
+                                    !ItemHelpers.HasReceivedItem(0x0002) &&
+                                    DataDicts.ExitDataDict.TryGetValue("Old City (dogs, no weapons) -> Watcher Sub-City", out var watcherSubCityExit)
+                                )
+                                {
+                                    Log.Logger.Information("Asdf");
+                                    _ = watcherSubCityExit.LockExit();
+                                }
                                 break;
                             case "City Hall":
                                 LogLoopWrite("FastGameLoop", "MemoryHelpers.WriteCode FastForwardCityHall");
@@ -707,6 +717,9 @@ public partial class App : Application
                             case "Flutter To Sub-Gate Cutscene":
                                 Log.Logger.Information("Applying Flutter to Sub-Gate Cutscene fast-forward.");
                                 MemoryHelpers.WriteCode(Cheats.FastForwardFlutterToSubGateCutscene());
+                                break;
+                            case "Main Gate":
+                                MemoryHelpers.WriteCode(Cheats.FastForwardMainGate(CurrentProgressionCounter));
                                 break;
                             default:
                                 break;
@@ -1043,14 +1056,14 @@ public partial class App : Application
                                         }
                                         break;
                                     case "Old City: Old City (dogs, no weapons)":
-                                        // Prevent warehouse soft-lock by moving (invisible) warehouse double doors z-axis
-                                        if (!MemoryHelpers.ReadAddressDataBit(Addresses.SubCitiesAreSurfaced))
-                                        {
-                                            LogLoopWrite("SlowGameLoop", "Memory.WriteByte 0x1169D4 = 0xFF");
-                                            Memory.WriteByte(0x1169D4, 0xFF);
-                                            LogLoopWrite("SlowGameLoop", "Memory.WriteByte 0x1169EB = 0xFF");
-                                            Memory.WriteByte(0x1169EB, 0xFF);
-                                        }
+                                        //if (
+                                        //    !ItemHelpers.HasReceivedItem(0x0002) &&
+                                        //    DataDicts.ExitDataDict.TryGetValue("Old City (dogs, no weapons) -> Watcher Sub-City", out var watcherSubCityExit)
+
+                                        //)
+                                        //{
+                                        //    _ = watcherSubCityExit.LockExit();
+                                        //}
                                         break;
                                     case "Wily's Boat: Outside Boat Shop":
                                         if (

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Archipelago.Core.Util;
 
 namespace MMLAP.Models
 {
@@ -30,5 +31,17 @@ namespace MMLAP.Models
         public uint TargetCoordinatesAddress {get; set;} = targetCoordinatesAddress;
         public bool IsDoor {get; set;} = isDoor;
         
+        public bool LockExit()
+        {
+            // TODO: Change for non-standard exits e.g. sub-cities, elevators
+            if (!IsDoor)
+            {
+                return false;
+            }
+            uint sourceZCoordinateAddress = TargetCoordinatesAddress - 5; // xx xx zz zz yy yy aa aa *XX XX ZZ ZZ YY YY AA AA
+            byte sourceZCoordinateValue = Memory.ReadByte(sourceZCoordinateAddress);
+            Memory.WriteByte(sourceZCoordinateAddress, (byte)(sourceZCoordinateValue + 0x80));
+            return true;
+        }
     }
 }

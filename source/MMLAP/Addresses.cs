@@ -51,7 +51,7 @@ namespace MMLAP
         public static readonly AddressData HasRedRefractor = new(0xBE41D, 6, null);
         public static readonly AddressData HasActivatedEmergencySystem = new(0xBE380, 3, null);
         public static readonly AddressData HasWatchedMainGateOpenCutscene = new(0xBE3EE, 4, null);
-        public static readonly AddressData SubCitiesAreSurfaced = new(0xBE382, 1, null);
+        public static readonly AddressData HasActivatedUnlockSubCities = new(0xBE382, 1, null);
         // Utility addresses for codes
         public static readonly AddressData FixBoatCallRollUtil = new(0x5545C, null, 4);
         public static readonly AddressData YellowRefractorTerminal = new(0xBE439, null, 1);

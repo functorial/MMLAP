@@ -65,26 +65,18 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardDowntown(byte minProgressionCounter, bool subCitiesAreSurfaced)
+        public static OpCode[] FastForwardDowntown(byte currentProgressionCounter, bool hasUnlockedSubCities)
         {
             // Needs to be written fast during loading screen
-            OpCode[] code = subCitiesAreSurfaced ?
-            [
+            byte fastForwardState = hasUnlockedSubCities ? Math.Max((byte)0x09, currentProgressionCounter) : Math.Min((byte)0x08, Math.Max((byte)0x02, currentProgressionCounter)); 
+            return [
                 // Enable Sub-City
-                LoadHalfImmediate(0x00106BB0, MMLEnums.Register.v0, 0x09),
+                LoadHalfImmediate(0x00106BB0, MMLEnums.Register.v0, fastForwardState),
                 // Open doors
-                LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, Math.Max((byte)0x09, minProgressionCounter)),
+                LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, fastForwardState),
                 // Opens doors during Tron / dog scene
-                LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, Math.Max((byte)0x09, minProgressionCounter)),
-            ] :
-            [
-                // Open doors
-                LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, Math.Max((byte)0x02, minProgressionCounter)),
-                // Opens doors during Tron / dog scene
-                LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, Math.Max((byte)0x02, minProgressionCounter)), 
-
+                LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, fastForwardState), 
             ];
-            return code;
         }
 
         public static OpCode[] FastForwardOldCity(byte minProgressionCounter)
@@ -95,17 +87,15 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardUptown(byte minProgressionCounter, bool subCitiesAreSurfaced)
+        public static OpCode[] FastForwardUptown(byte currentProgressionCounter, bool hasUnlockedSubCities)
         {
-            OpCode[] code = subCitiesAreSurfaced ?
+            // Needs to be written fast during loading screen
+            byte fastForwardState = hasUnlockedSubCities ? Math.Max((byte)0x09, currentProgressionCounter) : Math.Min((byte)0x08, Math.Max((byte)0x02, currentProgressionCounter));
+            return
             [
-                LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter)),
-                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, Math.Max((byte)0x09, minProgressionCounter)),
-            ] :
-            [
-                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, Math.Max((byte)0x02, minProgressionCounter)),
+                LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardState),
             ];
-            return code;
         }
 
         public static OpCode[] FastForwardCityHall(byte minProgressionCounter)
@@ -201,12 +191,25 @@ namespace MMLAP
         public static OpCode[] FastForwardOutsideMainGate(byte currentProgressionCounter, bool hasUnlockedMainGate, bool hasActivatedEmergencySystem, bool hasWatchedMainGateOpenCutscene)
         {
             bool isInCutscene = hasActivatedEmergencySystem && !hasWatchedMainGateOpenCutscene;
-            byte fastForwardState = (byte)(isInCutscene ? 0x07 : hasUnlockedMainGate ? 0x08 : Math.Min(currentProgressionCounter, (byte)0x07));
+            byte fastForwardState = (byte)(isInCutscene ? 0x07 : hasUnlockedMainGate ? Math.Max(currentProgressionCounter, (byte)0x08) : Math.Min(currentProgressionCounter, (byte)0x07));
             return [
                 // Prevents unlocking main gate cutscene black screen
                 LoadHalfImmediate(0x00100420, MMLEnums.Register.v1, fastForwardState),
                 // ?
                 LoadHalfImmediate(0x001007E0, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardMainGate(byte currentProgressionCounter)
+        {
+            byte fastForwardState = Math.Max(currentProgressionCounter, (byte)0x08);
+            return [
+                // Unlock standard doors
+                LoadHalfImmediate(0x00100990, MMLEnums.Register.v1, fastForwardState),
+                // Disables control panel
+                //LoadHalfImmediate(0x0012B9B8, MMLEnums.Register.v0, 0x01),
+                // Opens door in control panel room
+                LoadHalfImmediate(0x00126798, MMLEnums.Register.v0, 0x01),
             ];
         }
 

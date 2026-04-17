@@ -1711,7 +1711,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Main Gate - (Command Terminal)": 
             GameRegionData(
                 [
-                    
+                    "Activate Unlock Sub-Cities"
                 ],
                 [
                     ExitData("Main Gate - (Entrance)"),
