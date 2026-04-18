@@ -74,7 +74,7 @@ namespace MMLAP.Helpers
             if (busterInvSlotWrite != null && itemData.ItemCode != null)
             {
                 // Offset of 1 is intended for buster part code conversion
-                Memory.WriteByte(busterInvSlotWrite??0, itemData.ItemCode.Value);
+                Memory.WriteByte(busterInvSlotWrite.Value, (byte)(itemData.ItemCode.Value + 1));
             }
             // If buster inventory is full then do nothing
             return;

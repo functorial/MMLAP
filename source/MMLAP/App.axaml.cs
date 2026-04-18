@@ -623,7 +623,6 @@ public partial class App : Application
                 APClient.CurrentSession != null
             )
             {
-
                 // Pause these loop actions if in title menu or save menu
                 if (
                     MemoryHelpers.IsOutOfTitleScreen() &&
@@ -653,25 +652,17 @@ public partial class App : Application
                         string levelName = currentLevelData.AreaName + ": " + currentLevelData.RoomName;
 
                         // Task 2.b: Based on current level, do things like overwrite text, write code that isnt needed during loading, and locking doors
-                        if (IsManagingLevelChange)
+                        if (
+                            IsManagingLevelChange &&
+                            !MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag) &&
+                            !MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag) &&
+                            !MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag)
+                        )
                         {
-
-                            // Wait until loading and screen wipe flags are false (to avoid racing with the game loading assets), then do stuff
-                            if (
-                                !MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag) &&
-                                !MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag) &&
-                                !MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag)
-                            )
-                            {
-                                // Lock doors based on items received
-                                LoopHelpers.HandleAreaExitLocks(currentLevelData);
-                                LoopHelpers.HandleFlutterFixedBrokenDistinction(currentLevelData);
-                                LoopHelpers.HandleOddPails(currentLevelData);
-
-                                // Do area-based writes first
-                                // Do room-based writes second
-                            }
-
+                            // Lock doors based on items received
+                            LoopHelpers.HandleFlutterFixedBrokenDistinction(currentLevelData);
+                            LoopHelpers.HandleAreaExitLocks(currentLevelData);
+                            LoopHelpers.HandleOddPails(currentLevelData);
                             IsManagingLevelChange = false;
                         }
                         // Task 3: Do things regardless of level change

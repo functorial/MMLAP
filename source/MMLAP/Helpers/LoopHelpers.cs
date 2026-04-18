@@ -349,7 +349,7 @@ namespace MMLAP.Helpers
                     {
                         MemoryHelpers.WriteAddressDataBit(Addresses.BagPailIsReady, true);
                     }
-                    break
+                    break;
 
                 default:
                     break;
@@ -397,61 +397,192 @@ namespace MMLAP.Helpers
 
         public static void HandleAreaExitLocks(LevelData currentLevelData)
         {
+            HandleCitizensCardExitLocks(currentLevelData);
+            HandleClassBLicenseExitLocks(currentLevelData);
+            HandleClassALicenseExitLocks(currentLevelData);
+            HandleMainGateExitLocks(currentLevelData);
+            HandleSubCityUnlockExitLocks(currentLevelData);
+        }
+
+        private static void TryLockExitWithDebug(string exitName, ExitData exitData)
+        {
+            bool didLock = exitData.LockExit();
+            if (!didLock)
+            {
+                Log.Logger.Information($"LockExit failed for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+            }
+            else
+            {
+                Log.Logger.Information($"LockExit succeeded for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+            }
+
+        }
+
+        private static void TryLockExitByName(string exitName)
+        {
+            if (!DataDicts.ExitDataDict.TryGetValue(exitName, out var exitData))
+            {
+                Log.Logger.Information($"LockExit skipped because exit '{exitName}' was not found in ExitDataDict.");
+                return;
+            }
+
+            TryLockExitWithDebug(exitName, exitData);
+        }
+
+        public static void HandleCitizensCardExitLocks(LevelData currentLevelData)
+        {
+            if (ItemHelpers.HasReceivedItem(0x022A))
+            {
+                return;
+            }
+
             switch (currentLevelData.AreaName)
             {
                 case "Apple Market":
-                    // Lock door to Downtown if haven't received Citizen's Card
-                    if (
-                        !ItemHelpers.HasReceivedItem(0x022A) &&
-                        DataDicts.ExitDataDict.TryGetValue("Apple Market -> Downtown", out var exitDataAppleToDowntown)
-                    )
-                    {
-                        _ = exitDataAppleToDowntown.LockExit();
-                    }
+                    TryLockExitByName("Apple Market -> Downtown");
                     break;
 
                 case "Yass Plains":
-                    // Lock door to City Hall if haven't received Citizen's Card
-                    if (
-                        !ItemHelpers.HasReceivedItem(0x022A) &&
-                        DataDicts.ExitDataDict.TryGetValue("Clozer Woods With Bridge -> Underground Ruins", out var exitDataYassToCity)
-                    )
-                    {
-                        _ = exitDataYassToCity.LockExit();
-                    }
+                    TryLockExitByName("Clozer Woods With Bridge -> Underground Ruins");
                     break;
 
                 case "Outside Main Gate":
-                    // Lock door to Old City if haven't received Citizen's Card
-                    if (
-                        !ItemHelpers.HasReceivedItem(0x022A) &&
-                        DataDicts.ExitDataDict.TryGetValue("Outside Main Gate -> Old City", out var exitDataMainGateToOldCity)
-                    )
-                    {
-                        _ = exitDataMainGateToOldCity.LockExit();
-                    }
+                    TryLockExitByName("Outside Main Gate -> Old City");
                     break;
 
+                case "Wily's Boat":
+                    TryLockExitByName("Wily's Boat, Outside (Walkway) -> Uptown");
+                    break;
+
+                case "Underground ruins":
+                    TryLockExitByName("Underground Ruins, Room 3 (Sewer) -> Downtown");
+                    TryLockExitByName("Underground Ruins, Room 4  -> Old City");
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        public static void HandleClassBLicenseExitLocks(LevelData currentLevelData)
+        {
+            if (ItemHelpers.HasReceivedItem(0x022C))
+            {
+                return;
+            }
+
+            switch (currentLevelData.AreaName)
+            {
                 case "Clozer Woods With Bridge":
-                    // Lock door to ruins if haven't received Class B License
-                    if (
-                        !ItemHelpers.HasReceivedItem(0x022C) &&
-                        DataDicts.ExitDataDict.TryGetValue("\"Yass Plains -> City Hall\"", out var exitDataClozerToRuins)
-                    )
-                    {
-                        _ = exitDataClozerToRuins.LockExit();
-                    }
+                    TryLockExitByName("Yass Plains -> City Hall");
                     break;
 
+                case "Cardon Forest (Flutter Broken)":
+                    TryLockExitByName("Cardon Forest North (Flutter Broken) -> Underground Ruins, Room 1");
+                    //if (DataDicts.ExitDataDict.TryGetValue("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2", out var exitDataCardonForestBrokenToRuins2))
+                    //{
+                    //    _ = exitDataCardonForestBrokenToRuins2.LockExit();
+                    //}
+                    break;
+
+                case "Cardon Forest (Flutter Fixed)":
+                    TryLockExitByName("Cardon Forest North (Flutter Fixed) -> Underground Ruins, Room 1");
+                    //TryLockExitByName("Cardon Forest South (Flutter Fixed) -> Underground Ruins, Room 2");
+                    break;
+
+                //case "Old City":
+                //    TryLockExitByName("Old City -> Underground Ruins");
+                //    TryLockExitByName("Old City (dogs, no weapons) -> Underground Ruins, to Main Gate");
+                //    break;
+
+                case "Cardon Forest Sub-Gate":
+                    TryLockExitByName("Cardon Forest Sub-Gate, Room 1 (N) -> Underground Ruins");
+                    break;
+
+                case "Lake Jyun Sub-Gate":
+                    TryLockExitByName("Lake Jyun Sub-Gate, Room 4 (W) -> Underground Ruins (NW)");
+                    TryLockExitByName("Lake Jyun Sub-Gate, Room 4 (E) -> Underground Ruins (NE)");
+                    break;
+
+                case "Clozer Woods Sub-Gate":
+                    TryLockExitByName("Clozer Woods Sub-Gate, Room 10 -> Underground Ruins");
+                    break;
+
+                case "Main Gate":
+                    TryLockExitByName("East Door Console Room -> Underground Ruins, NE Area 2");
+                    break;
+
+                case "Underground Ruins":
+                    TryLockExitByName("Underground Ruins, Room 1 (Junk Store Man Area) -> Room 2");
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        public static void HandleClassALicenseExitLocks(LevelData currentLevelData)
+        {
+            if (ItemHelpers.HasReceivedItem(0x022B))
+            {
+                return;
+            }
+            switch (currentLevelData.AreaName)
+            {
+                case "Outside Cardon Forest Sub-Gate":
+                    TryLockExitByName("Outside Cardon Forest Sub-Gate -> Cardon Forest Sub-Gate");
+                    break;
+
+                case "Lake Jyun":
+                    TryLockExitByName("On the Lake -> Lake Jyun Sub-Gate");
+                    break;
+
+                case "Clozer Woods Sub-Gate":
+                    TryLockExitByName("Flutter Lobby -> Clozer Woods Sub-Gate");
+                    break;
+
+                case "Underground Ruins":
+                    TryLockExitByName("Underground Ruins, Room 2 -> Cardon Forest Sub-gate");
+                    TryLockExitByName("Underground Ruins, Room 7 -> Lake Jyun Sub-Gate (W)");
+                    TryLockExitByName("Underground Ruins, Room 7 -> Lake Jyun Sub-Gate (E)");
+                    TryLockExitByName("Underground Ruins, Room 9 -> Clozer Woods Sub-Gate");
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        // The outside main gate to main gate is handled in the fast foward cheat. Little room from Bruno is ignored as well.
+        public static void HandleMainGateExitLocks(LevelData currentLevelData)
+        {
+            if (ItemHelpers.HasReceivedItem(0x0001))
+            {
+                return;
+            }
+            switch (currentLevelData.AreaName)
+            {
+                case "Underground Ruins":
+                    TryLockExitByName("Underground Ruins, Room 2 -> Main Gate");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // The Downtown and Uptown sub-city locks are done in the fast forward cheats by just preventing the sub-city to raise up
+        public static void HandleSubCityUnlockExitLocks(LevelData currentLevelData)
+        {
+            if (ItemHelpers.HasReceivedItem(0x0002))
+            {
+                return;
+            }
+
+            switch (currentLevelData.AreaName)
+            {
                 case "Old City":
                     // TODO: Actually delete sub city entrance model if not received unlock sub-cities
-                    if (
-                        !ItemHelpers.HasReceivedItem(0x0002) &&
-                        DataDicts.ExitDataDict.TryGetValue("Old City (dogs, no weapons) -> Watcher Sub-City", out var watcherSubCityExit)
-                    )
-                    {
-                        _ = watcherSubCityExit.LockExit();
-                    }
+                    TryLockExitByName("Old City (dogs, no weapons) -> Watcher Sub-City");
                     break;
 
                 default:
