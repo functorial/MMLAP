@@ -150,7 +150,7 @@ namespace MMLAP.Helpers
             return res;
         }
 
-        public static byte[] EncodeSimpleString(String text)
+        public static byte[] EncodeSimpleString(string text)
         {
             char[] inArray = text.ToCharArray();
             byte[] outArray = new byte[inArray.Length];

@@ -110,6 +110,18 @@ namespace MMLAP.Helpers
                     }
                     break;
 
+                case "Cardon Forest (Flutter Fixed): Crash Site":
+                    // Prevent starting ending cutscene at Roll if Goal isn't completed
+                    List<byte[]> rollInitiateEndingCutsceneTextArrs = [
+                        TextHelpers.EncodeSimpleString("Have you completed your\n"),
+                        TextHelpers.AddTextColor(TextHelpers.EncodeSimpleString("Archipelago Goal"), TextHelpers.textColorRed),
+                        TextHelpers.EncodeSimpleString(" yet,\nMegaMan?"),
+                        TextHelpers.endWindow,
+                    ];
+                    byte[] rollInitiateEndingCutsceneText = TextHelpers.ConcatArrayList(rollInitiateEndingCutsceneTextArrs);
+                    Memory.WriteByteArray(0x00154737, rollInitiateEndingCutsceneText);
+                    break;
+
                 default:
                     break;
             }
@@ -126,7 +138,8 @@ namespace MMLAP.Helpers
                     break;
 
                 case "Cardon Forest (Flutter Fixed)":
-                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(currentProgressionCounter));
+                    bool hasDefeatedJunoFlutterFixed = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(currentProgressionCounter, hasDefeatedJunoFlutterFixed));
                     break;
 
                 case "Outside Cardon Forest Sub-Gate":
@@ -231,16 +244,23 @@ namespace MMLAP.Helpers
                     MemoryHelpers.WriteCode(Cheats.EnableRedRefractorCutscene());
                     break;
 
-                case "Gesselschaft Interior":
+                case "Gesellschaft Interior":
                     // This is for during Bonne cutscenes
                     // Player is sent to Amelia if value is low, Wily's if 0x06
-                    bool hasTakenRedRefractorGesselschaft = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardGesselschaft(currentProgressionCounter, hasTakenRedRefractorGesselschaft));
+                    bool hasTakenRedRefractorGesellschaft = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardGesellschaft(currentProgressionCounter, hasTakenRedRefractorGesellschaft));
                     break;
 
                 case "Flutter To Sub-Gate Cutscene":
                     Log.Logger.Information("Applying Flutter to Sub-Gate Cutscene fast-forward.");
-                    MemoryHelpers.WriteCode(Cheats.FastForwardFlutterToSubGateCutscene());
+                    bool hasActivatedEmergencySystemFlutterCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
+                    bool hasDefeatedFockeWulfFlutterCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFockeWulf);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardFlutterToSubGateCutscene(hasActivatedEmergencySystemFlutterCutscene, hasDefeatedFockeWulfFlutterCutscene));
+                    break;
+
+                case "Gesellschaft Battle":
+                    Log.Logger.Information("Applying Gesellshaft Battle fast-forward");
+                    MemoryHelpers.WriteCode(Cheats.FastForwardGesellschaftBattle());
                     break;
 
                 case "Main Gate":

@@ -649,8 +649,6 @@ public partial class App : Application
                     {
                         System.Threading.Thread.Sleep(50);
 
-                        string levelName = currentLevelData.AreaName + ": " + currentLevelData.RoomName;
-
                         // Task 2.b: Based on current level, do things like overwrite text, write code that isnt needed during loading, and locking doors
                         if (
                             IsManagingLevelChange &&
@@ -682,27 +680,8 @@ public partial class App : Application
                                 }
                             }
 
-                            // Restore branch statement noped in EnableFixBoatCallRoll code which is used elsewhere
-                            if (
-                                levelName != "Wily's Boat: Outside Boat Shop" &&
-                                Memory.ReadUInt(Addresses.FixBoatCallRollUtil.Address) == 0x00000000 &&
-                                MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat)
-                            )
-                            {
-                                MemoryHelpers.WriteCode(Cheats.RestoreFixBoatCallRoll());
-                            }
-
-                            // Restore code persisting from FastForwardLakeJyun causing crash later
-                            if (
-                                levelName != "Lake Jyun: On the Lake" &&
-                                levelName != "Lake Jyun: Side River" &&
-                                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat) &&
-                                Memory.ReadUInt(0x0001FBCC) == 0x00000000
-                            )
-                            {
-                                Memory.Write(0x0001FBC8, 0x3C03800C);
-                                Memory.Write(0x0001FBCC, 0x80631B62);
-                            }
+                            // Restore non-area-specific code writes (i.e. functions that may be used in multiple areas)
+                            Cheats.Restore1FXXXWrites(currentLevelData);
                         }
                     }
                 }
@@ -806,7 +785,7 @@ public partial class App : Application
                 int goalValue = goalValueObj as int? ?? 0;
                 bool isGoalComplete = (CompletionGoal)goalValue switch
                 {
-                    CompletionGoal.Juno => MemoryHelpers.ReadAddressDataBit(Addresses.GoalJunoFlag),
+                    CompletionGoal.Juno => MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
                     _ => false
                 };
                 if (isGoalComplete)

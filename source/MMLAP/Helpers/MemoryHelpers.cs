@@ -19,14 +19,14 @@ namespace MMLAP.Helpers
             bool isInTitleScreenCutscene = new short[]
             {
                     0x0100,  // Scrolling text cutscene
-                    0x0700,  // Gesselschaft cutscene
-                    0x0701,  // Gesselschaft cutscene
-                    0x0702,  // Gesselschaft cutscene
-                    0x0703,  // Gesselschaft cutscene
-                    0x0704,  // Gesselschaft cutscene
-                    0x0705,  // Gesselschaft cutscene
-                    0x0706,  // Gesselschaft cutscene
-                    0x0707   // Gesselschaft cutscene
+                    0x0700,  // Gesellschaft cutscene
+                    0x0701,  // Gesellschaft cutscene
+                    0x0702,  // Gesellschaft cutscene
+                    0x0703,  // Gesellschaft cutscene
+                    0x0704,  // Gesellschaft cutscene
+                    0x0705,  // Gesellschaft cutscene
+                    0x0706,  // Gesellschaft cutscene
+                    0x0707   // Gesellschaft cutscene
             }.Contains(currentLevelID);
             return isInGameOrCutscene && !isInTitleScreenCutscene;
         }
@@ -37,6 +37,11 @@ namespace MMLAP.Helpers
             {
                 Memory.Write(op.StartAddress, op.Instruction);
             }
+        }
+
+        public static void WriteCode(OpCode op)
+        {
+            Memory.Write(op.StartAddress, op.Instruction);
         }
 
         public static bool ReadAddressDataBit(AddressData addressData)

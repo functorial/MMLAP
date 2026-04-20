@@ -9,8 +9,6 @@ namespace MMLAP
         public static readonly AddressData CurrentProgressionCounter = new(0xC1B63, null, 1);
         public static readonly AddressData CurrentZenny = new(0xC1B2C, null, 4);
         public static readonly AddressData UnequippedBusterInvStart = new(0xB5604, null, 34);
-        // Goals
-        public static readonly AddressData GoalJunoFlag = new(0xBE385, 3, null);
         // Game status
         // TODO: Is there an indicator for moving through a door? E.g. when "cutscene" of player running through. Useful for slow writes.
         public static readonly AddressData ScreenWipeFlag = new(0x1FF3E2, 0, null);
@@ -51,7 +49,9 @@ namespace MMLAP
         public static readonly AddressData HasRedRefractor = new(0xBE41D, 6, null);
         public static readonly AddressData HasActivatedEmergencySystem = new(0xBE380, 3, null);
         public static readonly AddressData HasWatchedMainGateOpenCutscene = new(0xBE3EE, 4, null);
+        public static readonly AddressData HasDefeatedFockeWulf = new(0xBE37D, 5, null);
         public static readonly AddressData HasActivatedUnlockSubCities = new(0xBE382, 1, null);
+        public static readonly AddressData HasDefeatedJuno = new(0xBE385, 3, null);
         // Utility addresses for codes
         public static readonly AddressData FixBoatCallRollUtil = new(0x5545C, null, 4);
         public static readonly AddressData YellowRefractorTerminal = new(0xBE439, null, 1);
