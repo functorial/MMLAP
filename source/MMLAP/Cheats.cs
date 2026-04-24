@@ -8,6 +8,8 @@ namespace MMLAP
     public class Cheats
     {
         // NOTE: Any address of the form 0x0001FXXX which is overwritten should be restored after leaving the area where an overwrite is needed.
+        public static readonly OpCode Restore1F830 = new(0x0001F830, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1F8E0 = new(0x0001F8E0, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FB28 = new(0x0001FB28, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FB58 = new(0x0001FB58, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FB90 = new(0x0001FB90, 0x80631B62); // lb v1, 0x1B62(v1)
@@ -80,6 +82,16 @@ namespace MMLAP
             {
                 MemoryHelpers.WriteCode(Restore1FDE8);
             }
+
+            if (currentLevelData.AreaName != "Cardon Forest (Flutter Broken)")
+            {
+                MemoryHelpers.WriteCode(Restore1F830);
+            }
+
+            if (currentLevelData.AreaName != "Apple Market")
+            {
+                MemoryHelpers.WriteCode(Restore1F8E0);
+            }
         }
 
         public static OpCode[] FastForwardCardonSubgate(bool hasTakenYellowRefractor)
@@ -118,26 +130,47 @@ namespace MMLAP
         {
             // Needs to be written fast during loading screen
             byte fastForwardState = (byte)(!hasDefeatedFerdinand ? 0x00 : (hasCompletedCardonTankEvent ? Math.Max((byte)0x04, currentProgressionCounter)  : 0x03));
+
             return
             [
-                LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, fastForwardState),
+                // Unlock Door
+                LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, 0x04),
+                //
                 LoadHalfImmediate(0x00100CE4, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x00100E8C, MMLEnums.Register.v1, fastForwardState),
             ];
         }
 
-        public static OpCode[] FastForwardCardonForestFlutterBroken(byte currentProgressionCounter)
+        public static OpCode[] FastForwardCardonForestFlutterBroken(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool HasEarnedCitizenship)
         {
-            // Needs to be written fast during loading screen
+            byte fastForwardState = !hasEarnedClassBLicense || !HasEarnedCitizenship ? (byte)0x00 : Math.Max((byte)0x01, currentProgressionCounter);
             return [
-                // Unlocks doors after loading from Flutter
-                // Unlocks doors
-                LoadHalfImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, currentProgressionCounter)),
+                // Unlocks doors if >0
+                LoadHalfImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardState)),
+                Nop(0x00100848), // Locks doors after taking to inspector even if 0x001007E0 is altered
+                Nop(0x0010084C), // Locks doors after taking to inspector even if 0x001007E0 is altered
+                // ? Checks =0
+                LoadHalfImmediate(0x001005EC, MMLEnums.Register.v0, fastForwardState),
+                // ? Checks =0
+                LoadHalfImmediate(0x001007F8, MMLEnums.Register.v0, fastForwardState),
+                // In internal game loop. Loads car if =0 (also need 1F830=0)
+                LoadHalfImmediate(0x001008F4, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x0001F830, MMLEnums.Register.v1, fastForwardState),
             ];
         }
+
+        public static OpCode[] FastForwardCardonForestFlutterBrokenSlow(byte currentProgressionCounter)
+        {
+            byte fastForwardState = Math.Max((byte)0x01, currentProgressionCounter);
+            return [
+                // Unlocks doors after loading from Flutter
+                //LoadHalfImmediate(0x0001F830, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
         public static OpCode[] FastForwardCardonForestFlutterFixed(byte currentProgressionCounter, bool hasDefeatedJuno)
         {
-            byte fastForwardState = hasDefeatedJuno ? (byte)0x0A : Math.Min((byte)0x0A, Math.Max((byte)0x07, currentProgressionCounter));
+            byte fastForwardState = hasDefeatedJuno ? (byte)0x0B : Math.Min((byte)0x0A, Math.Max((byte)0x07, currentProgressionCounter));
             return [
                 // Can re-enter flutter
                 LoadHalfImmediate(0x00100A3C, MMLEnums.Register.a1, fastForwardState),
@@ -155,11 +188,21 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardAppleMarket(byte currentProgressionCounter)
+        public static OpCode[] FastForwardAppleMarket(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband, bool hasEarnedClassBLicense, bool hasShownRollRedRefractor)
         {
-            // Needs to be written fast during loading screen
+            byte fastForwardState = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 : Math.Max((byte)0x01, currentProgressionCounter);
+            //byte fastForwardMissingWoman = has
             return [
-                LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, currentProgressionCounter)),
+                // 
+                LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, 0x08),
+                // Check if less than 7
+                LoadHalfImmediate(0x00100384, MMLEnums.Register.v0, fastForwardState),
+                // lb a1 0x0(s0), check if equal 0
+                LoadHalfImmediate(0x0010048C, MMLEnums.Register.v0, fastForwardState),
+                // 
+                LoadHalfImmediate(0x0010054C, MMLEnums.Register.v1, fastForwardState),
+                // Open door to downtown
+                LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, 0x01),
             ];
         }
 

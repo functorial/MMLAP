@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Serilog;
 using System.Linq;
+using System.Collections;
 
 namespace MMLAP.Helpers
 {
@@ -105,7 +106,7 @@ namespace MMLAP.Helpers
                     {
                         // Being careful about text box overflow. Replacing new text window from man -> "You got" with a newpage, which saves a bunch of bytes.
                         // Not bothering to restore this text
-                        byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(citizensCardScoutedItemData, prefix: TextHelpers.newPage, suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]);
+                        byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(citizensCardScoutedItemData, prefix: TextHelpers.newPage, suffix: TextHelpers.endWindow); // suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x89, 0x00]);
                         Memory.WriteByteArray(citizensCardLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                     }
                     break;
@@ -131,24 +132,26 @@ namespace MMLAP.Helpers
         {
             string areaName = currentLevelData.AreaName;
 
-            switch (areaName)
+            switch (currentLevelData)
             {
-                case "Cardon Forest (Flutter Broken)":
-                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterBroken(currentProgressionCounter));
+                case var data when data.AreaName == "Cardon Forest (Flutter Broken)":
+                    bool hasEarnedClassBLicense = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
+                    bool hasEarnedCitizenship = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenship);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterBroken(currentProgressionCounter, hasEarnedClassBLicense, hasEarnedCitizenship));
                     break;
 
-                case "Cardon Forest (Flutter Fixed)":
+                case var data when data.AreaName == "Cardon Forest (Flutter Fixed)":
                     bool hasDefeatedJunoFlutterFixed = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno);
                     MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(currentProgressionCounter, hasDefeatedJunoFlutterFixed));
                     break;
 
-                case "Outside Cardon Forest Sub-Gate":
+                case var data when data.AreaName == "Outside Cardon Forest Sub-Gate":
                     bool hasDefeatedFerdinand = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand);
                     bool hasCompletedCardonTankEvent = MemoryHelpers.ReadAddressDataBit(Addresses.HasCompletedCardonTankEvent);
                     MemoryHelpers.WriteCode(Cheats.FastForwardOutsideCardonSubgate(currentProgressionCounter, hasDefeatedFerdinand, hasCompletedCardonTankEvent));
                     break;
 
-                case "Cardon Forest Sub-Gate":
+                case var data when data.AreaName == "Cardon Forest Sub-Gate":
                     bool hasTakenYellowRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenYellowRefractor);
                     MemoryHelpers.WriteCode(Cheats.FastForwardCardonSubgate(hasTakenYellowRefractor));
                     MemoryHelpers.WriteCode(Cheats.DecoupleCardonForestSubGateKeys());
@@ -170,63 +173,67 @@ namespace MMLAP.Helpers
                     }
                     break;
 
-                case "Lake Jyun Sub-Gate":
+                case var data when data.AreaName == "Lake Jyun Sub-Gate":
                     MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyunSubgate());
                     break;
 
-                case "Clozer Woods Sub-Gate":
+                case var data when data.AreaName == "Clozer Woods Sub-Gate":
                     MemoryHelpers.WriteCode(Cheats.FastForwardClozerWoodsSubgate());
                     break;
 
-                case "Outside Main Gate":
+                case var data when data.AreaName == "Outside Main Gate":
                     bool hasUnlockedMainGate = ItemHelpers.HasReceivedItem(0x0001);
                     bool hasActivatedEmergencySystem = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
                     bool hasWatchedMainGateOpenCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedMainGateOpenCutscene);
                     MemoryHelpers.WriteCode(Cheats.FastForwardOutsideMainGate(currentProgressionCounter, hasUnlockedMainGate, hasActivatedEmergencySystem, hasWatchedMainGateOpenCutscene));
                     break;
 
-                case "Apple Market":
-                    MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter));
+                case var data when data.AreaName == "Apple Market":
+                    bool hasRescuedShopOwnersHusband = MemoryHelpers.ReadAddressDataBit(Addresses.HasRescuedShopOwnersHusband);
+                    bool hasEarnedClassBLicenseApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
+                    bool hasShownRollRedRefractorApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
+                    //MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusband, hasEarnedClassBLicenseApple, hasShownRollRedRefractorApple));
                     break;
 
-                case "Downtown":
+
+                case var data when data.AreaName == "Downtown":
                     bool hasUnlockedSubCitiesDowntown = ItemHelpers.HasReceivedItem(0x0002);
                     MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(currentProgressionCounter, hasUnlockedSubCitiesDowntown));
                     break;
 
-                case "Uptown":
+                case var data when data.AreaName == "Uptown":
                     bool hasUnlockedSubCitiesUptown = ItemHelpers.HasReceivedItem(0x0002);
                     MemoryHelpers.WriteCode(Cheats.FastForwardUptown(currentProgressionCounter, hasUnlockedSubCitiesUptown));
                     break;
 
-                case "Old City":
+                case var data when data.AreaName == "Old City":
                     //bool HasUnlockedSubCitiesOldCity = Memory.ReadBit(Addresses.HasUnlockedSubCities.Address, Addresses.HasUnlockedSubCities.BitNumber ?? 1);
                     MemoryHelpers.WriteCode(Cheats.FastForwardOldCity(currentProgressionCounter));
                     break;
 
-                case "City Hall":
+                case var data when data.AreaName == "City Hall":
                     MemoryHelpers.WriteCode(Cheats.FastForwardCityHall(currentProgressionCounter));
                     break;
 
-                case "Yass Plains":
+                case var data when data.AreaName == "Yass Plains":
                     bool hasEarnedClassBLicenseYass = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasEarnedClassALicenseYass = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
                     MemoryHelpers.WriteCode(Cheats.FastForwardYassPlains(currentProgressionCounter, hasEarnedClassBLicenseYass, hasEarnedClassALicenseYass));
                     break;
 
-                case "Clozer Woods With Bridge":
+                case var data when data.AreaName == "Clozer Woods With Bridge":
                     bool hasEarnedClassBLicenseClozerBridge = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasEarnedClassALicenseClozerBridge = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
                     MemoryHelpers.WriteCode(Cheats.FastForwardClozerWoodsWithBridge(currentProgressionCounter, hasEarnedClassBLicenseClozerBridge, hasEarnedClassALicenseClozerBridge));
                     break;
 
-                case "Clozer Woods":
+                case var data when data.AreaName == "Clozer Woods":
                     bool hasEarnedClassBLicenseClozer = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasEarnedClassALicenseClozer = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
                     MemoryHelpers.WriteCode(Cheats.FastForwardClozerWoods(currentProgressionCounter, hasEarnedClassBLicenseClozer, hasEarnedClassALicenseClozer));
                     break;
 
-                case "Wily's Boat":
+                case var data when data.AreaName == "Wily's Boat" && data.RoomName != "Outside Boat Shop":
                     if (MemoryHelpers.ReadAddressDataBit(Addresses.HasYellowRefractor))
                     {
                         bool boatIsFixed = MemoryHelpers.ReadAddressDataBit(Addresses.BoatIsFixed);
@@ -235,46 +242,7 @@ namespace MMLAP.Helpers
                     }
                     break;
 
-                case "Lake Jyun":
-                    bool hasDefeatedBalkonGeratLake = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyun(hasDefeatedBalkonGeratLake));
-                    break;
-
-                case "Flutter Takeoff":
-                    MemoryHelpers.WriteCode(Cheats.EnableRedRefractorCutscene());
-                    break;
-
-                case "Gesellschaft Interior":
-                    // This is for during Bonne cutscenes
-                    // Player is sent to Amelia if value is low, Wily's if 0x06
-                    bool hasTakenRedRefractorGesellschaft = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardGesellschaft(currentProgressionCounter, hasTakenRedRefractorGesellschaft));
-                    break;
-
-                case "Flutter To Sub-Gate Cutscene":
-                    Log.Logger.Information("Applying Flutter to Sub-Gate Cutscene fast-forward.");
-                    bool hasActivatedEmergencySystemFlutterCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
-                    bool hasDefeatedFockeWulfFlutterCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFockeWulf);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardFlutterToSubGateCutscene(hasActivatedEmergencySystemFlutterCutscene, hasDefeatedFockeWulfFlutterCutscene));
-                    break;
-
-                case "Gesellschaft Battle":
-                    Log.Logger.Information("Applying Gesellshaft Battle fast-forward");
-                    MemoryHelpers.WriteCode(Cheats.FastForwardGesellschaftBattle());
-                    break;
-
-                case "Main Gate":
-                    MemoryHelpers.WriteCode(Cheats.FastForwardMainGate(currentProgressionCounter));
-                    break;
-
-                default:
-                    break;
-            }
-
-            string levelName = currentLevelData.AreaName + ": " + currentLevelData.RoomName;
-            switch (levelName)
-            {
-                case "Wily's Boat: Outside Boat Shop":
+                case var data when data.AreaName == "Wily's Boat" && data.RoomName == "Outside Boat Shop":
                     if (
                         MemoryHelpers.ReadAddressDataBit(Addresses.HasYellowRefractor) &&
                         !MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat)
@@ -284,9 +252,60 @@ namespace MMLAP.Helpers
                     }
                     break;
 
+                case var data when data.AreaName == "Lake Jyun":
+                    bool hasDefeatedBalkonGeratLake = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyun(hasDefeatedBalkonGeratLake));
+                    break;
+
+                case var data when data.AreaName == "Flutter Takeoff":
+                    MemoryHelpers.WriteCode(Cheats.EnableRedRefractorCutscene());
+                    break;
+
+                case var data when data.AreaName == "Gesellschaft Interior":
+                    // This is for during Bonne cutscenes
+                    // Player is sent to Amelia if value is low, Wily's if 0x06
+                    bool hasTakenRedRefractorGesellschaft = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardGesellschaft(currentProgressionCounter, hasTakenRedRefractorGesellschaft));
+                    break;
+
+                case var data when data.AreaName == "Flutter To Sub-Gate Cutscene":
+                    Log.Logger.Information("Applying Flutter to Sub-Gate Cutscene fast-forward.");
+                    bool hasActivatedEmergencySystemFlutterCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
+                    bool hasDefeatedFockeWulfFlutterCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFockeWulf);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardFlutterToSubGateCutscene(hasActivatedEmergencySystemFlutterCutscene, hasDefeatedFockeWulfFlutterCutscene));
+                    break;
+
+                case var data when data.AreaName == "Gesellschaft Battle":
+                    Log.Logger.Information("Applying Gesellshaft Battle fast-forward");
+                    MemoryHelpers.WriteCode(Cheats.FastForwardGesellschaftBattle());
+                    break;
+
+                case var data when data.AreaName == "Main Gate":
+                    MemoryHelpers.WriteCode(Cheats.FastForwardMainGate(currentProgressionCounter));
+                    break;
+
                 default:
                     break;
             }
+        }
+
+        public static void HandleSlowCodeWrites(LevelData currentLevelData, byte currentProgressionCounter)
+        {
+            string areaName = currentLevelData.AreaName;
+
+            switch (areaName)
+            {
+                case "Cardon Forest (Flutter Broken)":
+                    HandleUnlockDoorsCardonFlutterBrokenFromOceanTower(currentProgressionCounter);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private static void HandleUnlockDoorsCardonFlutterBrokenFromOceanTower(byte currentProgressionCounter)
+        {
+                MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterBrokenSlow(currentProgressionCounter));
         }
 
         public static void HandleYellowRefractorTerminal()
@@ -498,7 +517,7 @@ namespace MMLAP.Helpers
                     break;
 
                 case "Cardon Forest (Flutter Broken)":
-                    TryLockExitByName("Cardon Forest North (Flutter Broken) -> Underground Ruins, Room 1");
+                    TryLockExitByName("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2");
                     //if (DataDicts.ExitDataDict.TryGetValue("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2", out var exitDataCardonForestBrokenToRuins2))
                     //{
                     //    _ = exitDataCardonForestBrokenToRuins2.LockExit();
@@ -506,7 +525,7 @@ namespace MMLAP.Helpers
                     break;
 
                 case "Cardon Forest (Flutter Fixed)":
-                    TryLockExitByName("Cardon Forest North (Flutter Fixed) -> Underground Ruins, Room 1");
+                    TryLockExitByName("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2");
                     //TryLockExitByName("Cardon Forest South (Flutter Fixed) -> Underground Ruins, Room 2");
                     break;
 

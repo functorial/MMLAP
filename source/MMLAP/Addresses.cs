@@ -30,6 +30,8 @@ namespace MMLAP
         public static readonly AddressData StartBagQuest = new(0xBE3B9, 6, null); //lobby man = 0xBE3B9 5, electric = 0xBE3B9 4, baker = 0xBE3B9 2, librarian = 0xBE3B9 3, vending = 0xBE3B9 1, boy1 = 0xBE3B9 0, boy2 = 0xBE3BA 7, talk to inspector with bag 0xBE3BA 6
         public static readonly AddressData BagPailIsReady = new(0xBE3BA, 7, null);
         // Main story flags
+        public static readonly AddressData HasRescuedShopOwnersHusband = new(0xBE3D6, 4, null);
+        public static readonly AddressData HasEarnedCitizenship = new(0xBE37C, 4, null);
         public static readonly AddressData HasStartedPirateAttackEvent = new(0xBE378, 1, null); // Flipped after talking to roll by the car
         public static readonly AddressData HasStartedBlumebearFight = new(0xBE379, 6, null); // Flipped after policemen cutscene
         public static readonly AddressData HasDefeatedFerdinand = new(0xBE383, 6, null);
@@ -52,6 +54,8 @@ namespace MMLAP
         public static readonly AddressData HasDefeatedFockeWulf = new(0xBE37D, 5, null);
         public static readonly AddressData HasActivatedUnlockSubCities = new(0xBE382, 1, null);
         public static readonly AddressData HasDefeatedJuno = new(0xBE385, 3, null);
+        // Side quest flags
+        public static readonly AddressData HasSavedTheMissingWoman = new(0xBE3BE, 7, null);
         // Utility addresses for codes
         public static readonly AddressData FixBoatCallRollUtil = new(0x5545C, null, 4);
         public static readonly AddressData YellowRefractorTerminal = new(0xBE439, null, 1);

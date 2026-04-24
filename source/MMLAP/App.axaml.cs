@@ -657,6 +657,8 @@ public partial class App : Application
                             !MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag)
                         )
                         {
+                            // Do slow code writes, typically ones that cause problems in fast write
+                            LoopHelpers.HandleSlowCodeWrites(currentLevelData, CurrentProgressionCounter);
                             // Lock doors based on items received
                             LoopHelpers.HandleFlutterFixedBrokenDistinction(currentLevelData);
                             LoopHelpers.HandleAreaExitLocks(currentLevelData);
