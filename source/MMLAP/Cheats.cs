@@ -168,12 +168,16 @@ namespace MMLAP
                 // In internal game loop. Loads car if =0 (also need 1F830=0)
                 LoadHalfImmediate(0x001008F4, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x0001F830, MMLEnums.Register.v1, fastForwardState),
+                // Stops from juno cutscene if directed here instead of flutter fixed
+                //LoadHalfImmediate(0x00100BB4, MMLEnums.Register.v0, 1),
             ];
         }
 
-        public static OpCode[] FastForwardCardonForestFlutterFixed(byte currentProgressionCounter, bool hasDefeatedJuno)
+        public static OpCode[] FastForwardCardonForestFlutterFixed(byte currentProgressionCounter, bool hasDefeatedJuno, bool hasWatchedFlutterFixFromJunoCutscene, bool hasCompletedGoal)
         {
-            byte fastForwardState = hasDefeatedJuno ? (byte)0x0B : Math.Min((byte)0x0A, Math.Max((byte)0x07, currentProgressionCounter));
+            bool isWatchingFromJunoCutscene = hasDefeatedJuno && !hasWatchedFlutterFixFromJunoCutscene;
+            byte fastForwardState = hasCompletedGoal || isWatchingFromJunoCutscene ? (byte)0x0B :
+                                    Math.Min((byte)0x0A, Math.Max((byte)0x07, currentProgressionCounter));
             return [
                 // Can re-enter flutter
                 LoadHalfImmediate(0x00100A3C, MMLEnums.Register.a1, fastForwardState),
@@ -469,9 +473,10 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardMainGate(byte currentProgressionCounter)
+        public static OpCode[] FastForwardMainGate(byte currentProgressionCounter, bool hasShownRollRedRefractor)
         {
             byte fastForwardState = Math.Max(currentProgressionCounter, (byte)0x08);
+            byte cardonForestState = hasShownRollRedRefractor ? (byte)0x1B : (byte)0x03;
             return [
                 // Unlock standard doors
                 LoadHalfImmediate(0x00100990, MMLEnums.Register.v1, fastForwardState),
@@ -479,6 +484,8 @@ namespace MMLAP
                 //LoadHalfImmediate(0x0012B9B8, MMLEnums.Register.v0, 0x01),
                 // Opens door in control panel room
                 LoadHalfImmediate(0x00126798, MMLEnums.Register.v0, 0x01),
+                // Pick which cardon forest flutter state to go to after Juno
+                LoadHalfImmediate(0x00105660, MMLEnums.Register.v0, cardonForestState),
             ];
         }
 

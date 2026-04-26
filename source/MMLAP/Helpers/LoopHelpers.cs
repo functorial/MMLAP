@@ -142,7 +142,9 @@ namespace MMLAP.Helpers
 
                 case var data when data.AreaName == "Cardon Forest (Flutter Fixed)":
                     bool hasDefeatedJunoFlutterFixed = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(currentProgressionCounter, hasDefeatedJunoFlutterFixed));
+                    bool hasWatchedFlutterFixFromJunoCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedFlutterFixFromJunoCutscene);
+                    bool hasCompletedGoal = App.HasSubmittedGoal;
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(currentProgressionCounter, hasDefeatedJunoFlutterFixed, hasWatchedFlutterFixFromJunoCutscene, hasCompletedGoal));
                     break;
 
                 case var data when data.AreaName == "Outside Cardon Forest Sub-Gate":
@@ -294,7 +296,8 @@ namespace MMLAP.Helpers
                     break;
 
                 case var data when data.AreaName == "Main Gate":
-                    MemoryHelpers.WriteCode(Cheats.FastForwardMainGate(currentProgressionCounter));
+                    bool hasShownRollRedRefractorMainGate = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardMainGate(currentProgressionCounter, hasShownRollRedRefractorMainGate));
                     break;
 
                 default:

@@ -42,7 +42,7 @@ public partial class App : Application
     private static Dictionary<long, ItemData>? ScoutedLocationItemData { get; set; }
     private static List<ILocation>? GameLocations { get; set; }
     private static string? PlayerName { get; set; }
-    private static bool HasSubmittedGoal { get; set; } = false;
+    public static bool HasSubmittedGoal { get; set; } = false;
     private static int IsInGameSyncInitialized = 0;
     private static Timer? SlowGameLoopTimer { get; set; }
     private static int IsSlowLoopRunning = 0;
