@@ -10,6 +10,8 @@ namespace MMLAP
         // NOTE: Any address of the form 0x0001FXXX which is overwritten should be restored after leaving the area where an overwrite is needed.
         public static readonly OpCode Restore1F830 = new(0x0001F830, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1F8E0 = new(0x0001F8E0, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FA08 = new(0x0001FA08, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FA9C = new(0x0001FA9C, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FB28 = new(0x0001FB28, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FB58 = new(0x0001FB58, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FB90 = new(0x0001FB90, 0x80631B62); // lb v1, 0x1B62(v1)
@@ -92,6 +94,16 @@ namespace MMLAP
             {
                 MemoryHelpers.WriteCode(Restore1F8E0);
             }
+
+            if (currentLevelData.AreaName != "City Hall")
+            {
+                MemoryHelpers.WriteCode(Restore1FA9C);
+            }
+
+            if (currentLevelData.AreaName != "Downtown")
+            {
+                MemoryHelpers.WriteCode(Restore1FA08);
+            }
         }
 
         public static OpCode[] FastForwardCardonSubgate(bool hasTakenYellowRefractor)
@@ -159,15 +171,6 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardCardonForestFlutterBrokenSlow(byte currentProgressionCounter)
-        {
-            byte fastForwardState = Math.Max((byte)0x01, currentProgressionCounter);
-            return [
-                // Unlocks doors after loading from Flutter
-                //LoadHalfImmediate(0x0001F830, MMLEnums.Register.v1, fastForwardState),
-            ];
-        }
-
         public static OpCode[] FastForwardCardonForestFlutterFixed(byte currentProgressionCounter, bool hasDefeatedJuno)
         {
             byte fastForwardState = hasDefeatedJuno ? (byte)0x0B : Math.Min((byte)0x0A, Math.Max((byte)0x07, currentProgressionCounter));
@@ -193,30 +196,44 @@ namespace MMLAP
             byte fastForwardState = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 : Math.Max((byte)0x01, currentProgressionCounter);
             //byte fastForwardMissingWoman = has
             return [
+                // Open door to downtown
+                LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardState)),
                 // 
-                LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, 0x08),
+                LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, fastForwardState),
                 // Check if less than 7
                 LoadHalfImmediate(0x00100384, MMLEnums.Register.v0, fastForwardState),
                 // lb a1 0x0(s0), check if equal 0
                 LoadHalfImmediate(0x0010048C, MMLEnums.Register.v0, fastForwardState),
-                // 
+                // ?
                 LoadHalfImmediate(0x0010054C, MMLEnums.Register.v1, fastForwardState),
-                // Open door to downtown
-                LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, 0x01),
             ];
         }
 
-        public static OpCode[] FastForwardDowntown(byte currentProgressionCounter, bool hasUnlockedSubCities)
+        public static OpCode[] FastForwardDowntown(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasUnlockedSubCities)
         {
-            // Needs to be written fast during loading screen
-            byte fastForwardState = hasUnlockedSubCities ? Math.Max((byte)0x09, currentProgressionCounter) : Math.Min((byte)0x08, Math.Max((byte)0x02, currentProgressionCounter)); 
+            // Complex area, but important things here are:
+            // 1. Tron and dog scene happens at 0, and can't skip this in vanilla for boss sequence
+            // 2. Bomb quest requires class A license 
+            // 3. Bank Robber requires sub-cities raised
+            byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    //hasActivatedUnlockSubCities ? (byte)0x09 :
+                                    //hasDefeatedBalkonGerat ? (byte)0x06 :
+                                    currentProgressionCounter;
+            byte fastForwardStateSubCity = hasUnlockedSubCities ? (byte)0x09 : (byte)0x00;
             return [
+                // Multiple tiers here for checking 0xC1B62: 0 (also checks 0xBE378[5, 6]), 1-5, 6-7, 8-10, 11
+                // Writes to global value 0x800981E2, copied into 0xC1B7A
+                LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState),
+                // ?
+                LoadHalfImmediate(0x00106C24, MMLEnums.Register.v1, fastForwardState),
+                // In internal game loop
+                LoadHalfImmediate(0x00106C84, MMLEnums.Register.v1, fastForwardState),
                 // Enable Sub-City
-                LoadHalfImmediate(0x00106BB0, MMLEnums.Register.v0, fastForwardState),
+                LoadHalfImmediate(0x00106BB0, MMLEnums.Register.v0, fastForwardStateSubCity),
                 // Open doors
-                LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, fastForwardState),
+                LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, 0x02),
                 // Opens doors during Tron / dog scene
-                LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, fastForwardState), 
+                LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, 0x02),
             ];
         }
 
@@ -239,14 +256,79 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardCityHall(byte currentProgressionCounter)
+        public static OpCode[] FastForwardCityHall(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense)
         {
-            // Needs to be written fast during loading screen
+            // Note: Important here is:
+            // 1. Need 0x00 to talk to officer before pirates & to do Bon Bonne
+            // 2. Amelia's Office counts as City Hall (werid things can happen there with cutscenes)
+            // Going to try separating Amelia's Office from here to make things easier
+            byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    !hasEarnedClassALicense ? (byte)0x01 :
+                                    currentProgressionCounter;
             return
             [
+                // Four tiers: checks if = 1. else checks = 0 (and 0xBE43E?), else checks 2 <= .. <= 5, else checks >= 6
+                // Each tier writes a different value to $gp + 0x98A = 0x800981EE which is written to 0xC1B7A
+                LoadHalfImmediate(0x0001FA9C, MMLEnums.Register.v1, fastForwardState),
+                // Check if = 0
+                LoadHalfImmediate(0x001005D8, MMLEnums.Register.v1, fastForwardState),
+                // lb a1 0x0(s0), unlocks doors if >0
                 LoadHalfImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, currentProgressionCounter)),
+                // check if = 0, In a complex branch structure
+                LoadHalfImmediate(0x00119FA4, MMLEnums.Register.v1, fastForwardState),
+                // check if = 0, In a complex branch structure
+                LoadHalfImmediate(0x00119FDC, MMLEnums.Register.v1, fastForwardState),
+                // In internal game loop, checks if = 0, spawns NPCs if >0
+                LoadHalfImmediate(0x00100778, MMLEnums.Register.v1, fastForwardState),
+                // lb v0 0x0(s0), check if = 0
+                LoadHalfImmediate(0x001006FC, MMLEnums.Register.v0, fastForwardState),
+                LoadHalfImmediate(0x001007BC, MMLEnums.Register.v1, fastForwardState),
+                // Loading in from Marlwolf cutscene
+                LoadHalfImmediate(0x00101088, MMLEnums.Register.v0, fastForwardState),
             ];
         }
+
+        public static OpCode[] FastForwardCityHallIndoors(byte currentProgressionCounter, bool hasActivatedEmergencySystem)
+        {
+            byte fastForwardState = hasActivatedEmergencySystem ? Math.Max((byte)0x08, currentProgressionCounter) : Math.Max((byte)0x02, currentProgressionCounter);
+            return 
+            [
+                // Checks < 8
+                LoadHalfImmediate(0x0001FCE8, MMLEnums.Register.v1, fastForwardState),
+                // Changes something at >1
+                LoadHalfImmediate(0x0010022C, MMLEnums.Register.a1, fastForwardState),
+                // In game loop, will move police officer if >1
+                LoadHalfImmediate(0x001002B4, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        //public static OpCode[] FastForwardCityHallAmelia(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense)
+        //{
+        //    // Note: Important here is (1) need 0x00 to talk to officer before pirates (2) Amelia's Office counts as City Hall
+        //    byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 : 
+        //                            !hasEarnedClassALicense ? (byte)0x01 :
+        //                            currentProgressionCounter;
+        //    return
+        //    [
+        //        // Four tiers: checks if = 1. else checks = 0 (and 0xBE43E?), else checks 2 <= .. <= 5, else checks >= 6
+        //        // Each tier writes a different value to $gp + 0x98A = 0x800981EE which is written to 0xC1B7A
+        //        LoadHalfImmediate(0x0001FA9C, MMLEnums.Register.v1, fastForwardState),
+        //        // Check if = 0
+        //        LoadHalfImmediate(0x001005D8, MMLEnums.Register.v1, fastForwardState),
+        //        // lb a1 0x0(s0), unlocks doors if >0
+        //        LoadHalfImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, currentProgressionCounter)),
+        //        // check if = 0, In a complex branch structure
+        //        LoadHalfImmediate(0x00119FA4, MMLEnums.Register.v1, fastForwardState),
+        //        // check if = 0, In a complex branch structure
+        //        LoadHalfImmediate(0x00119FDC, MMLEnums.Register.v1, fastForwardState),
+        //        // In internal game loop, checks if = 0, spawns NPCs if >0
+        //        LoadHalfImmediate(0x00100778, MMLEnums.Register.v1, fastForwardState),
+        //        // lb v0 0x0(s0), check if = 0
+        //        LoadHalfImmediate(0x001006FC, MMLEnums.Register.v0, fastForwardState),
+        //        LoadHalfImmediate(0x001007BC, MMLEnums.Register.v1, fastForwardState),
+
+        //    ];
+        //}
 
         public static OpCode[] FastForwardWilysBoat(byte currentProgressionCounter, bool boatIsFixed, bool hasDefeatedBalkonGerat)
         {
@@ -338,12 +420,13 @@ namespace MMLAP
 
         public static OpCode[] FastForwardGesellschaft(byte currentProgressionCounter, bool hasTakenRedRefractor)
         {
-            byte fastForwardState = (byte)(!hasTakenRedRefractor ? currentProgressionCounter : 0x06);
+            byte fastForwardState = !hasTakenRedRefractor ? (byte)0x01 : (byte)0x06;
             return [
                 LoadHalfImmediate(0x0001FB28, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x00103F20, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x001002F0, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x001034A4, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x00100220, MMLEnums.Register.v1, fastForwardState),
             ];
         }
 

@@ -192,13 +192,14 @@ namespace MMLAP.Helpers
                     bool hasRescuedShopOwnersHusband = MemoryHelpers.ReadAddressDataBit(Addresses.HasRescuedShopOwnersHusband);
                     bool hasEarnedClassBLicenseApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasShownRollRedRefractorApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
-                    //MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusband, hasEarnedClassBLicenseApple, hasShownRollRedRefractorApple));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusband, hasEarnedClassBLicenseApple, hasShownRollRedRefractorApple));
                     break;
 
 
                 case var data when data.AreaName == "Downtown":
+                    bool hasEarnedClassBLicenseDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasUnlockedSubCitiesDowntown = ItemHelpers.HasReceivedItem(0x0002);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(currentProgressionCounter, hasUnlockedSubCitiesDowntown));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(currentProgressionCounter, hasEarnedClassBLicenseDowntown, hasUnlockedSubCitiesDowntown));
                     break;
 
                 case var data when data.AreaName == "Uptown":
@@ -211,8 +212,20 @@ namespace MMLAP.Helpers
                     MemoryHelpers.WriteCode(Cheats.FastForwardOldCity(currentProgressionCounter));
                     break;
 
-                case var data when data.AreaName == "City Hall":
-                    MemoryHelpers.WriteCode(Cheats.FastForwardCityHall(currentProgressionCounter));
+                case var data when data.AreaName == "City Hall": // && !data.RoomName.Contains("Amelia's Office"):
+                    bool hasEarnedClassBLicenseCityHall = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
+                    bool hasEarnedClassALicenseCityHall = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCityHall(currentProgressionCounter, hasEarnedClassBLicenseCityHall, hasEarnedClassALicenseCityHall));
+                    break;
+
+                //case var data when data.AreaName == "City Hall" && data.RoomName.Contains("Amelia's Office"):
+                //    bool hasEarnedClassBLicenseAmelia = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
+                //    MemoryHelpers.WriteCode(Cheats.FastForwardCityHallAmelia(currentProgressionCounter, hasEarnedClassBLicenseAmelia));
+                //    break;
+
+                case var data when data.AreaName == "City Hall (Indoors)":
+                    bool hasActivatedEmergencySystemcityHallIndoors = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCityHallIndoors(currentProgressionCounter, hasActivatedEmergencySystemcityHallIndoors));
                     break;
 
                 case var data when data.AreaName == "Yass Plains":
@@ -295,17 +308,9 @@ namespace MMLAP.Helpers
 
             switch (areaName)
             {
-                case "Cardon Forest (Flutter Broken)":
-                    HandleUnlockDoorsCardonFlutterBrokenFromOceanTower(currentProgressionCounter);
-                    break;
                 default:
                     break;
             }
-        }
-
-        private static void HandleUnlockDoorsCardonFlutterBrokenFromOceanTower(byte currentProgressionCounter)
-        {
-                MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterBrokenSlow(currentProgressionCounter));
         }
 
         public static void HandleYellowRefractorTerminal()
