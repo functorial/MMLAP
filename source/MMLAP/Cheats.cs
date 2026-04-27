@@ -260,7 +260,7 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardCityHall(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense)
+        public static OpCode[] FastForwardCityHall(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat)
         {
             // Note: Important here is:
             // 1. Need 0x00 to talk to officer before pirates & to do Bon Bonne
@@ -268,7 +268,8 @@ namespace MMLAP
             // Going to try separating Amelia's Office from here to make things easier
             byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
                                     !hasEarnedClassALicense ? (byte)0x01 :
-                                    currentProgressionCounter;
+                                    !hasDefeatedBalkonGerat ? (byte)0x02 :
+                                    Math.Max((byte)0x06, currentProgressionCounter);
             return
             [
                 // Four tiers: checks if = 1. else checks = 0 (and 0xBE43E?), else checks 2 <= .. <= 5, else checks >= 6
@@ -376,25 +377,31 @@ namespace MMLAP
         }
 
 
-        public static OpCode[] FastForwardYassPlains(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool HasEarnedClassALicense)
+        public static OpCode[] FastForwardYassPlains(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat)
         {
-            byte fastForwardState = (byte)(HasEarnedClassALicense ? Math.Max((byte)0x02, currentProgressionCounter) : (hasEarnedClassBLicense ? 0x01 : 0x00));
+            byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    !hasEarnedClassALicense ? (byte)0x01 :
+                                    !hasDefeatedBalkonGerat ? (byte)0x02 :
+                                    Math.Max((byte)0x06, currentProgressionCounter);
             return
             [
                 // Original tests v1 = 1
                 LoadHalfImmediate(0x0001FD40, MMLEnums.Register.v1, fastForwardState),
                 // ?
                 LoadHalfImmediate(0x0001FD5C, MMLEnums.Register.v1, fastForwardState),
-                // In internal game loop, loads tanks?
-                LoadHalfImmediate(0x00100754, MMLEnums.Register.v1, fastForwardState),
                 // ?
                 LoadHalfImmediate(0x001006D4, MMLEnums.Register.a1, fastForwardState),
+                // In internal game loop, loads tanks?
+                LoadHalfImmediate(0x00100754, MMLEnums.Register.v1, fastForwardState),
             ];
         }
 
-        public static OpCode[] FastForwardClozerWoodsWithBridge(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense)
+        public static OpCode[] FastForwardClozerWoodsWithBridge(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat)
         {
-            byte fastForwardState = (byte)(hasEarnedClassALicense ? Math.Max((byte)0x02, currentProgressionCounter) : (hasEarnedClassBLicense ? 0x01 : 0x00));
+            byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    !hasEarnedClassALicense ? (byte)0x01 :
+                                    !hasDefeatedBalkonGerat ? (byte)0x02 :
+                                    Math.Max((byte)0x06, currentProgressionCounter);
             return
             [
                 // ?
@@ -410,7 +417,9 @@ namespace MMLAP
 
         public static OpCode[] FastForwardClozerWoods(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense)
         {
-            byte fastForwardState = (byte)(hasEarnedClassALicense ? Math.Max((byte)0x02, currentProgressionCounter) : (hasEarnedClassBLicense ? 0x01 : 0x00));
+            byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    !hasEarnedClassALicense ? (byte)0x01 :
+                                    Math.Max((byte)0x02, currentProgressionCounter);
             return
             [
                 // ?

@@ -28,6 +28,7 @@ ITEM_DATA_DICT = {
     "Triple Access"                     : ItemData(0x021D, ItemClassification.filler,                                  None                        ),
     "Buster Unit"                       : ItemData(0x021E, ItemClassification.filler,                                  None                        ),
     "Rapid Fire"                        : ItemData(0x021F, ItemClassification.filler,                                  None                        ),
+    "Jump Springs"                      : ItemData(0x0221, ItemClassification.progression | ItemClassification.useful, None                        ), # Replacing spring set with this
     "Yellow Refractor"                  : ItemData(0x0228, ItemClassification.progression,                             None                        ),
     "Red Refractor"                     : ItemData(0x0229, ItemClassification.progression,                             None                        ),
     "Citizen's Card"                    : ItemData(0x022A, ItemClassification.progression,                             None                        ),
@@ -80,7 +81,7 @@ ITEM_DATA_DICT = {
     "Arm Supporter"                     : ItemData(0x0268, ItemClassification.progression,                             None                        ),
     "Weapon Plans"                      : ItemData(0x026A, ItemClassification.useful,                                  None                        ), # strong special weapon -> useful
     "Prism Crystal"                     : ItemData(0x026B, ItemClassification.useful,                                  None                        ), # strong special weapon -> useful
-    "Spring Set"                        : ItemData(0x026C, ItemClassification.useful | ItemClassification.progression, None                        ), # strong special items -> useful
+   #"Spring Set"                        : ItemData(0x026C, ItemClassification.useful | ItemClassification.progression, None                        ), # strong special items -> useful
     "Safety Helmet"                     : ItemData(0x026D, ItemClassification.useful,                                  None                        ), # strong special items -> useful
     "Rollerboard"                       : ItemData(0x026E, ItemClassification.useful | ItemClassification.progression, None                        ), # strong special items -> useful
     "Old Hoverjets"                     : ItemData(0x026F, ItemClassification.useful | ItemClassification.progression, None                        ), # strong special items -> useful
