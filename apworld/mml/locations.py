@@ -144,7 +144,7 @@ LOCATION_DATA_DICT = {
     "Museum donation, Shiny Object"                                 : LocationData(119, LocationCategory.QUEST,     False),
     "Museum donation, Old Shield"                                   : LocationData(120, LocationCategory.QUEST,     False),
     "Museum donation, Shiny Red Stone"                              : LocationData(121, LocationCategory.QUEST,     False),
-    "Complete the Museum exhibit"                                   : LocationData(122, LocationCategory.QUEST,     False),
+   #"Complete the Museum exhibit"                                   : LocationData(122, LocationCategory.QUEST,     False),
     "Take dangerous object from museum visitor"                     : LocationData(123, LocationCategory.QUEST,     False),
     "Gift Flower to Roll"                                           : LocationData(124, LocationCategory.QUEST,     False),
     "Gift Music Box to Roll"                                        : LocationData(125, LocationCategory.QUEST,     False),
