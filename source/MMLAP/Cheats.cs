@@ -161,9 +161,9 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardCardonForestFlutterBroken(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool HasEarnedCitizenship)
+        public static OpCode[] FastForwardCardonForestFlutterBroken(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedCitizenship)
         {
-            byte fastForwardState = !hasEarnedClassBLicense || !HasEarnedCitizenship ? (byte)0x00 : Math.Max((byte)0x01, currentProgressionCounter);
+            byte fastForwardState = !hasEarnedClassBLicense || !hasEarnedCitizenship ? (byte)0x00 : Math.Max((byte)0x01, currentProgressionCounter);
             return [
                 // Unlocks doors if >0
                 LoadHalfImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardState)),
@@ -176,8 +176,14 @@ namespace MMLAP
                 // In internal game loop. Loads car if =0 (also need 1F830=0)
                 LoadHalfImmediate(0x001008F4, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x0001F830, MMLEnums.Register.v1, fastForwardState),
-                // Stops from juno cutscene if directed here instead of flutter fixed
-                //LoadHalfImmediate(0x00100BB4, MMLEnums.Register.v0, 1),
+                // 0xBE37C bit checks (junk shop rescue)
+                //LoadHalfImmediate(0x00100D10, MMLEnums.Register.v0, )
+                // 0xBE378 bit checks
+                //LoadHalfImmediate(0x00100808, MMLEnums.Register.v0, fastForwardState),
+                //LoadHalfImmediate(0x00100838, MMLEnums.Register.v0, fastForwardState),
+                //LoadHalfImmediate(0x00100C58, MMLEnums.Register.v0, fastForwardState),
+                LoadHalfImmediate(0x00100C98, MMLEnums.Register.v0, !hasEarnedCitizenship ? (byte)0x00 : (byte)0x01),
+
             ];
         }
 
@@ -199,7 +205,8 @@ namespace MMLAP
                 LoadHalfImmediate(0x0001FDE8, MMLEnums.Register.v1, fastForwardState),
                 //Nop(0x0002FBCC),
                 //Nop(0x000322DC),
-
+                // Stops from juno cutscene
+                //LoadHalfImmediate(0x00100BB4, MMLEnums.Register.v0, 1),
             ];
         }
 
@@ -214,19 +221,30 @@ namespace MMLAP
 
         public static OpCode[] FastForwardAppleMarket(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband, bool hasEarnedClassBLicense, bool hasShownRollRedRefractor)
         {
+            //byte fastForwardShopOwner = hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01;
             byte fastForwardState = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 : Math.Max((byte)0x01, currentProgressionCounter);
             //byte fastForwardMissingWoman = has
             return [
-                // Open door to downtown
-                LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardState)),
                 // 
                 LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, fastForwardState),
+                // Open door to downtown
+                LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardState)),
                 // Check if less than 7
                 LoadHalfImmediate(0x00100384, MMLEnums.Register.v0, fastForwardState),
                 // lb a1 0x0(s0), check if equal 0
                 LoadHalfImmediate(0x0010048C, MMLEnums.Register.v0, fastForwardState),
                 // ?
                 LoadHalfImmediate(0x0010054C, MMLEnums.Register.v1, fastForwardState),
+                //// 0xBE378 bit checks, main area
+                //LoadHalfImmediate(0x000198C8, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                //LoadHalfImmediate(0x0001F910, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                //LoadHalfImmediate(0x00100348, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                //LoadHalfImmediate(0x00100678, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                //LoadHalfImmediate(0x0010049C, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), //
+                LoadHalfImmediate(0x00100688, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                // 0xBE378 bit checks, shop
+                LoadHalfImmediate(0x001008B0, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                
             ];
         }
 
