@@ -87,19 +87,19 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         return has_item("Unlock Sub-Cities")
     
     def has_drill_arm() -> Callable[[CollectionState], bool]:
-        return has_item("Blunted Drill")
+        return has_all([can_fix_support_car(), has_item("Blunted Drill")])
     
     def has_grand_grenade() -> Callable[[CollectionState], bool]:
-        return has_item("Bomb Schematic")
+        return has_all([can_fix_support_car(), has_item("Bomb Schematic")])
     
     def can_destroy_cracked_walls() -> Callable[[CollectionState], bool]:
         return has_any([has_drill_arm(), has_grand_grenade()])
 
     def has_explosive_wep() -> Callable[[CollectionState], bool]:
-        has_powered_buster = has_item("Cannon Kit")
-        has_grand_grenade = has_item("Bomb Schematic")
-        has_active_buster = has_item("Guidance Unit")
-        has_spread_buster = has_all_items(["Ancient Book", "Old Launcher", "Arm Supporter"])
+        has_powered_buster = has_all([can_fix_support_car(), has_item("Cannon Kit")])
+        has_grand_grenade = has_all([can_fix_support_car(), has_item("Bomb Schematic")])
+        has_active_buster = has_all([can_fix_support_car(), has_item("Guidance Unit")])
+        has_spread_buster = has_all([can_fix_support_car(), has_all_items(["Ancient Book", "Old Launcher", "Arm Supporter"])])
         return has_any([has_powered_buster, has_grand_grenade, has_active_buster, has_spread_buster])
 
     def has_clubhouse_items() -> Callable[[CollectionState], bool]:

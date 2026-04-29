@@ -23,6 +23,14 @@ namespace MMLAP
         public static readonly OpCode Restore1FDB0 = new(0x0001FDB0, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FDE8 = new(0x0001FDE8, 0x80631B62); // lb v1, 0x1B62(v1)
 
+        public static OpCode[] RestoreFixBoatCallRoll()
+        {
+            // This is what is overwritten by EnableFixBoatCallRoll
+            return [
+                new OpCode(Addresses.FixBoatCallRollUtil.Address, 0x10400006),  // beq v0, zero, 0x80055478
+            ];
+        }
+
         public static void Restore1FXXXWrites(LevelData currentLevelData)
         {
             string levelName = currentLevelData.AreaName + ": " + currentLevelData.RoomName;
@@ -195,6 +203,15 @@ namespace MMLAP
             ];
         }
 
+        public static OpCode[] FastForwardUndergroundRuins(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband)
+        {
+            byte fastForwardState = !hasRescuedShopOwnersHusband ? (byte)0x00 : currentProgressionCounter;
+            return [
+                //LoadHalfImmediate(0x00100484, MMLEnums.Register.v0, fastForwardState),
+                LoadHalfImmediate(0x00100620, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
         public static OpCode[] FastForwardAppleMarket(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband, bool hasEarnedClassBLicense, bool hasShownRollRedRefractor)
         {
             byte fastForwardState = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 : Math.Max((byte)0x01, currentProgressionCounter);
@@ -360,14 +377,6 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] RestoreFixBoatCallRoll()
-        {
-            // This is what is overwritten by EnableFixBoatCallRoll
-            return [
-                new OpCode(Addresses.FixBoatCallRollUtil.Address, 0x10400006),  // beq v0, zero, 0x80055478
-            ];
-        }
-
         public static OpCode[] EnableRedRefractorCutscene()
         {
             return
@@ -473,7 +482,9 @@ namespace MMLAP
         public static OpCode[] FastForwardOutsideMainGate(byte currentProgressionCounter, bool hasUnlockedMainGate, bool hasActivatedEmergencySystem, bool hasWatchedMainGateOpenCutscene)
         {
             bool isInCutscene = hasActivatedEmergencySystem && !hasWatchedMainGateOpenCutscene;
-            byte fastForwardState = (byte)(isInCutscene ? 0x07 : hasUnlockedMainGate ? Math.Max(currentProgressionCounter, (byte)0x08) : Math.Min(currentProgressionCounter, (byte)0x07));
+            byte fastForwardState = isInCutscene ? (byte)0x07 : 
+                                    hasUnlockedMainGate ? Math.Min((byte)0x0A, Math.Max((byte)0x08, currentProgressionCounter)) : 
+                                    Math.Min((byte)0x07, currentProgressionCounter);
             return [
                 // Prevents unlocking main gate cutscene black screen
                 LoadHalfImmediate(0x00100420, MMLEnums.Register.v1, fastForwardState),

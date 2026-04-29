@@ -191,12 +191,16 @@ namespace MMLAP.Helpers
                     break;
 
                 case var data when data.AreaName == "Apple Market":
-                    bool hasRescuedShopOwnersHusband = MemoryHelpers.ReadAddressDataBit(Addresses.HasRescuedShopOwnersHusband);
+                    bool hasRescuedShopOwnersHusbandApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasRescuedShopOwnersHusband);
                     bool hasEarnedClassBLicenseApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasShownRollRedRefractorApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusband, hasEarnedClassBLicenseApple, hasShownRollRedRefractorApple));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusbandApple, hasEarnedClassBLicenseApple, hasShownRollRedRefractorApple));
                     break;
 
+                case var data when data.AreaName == "Underground Ruins":
+                    bool hasRescuedShopOwnersHusbandRuins = MemoryHelpers.ReadAddressDataBit(Addresses.HasRescuedShopOwnersHusband);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardUndergroundRuins(currentProgressionCounter, hasRescuedShopOwnersHusbandRuins));
+                    break;
 
                 case var data when data.AreaName == "Downtown":
                     bool hasEarnedClassBLicenseDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
