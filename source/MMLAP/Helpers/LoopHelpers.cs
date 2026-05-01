@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Serilog;
 using System.Linq;
 using System.Collections;
+using Avalonia.Rendering;
 
 namespace MMLAP.Helpers
 {
@@ -128,7 +129,7 @@ namespace MMLAP.Helpers
             }
         }
 
-        public static void HandleFastForwardCodeWrites(LevelData currentLevelData, byte currentProgressionCounter)
+        public static void HandleLoadingFastCodeWrites(LevelData currentLevelData, byte currentProgressionCounter)
         {
             string areaName = currentLevelData.AreaName;
 
@@ -155,8 +156,18 @@ namespace MMLAP.Helpers
 
                 case var data when data.AreaName == "Cardon Forest Sub-Gate":
                     bool hasTakenYellowRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenYellowRefractor);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonSubgate(hasTakenYellowRefractor));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestSubgate(hasTakenYellowRefractor));
                     MemoryHelpers.WriteCode(Cheats.DecoupleCardonForestSubGateKeys());
+
+                    // Prevent black screen on cutscene due to meddling with other stuff
+                    if (
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenYellowRefractor) &&
+                        !MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedYellowRefractorCutscene) &&
+                        !MemoryHelpers.ReadAddressDataBit(Addresses.CutsceneFlag)
+                    )
+                    {
+                        PlayCutscene(0x19);
+                    }
 
                     // Manually unload the assets showing the yellow refractor if it has already been picked up
                     // The DecoupleCardonForestSubGateKeys requires explicitly not checking hasTakenYellowRefractor and loading stuff anyway
@@ -642,6 +653,19 @@ namespace MMLAP.Helpers
                 default:
                     break;
             }
+        }
+
+        public static void PlayCutscene(byte cutsceneID)
+        {
+            Memory.WriteByte(0xC4C4C, 0x00);        // Clear play status(?) (0 is start/pause, 1 is playing, 2 stop)
+            Memory.WriteByte(0xC4C4D, 0x00);        // Load cutscene step(?) (no standard format here)
+            Memory.WriteByte(0xC4C49, cutsceneID);  // ID is unique
+            Memory.WriteByte(Addresses.CutsceneFlag.Address, 0x01);        // Setting this plays the config queued up above
+        }
+
+        public static void StopCutscene()
+        {
+            Memory.WriteByte(0xC4C4C, 0x02);
         }
     }
 }

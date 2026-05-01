@@ -571,7 +571,7 @@ public partial class App : Application
                     )
                     {
                         // Write fast forward area cheats which do things like unlock doors and prevent black screens
-                        LoopHelpers.HandleFastForwardCodeWrites(currentLevelData, CurrentProgressionCounter);
+                        LoopHelpers.HandleLoadingFastCodeWrites(currentLevelData, CurrentProgressionCounter);
                         // Handle text and possible overflows from locations that give items during text windows Mine Parts Kit from the rescue shop owner's husband lcoation
                         LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack);
                     }
