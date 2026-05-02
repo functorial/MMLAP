@@ -120,9 +120,7 @@ namespace MMLAP
             byte fastForwardState = !hasDefeatedFerdinand ? (byte)0x00 :
                                     !hasCompletedCardonTankEvent ? (byte)0x03 :
                                     Math.Max((byte)0x04, currentProgressionCounter);
-
-            return
-            [
+            return [
                 // Unlock Door
                 LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, 0x04),
                 //
@@ -135,8 +133,7 @@ namespace MMLAP
         {
             // May be written slowly as it is checked during in-game loop
             byte fastForwardState = !hasTakenYellowRefractor ? (byte)0x03 : (byte)0x04;
-            return
-            [
+            return [
                 LoadHalfImmediate(0x00100320, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x0010E7FC, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x0010E8B8, MMLEnums.Register.v1, fastForwardState),
@@ -202,8 +199,7 @@ namespace MMLAP
         {
             // May be written slowly as it is checked during in-game loop
             byte fastForwardState = (byte)0x06;
-            return
-            [
+            return [
                 LoadHalfImmediate(0x001003F8, MMLEnums.Register.v1, fastForwardState),
             ];
         }
@@ -211,16 +207,16 @@ namespace MMLAP
         public static OpCode[] FastForwardClozerWoodsSubgate()
         {
             byte fastForwardState = (byte)0x07;
-            return
-            [
+            return [
                 // Enables doors, spawns Flutter NPCs
                 LoadHalfImmediate(0x00100574, MMLEnums.Register.v1, fastForwardState),
             ];
         }
 
-        public static OpCode[] FastForwardCardonForestFlutterBroken(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedCitizenship)
+        public static OpCode[] FastForwardCardonForestFlutterBroken(byte currentProgressionCounter, bool hasStartedTronDogCutscene, bool hasEarnedClassBLicense, bool hasEarnedCitizenship)
         {
-            byte fastForwardState = !hasEarnedClassBLicense || !hasEarnedCitizenship ? (byte)0x00 : Math.Max((byte)0x01, currentProgressionCounter);
+            byte fastForwardState = hasEarnedClassBLicense && hasEarnedCitizenship ? Math.Max((byte)0x01, currentProgressionCounter) : (byte)0x00;
+            byte startServbotCutscene = hasStartedTronDogCutscene && hasEarnedCitizenship ? (byte)0x01 : (byte)0x00;
             return [
                 // Unlocks doors if >0
                 LoadHalfImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardState)),
@@ -240,6 +236,8 @@ namespace MMLAP
                 //LoadHalfImmediate(0x00100838, MMLEnums.Register.v0, fastForwardState),
                 //LoadHalfImmediate(0x00100C58, MMLEnums.Register.v0, fastForwardState),
                 LoadHalfImmediate(0x00100C98, MMLEnums.Register.v0, !hasEarnedCitizenship ? (byte)0x00 : (byte)0x01),
+                // For starting servbot cutscene if skipped some stuff
+                hasStartedTronDogCutscene && hasEarnedCitizenship ? Nop(0x00100CA0) : new OpCode(0x00100CA0, 0x1040000D),
 
             ];
         }
@@ -335,8 +333,7 @@ namespace MMLAP
 
         public static OpCode[] FastForwardOldCity(byte currentProgressionCounter)
         {
-            return 
-            [
+            return [
                 LoadHalfImmediate(0x001007D0, MMLEnums.Register.v1, Math.Max((byte)0x09, currentProgressionCounter)),
             ];
         }
@@ -345,8 +342,7 @@ namespace MMLAP
         {
             // Needs to be written fast during loading screen
             byte fastForwardState = hasUnlockedSubCities ? Math.Max((byte)0x09, currentProgressionCounter) : Math.Min((byte)0x08, Math.Max((byte)0x02, currentProgressionCounter));
-            return
-            [
+            return [
                 LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardState),
             ];
@@ -362,8 +358,7 @@ namespace MMLAP
                                     !hasEarnedClassALicense ? (byte)0x01 :
                                     !hasDefeatedBalkonGerat ? (byte)0x02 :
                                     Math.Max((byte)0x06, currentProgressionCounter);
-            return
-            [
+            return [
                 // Four tiers: checks if = 1. else checks = 0 (and 0xBE43E?), else checks 2 <= .. <= 5, else checks >= 6
                 // Each tier writes a different value to $gp + 0x98A = 0x800981EE which is written to 0xC1B7A
                 LoadHalfImmediate(0x0001FA9C, MMLEnums.Register.v1, fastForwardState),
@@ -388,8 +383,7 @@ namespace MMLAP
         public static OpCode[] FastForwardCityHallIndoors(byte currentProgressionCounter, bool hasActivatedEmergencySystem)
         {
             byte fastForwardState = hasActivatedEmergencySystem ? Math.Max((byte)0x08, currentProgressionCounter) : Math.Max((byte)0x02, currentProgressionCounter);
-            return 
-            [
+            return [
                 // Checks < 8
                 LoadHalfImmediate(0x0001FCE8, MMLEnums.Register.v1, fastForwardState),
                 // Changes something at >1
@@ -405,8 +399,7 @@ namespace MMLAP
         //    byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 : 
         //                            !hasEarnedClassALicense ? (byte)0x01 :
         //                            currentProgressionCounter;
-        //    return
-        //    [
+        //    return [
         //        // Four tiers: checks if = 1. else checks = 0 (and 0xBE43E?), else checks 2 <= .. <= 5, else checks >= 6
         //        // Each tier writes a different value to $gp + 0x98A = 0x800981EE which is written to 0xC1B7A
         //        LoadHalfImmediate(0x0001FA9C, MMLEnums.Register.v1, fastForwardState),
@@ -431,8 +424,7 @@ namespace MMLAP
         {
             // This could go in slow loop, but put in fast loop since NPCs spawn on progression check
             byte fastForwardState = (byte)(hasDefeatedBalkonGerat ? Math.Max((byte)0x06, currentProgressionCounter) : (boatIsFixed ? 0x05 : 0x04));
-            return
-            [
+            return [
                 // Loads people into the zone (they were evacuated)
                 LoadHalfImmediate(0x001003A8, MMLEnums.Register.v1, fastForwardState),
                 // 
@@ -454,8 +446,7 @@ namespace MMLAP
 
         public static OpCode[] EnableRedRefractorCutscene()
         {
-            return
-            [
+            return [
                 LoadHalfImmediate(0x001001EC, MMLEnums.Register.v1, 0x06),
             ];
         }
@@ -467,8 +458,7 @@ namespace MMLAP
                                     !hasEarnedClassALicense ? (byte)0x01 :
                                     !hasDefeatedBalkonGerat ? (byte)0x02 :
                                     Math.Max((byte)0x06, currentProgressionCounter);
-            return
-            [
+            return [
                 // Original tests v1 = 1
                 LoadHalfImmediate(0x0001FD40, MMLEnums.Register.v1, fastForwardState),
                 // ?
@@ -486,8 +476,7 @@ namespace MMLAP
                                     !hasEarnedClassALicense ? (byte)0x01 :
                                     !hasDefeatedBalkonGerat ? (byte)0x02 :
                                     Math.Max((byte)0x06, currentProgressionCounter);
-            return
-            [
+            return [
                 // ?
                 LoadHalfImmediate(0x0001FD94, MMLEnums.Register.v1, fastForwardState),
                 // ?
@@ -504,8 +493,7 @@ namespace MMLAP
             byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
                                     !hasEarnedClassALicense ? (byte)0x01 :
                                     Math.Max((byte)0x02, currentProgressionCounter);
-            return
-            [
+            return [
                 // ?
                 LoadHalfImmediate(0x0001FB90, MMLEnums.Register.v1, fastForwardState),
                 // In internal game loop
@@ -586,8 +574,7 @@ namespace MMLAP
 
         public static OpCode[] FastForwardLakeJyun(bool hasDefeatedBalkonGerat)
         {
-            OpCode[] code = hasDefeatedBalkonGerat ? 
-            [
+            OpCode[] code = hasDefeatedBalkonGerat ? [
                 // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
                 LoadHalfImmediate(0x0010059C, MMLEnums.Register.v1, 0x06),
                 // Prevents crash after starting phase 1
@@ -596,8 +583,7 @@ namespace MMLAP
                 //LoadHalfImmediate(0x0011674C, MMLEnums.Register.v1, 0x06),
                 // Lets after phase 2 load
                 LoadHalfImmediate(0x00101A70, MMLEnums.Register.v1, 0x01),
-            ] :
-            [
+            ] : [
                 // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
                 LoadHalfImmediate(0x0010059C, MMLEnums.Register.v1, 0x05),
                 // Prevents crash after starting phase 1

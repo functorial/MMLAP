@@ -136,9 +136,10 @@ namespace MMLAP.Helpers
             switch (currentLevelData)
             {
                 case var data when data.AreaName == "Cardon Forest (Flutter Broken)":
+                    bool hasStartedTronDogCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedTronDogCutscene);
                     bool hasEarnedClassBLicense = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasEarnedCitizenship = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenship);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterBroken(currentProgressionCounter, hasEarnedClassBLicense, hasEarnedCitizenship));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterBroken(currentProgressionCounter, hasStartedTronDogCutscene, hasEarnedClassBLicense, hasEarnedCitizenship));
                     break;
 
                 case var data when data.AreaName == "Cardon Forest (Flutter Fixed)":
