@@ -574,6 +574,8 @@ public partial class App : Application
                         LoopHelpers.HandleLoadingFastCodeWrites(currentLevelData, CurrentProgressionCounter);
                         // Handle text and possible overflows from locations that give items during text windows Mine Parts Kit from the rescue shop owner's husband lcoation
                         LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack);
+                        // 
+                        LoopHelpers.HandleRedRefractorInSupportCar();
                     }
 
                     // Run these after loading

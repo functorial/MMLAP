@@ -656,6 +656,29 @@ namespace MMLAP.Helpers
             }
         }
 
+        // The "showing roll the red refractor" only works if you have the yellow refractor
+        public static void HandleRedRefractorInSupportCar()
+        {
+            bool isInSupportCar = MemoryHelpers.ReadAddressDataBit(Addresses.SupportCarRnDFlag);
+            bool hasRedRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasRedRefractor);
+            if (isInSupportCar && hasRedRefractor)
+            {
+                MemoryHelpers.WriteAddressDataBit(Addresses.HasYellowRefractor, true);
+            }
+            else
+            {
+                bool hasReceivedYellowRefractor = ItemHelpers.HasReceivedItem(0x0228);
+                if (!hasReceivedYellowRefractor)
+                {
+                    bool hasYellowRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasYellowRefractor);
+                    if (hasYellowRefractor)
+                    {
+                        MemoryHelpers.WriteAddressDataBit(Addresses.HasYellowRefractor, false);
+                    }
+                }
+            }
+        }
+
         public static void PlayCutscene(byte cutsceneID)
         {
             Memory.WriteByte(0xC4C4C, 0x00);        // Clear play status(?) (0 is start/pause, 1 is playing, 2 stop)
