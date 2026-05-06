@@ -32,8 +32,9 @@ namespace MMLAP
         public static readonly AddressData BagPailIsReady = new(0xBE3BA, 7, null);
         // Main story flags
         public static readonly AddressData HasRescuedShopOwnersHusband = new(0xBE3D6, 4, null);
-        public static readonly AddressData HasEarnedCitizenship = new(0xBE37C, 4, null);
+        public static readonly AddressData HasEarnedCitizenship = new(0xBE380, 1, null); //new(0xBE37C, 4, null);
         public static readonly AddressData HasStartedTronDogCutscene = new(0xBE378, 6, null);
+        public static readonly AddressData HasWatchedServbotTakeoffCutscene = new(0xBE37A, 0, null);
         public static readonly AddressData HasStartedPirateAttackEvent = new(0xBE378, 1, null); // Flipped after talking to roll by the car
         public static readonly AddressData HasStartedBlumebearFight = new(0xBE379, 6, null); // Flipped after policemen cutscene
         public static readonly AddressData HasDefeatedFerdinand = new(0xBE383, 6, null);

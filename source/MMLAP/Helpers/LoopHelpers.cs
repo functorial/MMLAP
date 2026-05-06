@@ -131,8 +131,6 @@ namespace MMLAP.Helpers
 
         public static void HandleLoadingFastCodeWrites(LevelData currentLevelData, byte currentProgressionCounter)
         {
-            string areaName = currentLevelData.AreaName;
-
             switch (currentLevelData)
             {
                 case var data when data.AreaName == "Cardon Forest (Flutter Broken)":
@@ -167,7 +165,7 @@ namespace MMLAP.Helpers
                         !MemoryHelpers.ReadAddressDataBit(Addresses.CutsceneFlag)
                     )
                     {
-                        PlayCutscene(0x19);
+                        PlayCutscene(0x19, 0x00);
                     }
 
                     // Manually unload the assets showing the yellow refractor if it has already been picked up
@@ -326,10 +324,19 @@ namespace MMLAP.Helpers
 
         public static void HandleSlowCodeWrites(LevelData currentLevelData, byte currentProgressionCounter)
         {
-            string areaName = currentLevelData.AreaName;
-
-            switch (areaName)
+            switch (currentLevelData)
             {
+                case var data when data.AreaName == "Cardon Forest (Flutter Broken)" && data.RoomName == "City Entrance":
+                    if (
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedTronDogCutscene) &&
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenship) && 
+                        !MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedServbotTakeoffCutscene) &&
+                        !MemoryHelpers.ReadAddressDataBit(Addresses.CutsceneFlag)
+                    )
+                    {
+                        PlayCutscene(0x08, 0x03);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -679,11 +686,16 @@ namespace MMLAP.Helpers
             }
         }
 
-        public static void PlayCutscene(byte cutsceneID)
+        public static void PlayCutscene(byte cutsceneID, byte subID)
         {
-            Memory.WriteByte(0xC4C4C, 0x00);        // Clear play status(?) (0 is start/pause, 1 is playing, 2 stop)
-            Memory.WriteByte(0xC4C4D, 0x00);        // Load cutscene step(?) (no standard format here)
-            Memory.WriteByte(0xC4C49, cutsceneID);  // ID is unique
+            // Not sure exactly how this works
+            // For stealing yellow refractor: SubID = (0 is start/pause, 1 is playing, 2 stop)
+            // For cardon forest flutter broken cutscenes, the ID is shared and the subID does different scenes like inspector and servbot takeoff
+            // 0xC4C4D/E might also be "cutscene steps" but not sure
+            Memory.WriteByte(0xC4C49, cutsceneID);
+            Memory.WriteByte(0xC4C4C, subID);
+            // Clear all this stuff just in case
+            Memory.WriteByteArray(0xC4C4D, Enumerable.Repeat((byte)0x00, 51).ToArray());
             Memory.WriteByte(Addresses.CutsceneFlag.Address, 0x01);        // Setting this plays the config queued up above
         }
 

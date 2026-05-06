@@ -572,9 +572,9 @@ public partial class App : Application
                     {
                         // Write fast forward area cheats which do things like unlock doors and prevent black screens
                         LoopHelpers.HandleLoadingFastCodeWrites(currentLevelData, CurrentProgressionCounter);
-                        // Handle text and possible overflows from locations that give items during text windows Mine Parts Kit from the rescue shop owner's husband lcoation
+                        // Handle text and possible overflows from locations that give items during text windows Mine Parts Kit from the rescue shop owner's husband location
                         LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack);
-                        // 
+                        // Fix cutscene
                         LoopHelpers.HandleRedRefractorInSupportCar();
                     }
 
