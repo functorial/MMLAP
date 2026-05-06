@@ -166,6 +166,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     
     def can_defeat_bon_bonne() -> Callable[[CollectionState], bool]:
         return has_citizens_card()
+    
+    def can_defeat_marlwolf() -> Callable [[CollectionState], bool]:
+        return has_citizens_card()
 
     def can_steal_yellow_refractor() -> Callable[[CollectionState], bool]:
         return has_all([
@@ -657,7 +660,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("Uptown"),
-                    ExitData("Uptown - Hospital (Ira's Room)", can_steal_red_refractor()),
+                    ExitData("Uptown - Hospital (Ira's Room)", can_defeat_marlwolf()), #can_steal_red_refractor()),
                     ExitData("Uptown - Hospital (Missing woman turn-in)", can_open_main_gate()),
                 ]
             ),

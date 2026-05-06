@@ -341,10 +341,27 @@ namespace MMLAP
         public static OpCode[] FastForwardUptown(byte currentProgressionCounter, bool hasUnlockedSubCities)
         {
             // Needs to be written fast during loading screen
-            byte fastForwardState = hasUnlockedSubCities ? Math.Max((byte)0x09, currentProgressionCounter) : Math.Min((byte)0x08, Math.Max((byte)0x02, currentProgressionCounter));
+            //byte fastForwardState = Math.Max((byte)0x06, currentProgressionCounter);
+            byte fastForwardState = Math.Max((byte)0x02, currentProgressionCounter);
+            byte fastForwardStateSubCity = hasUnlockedSubCities ? (byte)0x09 : (byte)0x02;
             return [
-                LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, fastForwardState),
-                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardState),
+                // Check slt 6, else check slt 8
+                LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, fastForwardStateSubCity),
+                // Sub city
+                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardStateSubCity),
+                // check slt 5
+                LoadHalfImmediate(0x0010047C, MMLEnums.Register.v0, fastForwardState),
+                // ? close to bit check @ bit 55
+                LoadHalfImmediate(0x001005A4, MMLEnums.Register.a1, fastForwardState),
+                // In game loop
+                LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardStateSubCity),
+                // Check if fixed flutter when loading in hospital (for side quests).
+                // Open it up, allowing Ira quest.
+                // Missing woman quest turn in still requires other (?) bit check @ bit 563
+                //LoadHalfImmediate(0x00101310, MMLEnums.Register.v0, (byte)0x01),
+                //LoadHalfImmediate(0x00101320, MMLEnums.Register.v0, (byte)0x01),
+                Nop(0x00101318),
+                //Nop(0x00101328),
             ];
         }
 
