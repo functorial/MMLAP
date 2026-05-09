@@ -1,6 +1,7 @@
 ﻿using Archipelago.Core.Util;
 using MMLAP.Helpers;
 using MMLAP.Models;
+using ReactiveUI;
 using System;
 
 namespace MMLAP
@@ -400,6 +401,7 @@ namespace MMLAP
         public static OpCode[] FastForwardCityHallIndoors(byte currentProgressionCounter, bool hasActivatedEmergencySystem)
         {
             byte fastForwardState = hasActivatedEmergencySystem ? Math.Max((byte)0x08, currentProgressionCounter) : Math.Max((byte)0x02, currentProgressionCounter);
+            short jumpSpringsBit = MemoryHelpers.BitsFromBE378(DataDicts.ItemDataDict[0x026C].InventoryAddressData) ?? 0x00;
             return [
                 // Checks < 8
                 LoadHalfImmediate(0x0001FCE8, MMLEnums.Register.v1, fastForwardState),
@@ -407,6 +409,9 @@ namespace MMLAP
                 LoadHalfImmediate(0x0010022C, MMLEnums.Register.a1, fastForwardState),
                 // In game loop, will move police officer if >1
                 LoadHalfImmediate(0x001002B4, MMLEnums.Register.v1, fastForwardState),
+                // Check HasTakenYellowRefractor @ talking to inspector
+                //LoadHalfImmediate(0x001047A0, MMLEnums.Register.v0, 0x01), // Remove check entirely
+                LoadHalfImmediate(0x001047A0, MMLEnums.Register.a0, jumpSpringsBit), // Replace with jump springs check
             ];
         }
 

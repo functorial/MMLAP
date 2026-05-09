@@ -472,7 +472,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Apple Market"),
                     ExitData("Downtown - Outside (Boss fight)"),
                     ExitData("Downtown - Outside (Blumebear pail)"), # Only lootable after city hall is saved
-                    ExitData("Downtown - Outside (Lost Bag)", has_all([can_steal_yellow_refractor(), can_steal_red_refractor()])), # Assume yellow for bomb quest 
+                    ExitData("Downtown - Outside (Lost Bag)", has_all([has_jump_springs(), can_steal_red_refractor()])), # Assume jump springs for bomb quest instead of can take yellow refractor 
                     ExitData("Downtown - Outside (Discarded Saw)", has_all([can_steal_yellow_refractor(), has_item("Pick")])),
                     ExitData("Downtown - Library"),
                     ExitData("City Hall - Outside"),

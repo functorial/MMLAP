@@ -65,5 +65,15 @@ namespace MMLAP.Helpers
 
             return Memory.WriteBit(addressData.Address, addressData.BitNumber.Value, value);
         }
+
+        // Used for [jal 0x0001da58 || addiv a0, zero, BitsFromBE378(addressData)] bit checks
+        public static short? BitsFromBE378(AddressData? addressData)
+        {
+            if(addressData == null || addressData.BitNumber == null)
+            {
+                return null;
+            }
+            return (short)((addressData.Address - 0xBE378) * 8 + (7 - addressData.BitNumber));
+        }
     }
 }

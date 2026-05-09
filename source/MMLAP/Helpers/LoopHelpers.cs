@@ -326,17 +326,20 @@ namespace MMLAP.Helpers
         {
             switch (currentLevelData)
             {
-                case var data when data.AreaName == "Cardon Forest (Flutter Broken)" && data.RoomName == "City Entrance":
-                    if (
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedTronDogCutscene) &&
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenship) && 
-                        !MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedServbotTakeoffCutscene) &&
-                        !MemoryHelpers.ReadAddressDataBit(Addresses.CutsceneFlag)
-                    )
-                    {
-                        PlayCutscene(0x08, 0x03);
-                    }
-                    break;
+                //case var data when data.AreaName == "Cardon Forest (Flutter Broken)" && data.RoomName == "City Entrance":
+                //    if (
+                //        MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedTronDogCutscene) &&
+                //        MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenship) && 
+                //        !MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedServbotTakeoffCutscene) &&
+                //        !MemoryHelpers.ReadAddressDataBit(Addresses.CutsceneFlag)
+                //    )
+                //    {
+                //        PlayCutscene(0x08, 0x03);
+                //        // Delete servbots
+                //        Memory.WriteByte(0x9F108, 0x00);
+                //        Memory.WriteByte(0x9F4C8, 0x00);
+                //    }
+                //    break;
                 default:
                     break;
             }
