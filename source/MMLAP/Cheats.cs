@@ -304,7 +304,7 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardDowntown(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasUnlockedSubCities)
+        public static OpCode[] FastForwardDowntown(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasDefeatedBalkonGerat, bool hasTakenRedRefractor, bool hasUnlockedSubCities)
         {
             // Complex area, but important things here are:
             // 1. Tron and dog scene happens at 0, and can't skip this in vanilla for boss sequence
@@ -312,7 +312,7 @@ namespace MMLAP
             // 3. Bank Robber requires sub-cities raised
             byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
                                     //hasActivatedUnlockSubCities ? (byte)0x09 :
-                                    //hasDefeatedBalkonGerat ? (byte)0x06 :
+                                    hasDefeatedBalkonGerat || hasTakenRedRefractor ? (byte)0x06 :
                                     currentProgressionCounter;
             byte fastForwardStateSubCity = hasUnlockedSubCities ? (byte)0x09 : (byte)0x00;
             return [
@@ -366,7 +366,7 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardCityHall(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat)
+        public static OpCode[] FastForwardCityHall(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat, bool hasTakenRedRefractor)
         {
             // Note: Important here is:
             // 1. Need 0x00 to talk to officer before pirates & to do Bon Bonne
@@ -374,7 +374,7 @@ namespace MMLAP
             // Going to try separating Amelia's Office from here to make things easier
             byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
                                     !hasEarnedClassALicense ? (byte)0x01 :
-                                    !hasDefeatedBalkonGerat ? (byte)0x02 :
+                                    !hasDefeatedBalkonGerat || hasTakenRedRefractor ? (byte)0x02 :
                                     Math.Max((byte)0x06, currentProgressionCounter);
             return [
                 // Four tiers: checks if = 1. else checks = 0 (and 0xBE43E?), else checks 2 <= .. <= 5, else checks >= 6
@@ -474,11 +474,11 @@ namespace MMLAP
         }
 
 
-        public static OpCode[] FastForwardYassPlains(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat)
+        public static OpCode[] FastForwardYassPlains(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat, bool hasTakenRedRefractor)
         {
             byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
                                     !hasEarnedClassALicense ? (byte)0x01 :
-                                    !hasDefeatedBalkonGerat ? (byte)0x02 :
+                                    !hasDefeatedBalkonGerat || hasTakenRedRefractor ? (byte)0x02 :
                                     Math.Max((byte)0x06, currentProgressionCounter);
             return [
                 // Original tests v1 = 1
@@ -492,11 +492,11 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardClozerWoodsWithBridge(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat)
+        public static OpCode[] FastForwardClozerWoodsWithBridge(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat, bool hasTakenRedRefractor)
         {
             byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
                                     !hasEarnedClassALicense ? (byte)0x01 :
-                                    !hasDefeatedBalkonGerat ? (byte)0x02 :
+                                    !hasDefeatedBalkonGerat || hasTakenRedRefractor ? (byte)0x02 :
                                     Math.Max((byte)0x06, currentProgressionCounter);
             return [
                 // ?

@@ -215,7 +215,9 @@ namespace MMLAP.Helpers
                 case var data when data.AreaName == "Downtown":
                     bool hasEarnedClassBLicenseDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasUnlockedSubCitiesDowntown = ItemHelpers.HasReceivedItem(0x0002);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(currentProgressionCounter, hasEarnedClassBLicenseDowntown, hasUnlockedSubCitiesDowntown));
+                    bool hasDefeatedBalkonGeratDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
+                    bool hasTakenRedRefractorDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(currentProgressionCounter, hasEarnedClassBLicenseDowntown, hasDefeatedBalkonGeratDowntown, hasTakenRedRefractorDowntown, hasUnlockedSubCitiesDowntown));
                     break;
 
                 case var data when data.AreaName == "Uptown":
@@ -232,7 +234,8 @@ namespace MMLAP.Helpers
                     bool hasEarnedClassBLicenseCityHall = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasEarnedClassALicenseCityHall = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
                     bool hasDefeatedBalkonGeratCityHall = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardCityHall(currentProgressionCounter, hasEarnedClassBLicenseCityHall, hasEarnedClassALicenseCityHall, hasDefeatedBalkonGeratCityHall));
+                    bool hasTakenRedRefractorCityHall = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCityHall(currentProgressionCounter, hasEarnedClassBLicenseCityHall, hasEarnedClassALicenseCityHall, hasDefeatedBalkonGeratCityHall, hasTakenRedRefractorCityHall));
                     break;
 
                 //case var data when data.AreaName == "City Hall" && data.RoomName.Contains("Amelia's Office"):
@@ -249,14 +252,16 @@ namespace MMLAP.Helpers
                     bool hasEarnedClassBLicenseYass = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasEarnedClassALicenseYass = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
                     bool hasDefeatedBalkonGeratYass = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardYassPlains(currentProgressionCounter, hasEarnedClassBLicenseYass, hasEarnedClassALicenseYass, hasDefeatedBalkonGeratYass));
+                    bool hasTakenRedRefractorYass = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardYassPlains(currentProgressionCounter, hasEarnedClassBLicenseYass, hasEarnedClassALicenseYass, hasDefeatedBalkonGeratYass, hasTakenRedRefractorYass));
                     break;
 
                 case var data when data.AreaName == "Clozer Woods With Bridge":
                     bool hasEarnedClassBLicenseClozerBridge = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasEarnedClassALicenseClozerBridge = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
                     bool hasDefeatedBalkonGeratClozerBridge = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardClozerWoodsWithBridge(currentProgressionCounter, hasEarnedClassBLicenseClozerBridge, hasEarnedClassALicenseClozerBridge, hasDefeatedBalkonGeratClozerBridge));
+                    bool hasTakenRedRefractorClozerBridge = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardClozerWoodsWithBridge(currentProgressionCounter, hasEarnedClassBLicenseClozerBridge, hasEarnedClassALicenseClozerBridge, hasDefeatedBalkonGeratClozerBridge, hasTakenRedRefractorClozerBridge));
                     break;
 
                 case var data when data.AreaName == "Clozer Woods":
