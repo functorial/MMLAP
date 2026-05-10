@@ -321,14 +321,12 @@ namespace MMLAP.Helpers
                     break;
 
                 case var data when data.AreaName == "Flutter To Sub-Gate Cutscene":
-                    Log.Logger.Information("Applying Flutter to Sub-Gate Cutscene fast-forward.");
                     bool hasActivatedEmergencySystemFlutterCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
                     bool hasDefeatedFockeWulfFlutterCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFockeWulf);
                     MemoryHelpers.WriteCode(Cheats.FastForwardFlutterToSubGateCutscene(hasActivatedEmergencySystemFlutterCutscene, hasDefeatedFockeWulfFlutterCutscene));
                     break;
 
                 case var data when data.AreaName == "Gesellschaft Battle":
-                    Log.Logger.Information("Applying Gesellshaft Battle fast-forward");
                     MemoryHelpers.WriteCode(Cheats.FastForwardGesellschaftBattle());
                     break;
 
@@ -505,11 +503,11 @@ namespace MMLAP.Helpers
             bool didLock = exitData.LockExit();
             if (!didLock)
             {
-                Log.Logger.Information($"LockExit failed for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+                //Log.Logger.Information($"LockExit failed for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
             }
             else
             {
-                Log.Logger.Information($"LockExit succeeded for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+                //Log.Logger.Information($"LockExit succeeded for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
             }
 
         }
@@ -518,7 +516,7 @@ namespace MMLAP.Helpers
         {
             if (!DataDicts.ExitDataDict.TryGetValue(exitName, out var exitData))
             {
-                Log.Logger.Information($"LockExit skipped because exit '{exitName}' was not found in ExitDataDict.");
+                //Log.Logger.Information($"LockExit skipped because exit '{exitName}' was not found in ExitDataDict.");
                 return;
             }
 
