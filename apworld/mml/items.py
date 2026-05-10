@@ -126,8 +126,8 @@ ITEM_DATA_DICT = {
     "4520 Zenny"                        : ItemData(0x81C4, ItemClassification.filler,                                  None                        ),
     "5130 Zenny"                        : ItemData(0x8201, ItemClassification.filler,                                  None                        ),
     "5600 Zenny"                        : ItemData(0x8230, ItemClassification.filler,                                  None                        ),
-    "9240 Zenny"                        : ItemData(0x839C, ItemClassification.useful,                                  None                        ), # Large amount of zenny -> useful
-    "10000 Zenny"                       : ItemData(0x83E8, ItemClassification.useful,                                  None                        ), # Large amount of zenny -> useful
+    "9240 Zenny"                        : ItemData(0x839C, ItemClassification.filler,                                  None                        ),
+    "10000 Zenny"                       : ItemData(0x83E8, ItemClassification.filler,                                  None                        ),
 }
 
 ITEM_NAME_TO_ID       = {itemName: ITEM_DATA_DICT[itemName].id                 for itemName in ITEM_DATA_DICT.keys()}

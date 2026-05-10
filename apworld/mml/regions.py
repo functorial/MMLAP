@@ -1771,7 +1771,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Main Gate - (Command Terminal)": 
             GameRegionData(
                 [
-                    "Activate Unlock Sub-Cities",
+                    "Activate unlock sub-cities",
                 ],
                 [
                     ExitData("Main Gate - (Entrance)"),
@@ -1799,18 +1799,26 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("Main Gate - (Entrance)"),
-                    ExitData("Main Gate - Juno Area (Boss)", has_sub_city_keys()),
+                    ExitData("Main Gate - Juno Area (Boss corridor)", has_sub_city_keys()),
+                ]
+            ),
+        "Main Gate - Juno Area (Boss corridor)": 
+            GameRegionData(
+                [
+                    "Main Gate, Boss corridor chest",
+                ],
+                [
+                    ExitData("Main Gate - Juno Area (Sub-City Key Doors)", has_sub_city_keys()),
+                    ExitData("Main Gate - Juno Area (Boss)"),
                 ]
             ),
         "Main Gate - Juno Area (Boss)": 
             GameRegionData(
                 [
-                    # Technically this connects to Cardon Forest after killing Juno.
-                    "Main Gate, Boss corridor chest",
+                    "Juno defeated",
                 ],
                 [
-                    ExitData("Main Gate - Juno Area (Sub-City Key Doors)", has_sub_city_keys()),
-                    ExitData("Cardon Forest"),
+                    ExitData("Cardon Forest"), # This one-time exit disappears after defeating Juno, but leaving it here for now
                 ]
             ),
         "Old City Sub-City - City": 

@@ -682,14 +682,14 @@ namespace MMLAP.Helpers
             { 93,  new(93,  "Uptown Sub-City, Chest",                                        LocationCategory.Container, LevelDataDict[0x1D05], ItemDataDict[0x0239], new AddressData(0xBE404, 2, null), null, false, 0x9F114, 0x8C735)  },
             { 94,  new(94,  "Flutter, Study chest",                                          LocationCategory.Hole,      LevelDataDict[0x1B05], ItemDataDict[0x0261], new AddressData(0xBE3E1, 5, null), null, false, null,    0x15333F) },
             { 95,  new(95,  "Escape the Ocean Tower",                                        LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], new AddressData(0xBE3E8, 4, null), null, false, null,    null)     },
-            { 96,  new(96,  "Ferdinand defeated",                                            LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedFerdinand,    null, false, null,    null)     },
-            { 97,  new(97,  "Bon Bonne defeated",                                            LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], new AddressData(0xBE382, 6, null), null, false, null,    null)     },
-            { 98,  new(98,  "Marlwolf defeated",                                             LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedMarlwolf,     null, false, null,    null)     },
-            { 99,  new(99,  "Balkon Gerat defeated",                                         LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedBalkonGerat,  null, false, null,    null)     },
-            { 100, new(100, "Garudoriten defeated",                                          LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], new AddressData(0xBE382, 7, null), null, false, null,    null)     },
-            { 101, new(101, "Karumuna Bash Trio defeated",                                   LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], new AddressData(0xBE382, 4, null), null, false, null,    null)     },
-            { 102, new(102, "Focke-Wulf defeated",                                           LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedFockeWulf, null, false, null,    null)     },
-            { 103, new(103, "Theodore Bruno defeated",                                       LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], new AddressData(0xBE382, 5, null), null, false, null,    null)     },
+            { 96,  new(96,  "Ferdinand defeated",                                            LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedFerdinand,        null, false, null,    null)     },
+            { 97,  new(97,  "Bon Bonne defeated",                                            LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedBonBonne,         null, false, null,    null)     },
+            { 98,  new(98,  "Marlwolf defeated",                                             LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedMarlwolf,         null, false, null,    null)     },
+            { 99,  new(99,  "Balkon Gerat defeated",                                         LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedBalkonGerat,      null, false, null,    null)     },
+            { 100, new(100, "Garudoriten defeated",                                          LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedGarudoriten,      null, false, null,    null)     },
+            { 101, new(101, "Karumuna Bash Trio defeated",                                   LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedKarumunaBashTrio, null, false, null,    null)     },
+            { 102, new(102, "Focke-Wulf defeated",                                           LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedFockeWulf,        null, false, null,    null)     },
+            { 103, new(103, "Theodore Bruno defeated",                                       LocationCategory.Combat,    null,                  ItemDataDict[0x00FF], Addresses.HasDefeatedTheodoreBruno,    null, false, null,    null)     },
             { 104, new(104, "Rescue the shop owner's husband",                               LocationCategory.Quest,     LevelDataDict[0x0401], ItemDataDict[0x0258], Addresses.HasRescuedShopOwnersHusband, null, false, null,    0x155C75) },
             { 105, new(105, "Beast Hunter Rank A",                                           LocationCategory.Quest,     LevelDataDict[0x0803], ItemDataDict[0x0264], new AddressData(0xBE3DA, 3, null), null, false, null,    0x1535B3) },
             { 106, new(106, "Balloon Fantasy Rank A",                                        LocationCategory.Quest,     LevelDataDict[0x0804], ItemDataDict[0x025C], new AddressData(0xBE3DA, 2, null), null, false, null,    0x153CAB) },
@@ -708,7 +708,7 @@ namespace MMLAP.Helpers
             { 119, new(119, "Museum donation, Shiny Object",                                 LocationCategory.Quest,     LevelDataDict[0x1C01], ItemDataDict[0x00FF], new AddressData(0xBE37F, 2, null), null, false, null,    null)     },
             { 120, new(120, "Museum donation, Old Shield",                                   LocationCategory.Quest,     LevelDataDict[0x1C01], ItemDataDict[0x00FF], new AddressData(0xBE37F, 1, null), null, false, null,    null)     },
             { 121, new(121, "Museum donation, Shiny Red Stone",                              LocationCategory.Quest,     LevelDataDict[0x1C01], ItemDataDict[0x00FF], new AddressData(0xBE37F, 0, null), null, false, null,    null)     },
-            { 122, new(122, "Complete the Museum exhibit",                                   LocationCategory.Quest,     LevelDataDict[0x1C01], ItemDataDict[0x00FF], new AddressData(0xBE37F, null, 1), "255", false, null,    null)     },
+          //{ 122, new(122, "Complete the Museum exhibit",                                   LocationCategory.Quest,     LevelDataDict[0x1C01], ItemDataDict[0x00FF], new AddressData(0xBE37F, null, 1), "255", false, null,    null)     },
             { 123, new(123, "Take dangerous object from museum visitor",                     LocationCategory.Quest,     LevelDataDict[0x1C01], ItemDataDict[0x026B], new AddressData(0xBE37D, 0, null), null, false, null,    0x155387) },
             { 124, new(124, "Gift Flower to Roll",                                           LocationCategory.Quest,     null,                  ItemDataDict[0x00FF], new AddressData(0xBE3B4, 7, null), null, false, null,    null)     },
             { 125, new(125, "Gift Music Box to Roll",                                        LocationCategory.Quest,     null,                  ItemDataDict[0x00FF], new AddressData(0xBE3B4, 6, null), null, false, null,    null)     },
@@ -720,8 +720,9 @@ namespace MMLAP.Helpers
             { 131, new(131, "Earn the Class B License",                                      LocationCategory.Quest,     LevelDataDict[0x0601], ItemDataDict[0x022C], Addresses.HasEarnedClassBLicense,  null, false, null,    0x15450A) },
             { 132, new(132, "Earn the Class A License",                                      LocationCategory.Quest,     LevelDataDict[0x0601], ItemDataDict[0x022B], Addresses.HasEarnedClassALicense,  null, false, null,    0x154E1D) },
             { 133, new(133, "Activate the emergency system",                                 LocationCategory.Quest,     LevelDataDict[0x1302], ItemDataDict[0x0001], Addresses.HasActivatedEmergencySystem,  null, false, null, null) },
-            { 134, new(134, "Activate Unlock Sub-Cities",                                    LocationCategory.Quest,     LevelDataDict[0x1A00], ItemDataDict[0x0002], Addresses.HasActivatedUnlockSubCities,  null, false, null,    null)     },
-          //{ 999, new(999, "Gai-nee Tooren defeated",                                       LocationCategory.Combat,    LevelDataDict[0x1D02], ItemDataDict[0x00FF], new AddressData(0xBE386, 6, null), null, false, null,    null)     },
+            { 134, new(134, "Activate unlock sub-cities",                                    LocationCategory.Quest,     LevelDataDict[0x1A00], ItemDataDict[0x0002], Addresses.HasActivatedUnlockSubCities,  null, false, null,    null)     },
+          //{ 135, new(135, "Gai-nee Tooren defeated",                                       LocationCategory.Combat,    LevelDataDict[0x1D02], ItemDataDict[0x00FF], new AddressData(0xBE386, 6, null), null, false, null,    null)     },
+            { 136, new(136, "Juno defeated",                                                 LocationCategory.Combat,    LevelDataDict[0x1A0F], ItemDataDict[0x00FF], Addresses.HasDefeatedJuno,         null, false, null,    null)     },
         };
         
         public static List<ILocation> BuildLocationList(Dictionary<string, object> options)
@@ -729,8 +730,16 @@ namespace MMLAP.Helpers
             List<ILocation> locationList = [];
             foreach (LocationData locationData in LocationDataDict.Values)
             {
-                // TODO: Make locations depend on options
-                if (locationData.CheckAddressData.BitNumber is not null)
+                // No reason to have a Juno defeated location if it is the goal
+                if (
+                    locationData.Id == 136 &&
+                    options.TryGetValue("goal", out var goal) && 
+                    (MMLEnums.CompletionGoal)goal == MMLEnums.CompletionGoal.JUNO
+                )
+                {
+                    continue;
+                }
+                else if (locationData.CheckAddressData.BitNumber != null)
                 {
                     Location location = new()
                     {
@@ -743,20 +752,23 @@ namespace MMLAP.Helpers
                     };
                     locationList.Add(location);
                 }
-                else if (locationData.CheckValue != null)
-                {
-                    Location location = new()
-                    {
-                        Id = locationData.Id,
-                        Name = locationData.Name,
-                        Address = locationData.CheckAddressData.Address,
-                        CheckType = LocationCheckType.Byte,
-                        CheckValue = locationData.CheckValue ?? "255",
-                        Category = locationData.Category.ToString()
-                    };
-                    locationList.Add(location);
-                }
+                //else if (locationData.CheckValue != null)
+                //{
+                //    Location location = new()
+                //    {
+                //        Id = locationData.Id,
+                //        Name = locationData.Name,
+                //        Address = locationData.CheckAddressData.Address,
+                //        CheckType = LocationCheckType.Byte,
+                //        CheckValue = locationData.CheckValue ?? "255",
+                //        Category = locationData.Category.ToString()
+                //    };
+                //    locationList.Add(location);
+                //}
             }
+
+
+
             return locationList;
         }
     }

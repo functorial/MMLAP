@@ -24,7 +24,8 @@
 
         public enum CompletionGoal
         {
-            Juno = 0,
+            JUNO = 0,
+            ALL_BOSSES = 1,
         }
 
         public enum Register : byte

@@ -38,6 +38,7 @@ namespace MMLAP
         public static readonly AddressData HasStartedPirateAttackEvent = new(0xBE378, 1, null); // Flipped after talking to roll by the car
         public static readonly AddressData HasStartedBlumebearFight = new(0xBE379, 6, null); // Flipped after policemen cutscene
         public static readonly AddressData HasDefeatedFerdinand = new(0xBE383, 6, null);
+        public static readonly AddressData HasDefeatedBonBonne = new(0xBE382, 6, null);
         public static readonly AddressData HasEarnedClassBLicense = new(0xBE3EA, 4, null);
         public static readonly AddressData HasStartedMarlwolf = new(0xBE3EA, 3, null);
         public static readonly AddressData HasDefeatedMarlwolf = new(0xBE37A, 7, null);
@@ -51,12 +52,15 @@ namespace MMLAP
         public static readonly AddressData BoatIsFixed = new(0xBE37A, 6, null);
         public static readonly AddressData HasDefeatedBalkonGerat = new(0xBE37B, 2, null);
         public static readonly AddressData HasTakenRedRefractor = new(0xBE37C, 0, null);
+        public static readonly AddressData HasDefeatedGarudoriten = new(0xBE382, 7, null);
         public static readonly AddressData HasShownRollRedRefractor = new(0xBE3B2, 6, null);
         public static readonly AddressData HasRedRefractor = new(0xBE41D, 6, null);
+        public static readonly AddressData HasDefeatedKarumunaBashTrio = new(0xBE382, 4, null);
         public static readonly AddressData HasActivatedEmergencySystem = new(0xBE380, 3, null);
         public static readonly AddressData HasWatchedMainGateOpenCutscene = new(0xBE3EE, 4, null);
         public static readonly AddressData HasDefeatedFockeWulf = new(0xBE37D, 5, null);
         public static readonly AddressData HasActivatedUnlockSubCities = new(0xBE382, 1, null);
+        public static readonly AddressData HasDefeatedTheodoreBruno = new(0xBE382, 5, null);
         public static readonly AddressData HasDefeatedJuno = new(0xBE385, 3, null);
         public static readonly AddressData HasStartedFlutterFixFromJunoCutscene = new(0xBE381, 2, null);
         public static readonly AddressData HasWatchedFlutterFixFromJunoCutscene = new(0xBE386, 7, null);

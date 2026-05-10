@@ -157,9 +157,9 @@ LOCATION_DATA_DICT = {
     "Earn the Class B License"                                      : LocationData(131, LocationCategory.QUEST,     False),
     "Earn the Class A License"                                      : LocationData(132, LocationCategory.QUEST,     False),
     "Activate the emergency system"                                 : LocationData(133, LocationCategory.QUEST,     False),
-    "Activate Unlock Sub-Cities"                                    : LocationData(134, LocationCategory.QUEST,     False),
-    # Goals
-    "Juno Defeated"                                                 : LocationData(999, LocationCategory.COMBAT,    False),
+    "Activate unlock sub-cities"                                    : LocationData(134, LocationCategory.QUEST,     False),
+   #"Gai-nee Tooren defeated"                                       : LocationData(135, LocationCategory.COMBAT,    False),
+    "Juno defeated"                                                   : LocationData(136, LocationCategory.COMBAT,    False),
 }
 
 LOCATION_NAME_TO_ID         = {locationName: LOCATION_DATA_DICT[locationName].id         for locationName in LOCATION_DATA_DICT.keys()}
@@ -180,12 +180,37 @@ def create_regular_locations(world: GameWorld) -> None:
         region_data = region_data_dict[region_name]
         region = world.get_region(region_name)
         location_names_with_ids = get_location_names_with_ids(region_data.locationNameList)
+        # Don't create the location for defeating Juno if the goal is to defeat Juno, since it will be handled as an event
+        if world.options.goal == world.options.goal.option_juno and region_name == "Main Gate - Juno Area (Boss)":
+            location_names_with_ids.pop("Juno defeated", None)
         region.add_locations(location_names_with_ids, GameLocation)
     return None
 
 def create_events(world: GameWorld) -> None:
-    juno_region = world.get_region("Main Gate - Juno Area (Boss)")
-    juno_region.add_event("Juno Defeated", "Victory", location_type=GameLocation, item_type=items.GameItem, rule=lambda state: True)  # Add logic for beating Juno with access.
+    match world.options.goal:
+        case world.options.goal.option_juno:
+            juno_region = world.get_region("Main Gate - Juno Area (Boss)")
+            juno_region.add_event("Juno defeated", "Victory", location_type=GameLocation, item_type=items.GameItem, rule=lambda state: True)  # Add logic for beating Juno with access.
+        case world.options.goal.option_all_bosses:
+            event_region = world.get_region("Cardon Forest")
+            event_region.add_event(
+                "All bosses defeated",
+                "Victory",
+                location_type=GameLocation,
+                item_type=items.GameItem,
+                rule=lambda state: (
+                    state.can_reach_location("Escape the Ocean Tower", world.player)
+                    and state.can_reach_location("Ferdinand defeated", world.player)
+                    and state.can_reach_location("Bon Bonne defeated", world.player)
+                    and state.can_reach_location("Marlwolf defeated", world.player)
+                    and state.can_reach_location("Balkon Gerat defeated", world.player)
+                    and state.can_reach_location("Garudoriten defeated", world.player)
+                    and state.can_reach_location("Karumuna Bash Trio defeated", world.player)
+                    and state.can_reach_location("Focke-Wulf defeated", world.player)
+                    and state.can_reach_location("Theodore Bruno defeated", world.player)
+                    and state.can_reach_location("Juno defeated", world.player)
+                )
+            )
     world.multiworld.completion_condition[world.player] = lambda state: state.has("Victory", world.player)
 
 def lock_missables_to_filler(world) -> None:
@@ -195,7 +220,10 @@ def lock_missables_to_filler(world) -> None:
         if cls == ItemClassification.filler
     ]
     world.locked_missable_filler_names = []
-    missable_locations = [loc for loc in world.multiworld.get_locations(world.player) if LOCATION_DATA_DICT[loc.name].isMissable]
+    missable_locations = [
+        loc for loc in world.multiworld.get_locations(world.player) 
+        if loc.name in LOCATION_DATA_DICT and LOCATION_DATA_DICT[loc.name].isMissable
+    ]
     for loc in missable_locations:
         name = world.random.choice(filler_item_names) 
         loc.place_locked_item(world.create_item(name))

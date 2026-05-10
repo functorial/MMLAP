@@ -9,13 +9,14 @@ from Options import Toggle, DefaultOnToggle, Option, Range, Choice, ItemDict, De
 
 class Goal(Choice):
     """
-    The goal that the player will have.
+    Juno: Defeat Juno.
+    All Bosses: Defeat all bosses with a healthbar.
     """
 
     display_name = "Goal"
 
     option_juno = 0
-    #complete_museum = 1
+    option_all_bosses = 1
 
     default = option_juno
 

@@ -202,7 +202,8 @@ public partial class App : Application
                     CompletionGoal goal = (CompletionGoal)goalValue;
                     goalText = goal switch
                     {
-                        CompletionGoal.Juno => "Defeat Juno",
+                        CompletionGoal.JUNO => "Defeat Juno.",
+                        CompletionGoal.ALL_BOSSES => "Defeat all bosses with a healthbar.",
                         _ => "Unknown",
                     };
                 }
@@ -783,13 +784,21 @@ public partial class App : Application
             )
         )
         {
-            APClient.Options.TryGetValue("goal", out var goalValueObj);
-            if (APClient != null && APClient.Options != null)
+            if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goalValueObj))
             {
-                int goalValue = goalValueObj as int? ?? 0;
-                bool isGoalComplete = (CompletionGoal)goalValue switch
+                bool isGoalComplete = (CompletionGoal)goalValueObj switch
                 {
-                    CompletionGoal.Juno => MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
+                    CompletionGoal.JUNO => MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
+                    CompletionGoal.ALL_BOSSES => 
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand) &&
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBonBonne) &&
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedMarlwolf) &&
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat) &&
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedGarudoriten) &&
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedKarumunaBashTrio) &&
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFockeWulf) &&
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedTheodoreBruno) &&
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
                     _ => false
                 };
                 if (isGoalComplete)
