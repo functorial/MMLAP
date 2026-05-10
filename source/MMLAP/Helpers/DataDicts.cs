@@ -733,8 +733,8 @@ namespace MMLAP.Helpers
                 // No reason to have a Juno defeated location if it is the goal
                 if (
                     locationData.Id == 136 &&
-                    options.TryGetValue("goal", out var goal) && 
-                    (MMLEnums.CompletionGoal)goal == MMLEnums.CompletionGoal.JUNO
+                    options.TryGetValue("goal", out var goal) &&
+                    (MMLEnums.CompletionGoal)int.Parse(goal.ToString()) == MMLEnums.CompletionGoal.JUNO
                 )
                 {
                     continue;

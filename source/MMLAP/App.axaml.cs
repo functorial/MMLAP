@@ -784,9 +784,9 @@ public partial class App : Application
             )
         )
         {
-            if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goalValueObj))
+            if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goal))
             {
-                bool isGoalComplete = (CompletionGoal)goalValueObj switch
+                bool isGoalComplete = (CompletionGoal)int.Parse(goal.ToString()) switch
                 {
                     CompletionGoal.JUNO => MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
                     CompletionGoal.ALL_BOSSES => 
