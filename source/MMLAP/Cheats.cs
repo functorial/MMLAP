@@ -17,6 +17,8 @@ namespace MMLAP
         public static readonly OpCode Restore1FB58 = new(0x0001FB58, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FB90 = new(0x0001FB90, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FBCC = new(0x0001FBCC, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FC54 = new(0x0001FC54, 0x80421B62); // lb v0, 0x1B62(v0) ?
+        public static readonly OpCode Restore1FCE8 = new(0x0001FCE8, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FCA8 = new(0x0001FCA8, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FD40 = new(0x0001FD40, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FD5C = new(0x0001FD5C, 0x80631B62); // lb v1, 0x1B62(v1)
@@ -50,7 +52,7 @@ namespace MMLAP
                 levelName != "Lake Jyun: On the Lake" &&
                 levelName != "Lake Jyun: Side River" &&
                 MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat) &&
-                Memory.ReadUInt(0x0001FBCC) == 0x00000000
+                Memory.ReadUInt(0x0001FBCC) != Restore1FBCC.Instruction
             )
             {
                 //Memory.Write(0x0001FBC8, 0x3C03800C);
@@ -107,11 +109,26 @@ namespace MMLAP
             if (currentLevelData.AreaName != "City Hall")
             {
                 MemoryHelpers.WriteCode(Restore1FA9C);
+                MemoryHelpers.WriteCode(Restore1FCE8);
             }
 
             if (currentLevelData.AreaName != "Downtown")
             {
                 MemoryHelpers.WriteCode(Restore1FA08);
+            }
+
+            if (currentLevelData.AreaName != "Outside Cardon Forest Sub-Gate")
+            {
+                //MemoryHelpers.WriteCode(Restore1FC54); // Actually don't want to restore this one...
+                // The game seems to crash if your progression counter is too high and trying to load into the tank with our fast forwarding
+                // So actually want to pre-load this before loading
+                bool hasDefeatedFerdinand = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand);
+                bool hasCompletedCardonTankEvent = MemoryHelpers.ReadAddressDataBit(Addresses.HasCompletedCardonTankEvent);
+                byte fastForwardState = !hasDefeatedFerdinand ? (byte)0x00 :
+                                        !hasCompletedCardonTankEvent ? (byte)0x03 :
+                                        (byte)0x04;
+                OpCode code = LoadHalfImmediate(0x0001FC54, MMLEnums.Register.v0, fastForwardState);
+                MemoryHelpers.WriteCode(code);
             }
         }
 
@@ -120,10 +137,12 @@ namespace MMLAP
             // Needs to be written fast during loading screen
             byte fastForwardState = !hasDefeatedFerdinand ? (byte)0x00 :
                                     !hasCompletedCardonTankEvent ? (byte)0x03 :
-                                    Math.Max((byte)0x04, currentProgressionCounter);
+                                    (byte)0x04;
             return [
                 // Unlock Door
-                LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, 0x04),
+                LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, fastForwardState),//0x04),
+                //
+                LoadHalfImmediate(0x0001FC54, MMLEnums.Register.v0, fastForwardState), // Also see special case in restore1fxxxwrites
                 //
                 LoadHalfImmediate(0x00100CE0, MMLEnums.Register.v0, fastForwardState),
                 LoadHalfImmediate(0x00100E8C, MMLEnums.Register.v1, fastForwardState),
@@ -360,12 +379,12 @@ namespace MMLAP
                 LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardState),
                 // Check if fixed flutter when loading in hospital (for side quests).
                 // Open it up, allowing Ira quest.
-                // Missing woman quest turn in (?) still requires other bit check @ bit 563
                 //LoadHalfImmediate(0x00101310, MMLEnums.Register.v0, (byte)0x01),
-                //LoadHalfImmediate(0x00101320, MMLEnums.Register.v0, (byte)0x01),
                 Nop(0x00101318),
+                // other bit check @ bit 563
+                //LoadHalfImmediate(0x00101320, MMLEnums.Register.v0, (byte)0x01),
                 //Nop(0x00101328),
-                // Missing woman quest check?
+                // Missing woman quest check
                 LoadHalfImmediate(0x0010129C, MMLEnums.Register.v0, fastForwardState),
             ];
         }
@@ -483,7 +502,7 @@ namespace MMLAP
         {
             byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
                                     !hasEarnedClassALicense ? (byte)0x01 :
-                                    !hasDefeatedBalkonGerat || hasTakenRedRefractor ? (byte)0x02 :
+                                    !hasDefeatedBalkonGerat && !hasTakenRedRefractor ? (byte)0x02 :
                                     Math.Max((byte)0x06, currentProgressionCounter);
             return [
                 // Original tests v1 = 1
