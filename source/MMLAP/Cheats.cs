@@ -265,7 +265,8 @@ namespace MMLAP
         public static OpCode[] FastForwardCardonForestFlutterFixed(byte currentProgressionCounter, bool hasDefeatedJuno, bool hasWatchedFlutterFixFromJunoCutscene, bool hasCompletedGoal)
         {
             bool isWatchingFromJunoCutscene = hasDefeatedJuno && !hasWatchedFlutterFixFromJunoCutscene;
-            byte fastForwardState = hasCompletedGoal || isWatchingFromJunoCutscene ? (byte)0x0B :
+            byte fastForwardState = hasCompletedGoal ? (byte)0x0B :
+                                  //isWatchingFromJunoCutscene ? (byte)0x0B :
                                     Math.Min((byte)0x0A, Math.Max((byte)0x07, currentProgressionCounter));
             return [
                 // Can re-enter flutter

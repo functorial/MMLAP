@@ -62,6 +62,7 @@ namespace MMLAP
         public static readonly AddressData HasActivatedUnlockSubCities = new(0xBE382, 1, null);
         public static readonly AddressData HasDefeatedTheodoreBruno = new(0xBE382, 5, null);
         public static readonly AddressData HasDefeatedJuno = new(0xBE385, 3, null);
+        public static readonly AddressData HasFinishedWatchingJunoDefeatCutscene = new(0xBE3B7, 0, null);
         public static readonly AddressData HasStartedFlutterFixFromJunoCutscene = new(0xBE381, 2, null);
         public static readonly AddressData HasWatchedFlutterFixFromJunoCutscene = new(0xBE386, 7, null);
         // Side quest flags

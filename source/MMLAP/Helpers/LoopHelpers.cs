@@ -145,6 +145,20 @@ namespace MMLAP.Helpers
                     bool hasWatchedFlutterFixFromJunoCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedFlutterFixFromJunoCutscene);
                     bool hasCompletedGoal = App.HasSubmittedGoal;
                     MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(currentProgressionCounter, hasDefeatedJunoFlutterFixed, hasWatchedFlutterFixFromJunoCutscene, hasCompletedGoal));
+                    if(
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasFinishedWatchingJunoDefeatCutscene) &&
+                        !MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedFlutterFixFromJunoCutscene)
+                    )
+                    {
+                        if (
+                            !MemoryHelpers.ReadAddressDataBit(Addresses.CutsceneFlag) &&
+                            (Memory.ReadUShort(0xC4C5C) == 0x215B)
+                        )
+                        {
+                            PlayCutscene(0x00, 0x00);
+                            System.Threading.Thread.Sleep(2000);
+                        }
+                    }
                     break;
 
                 case var data when data.AreaName == "Outside Cardon Forest Sub-Gate":
@@ -708,9 +722,9 @@ namespace MMLAP.Helpers
             Memory.WriteByte(Addresses.CutsceneFlag.Address, 0x01);        // Setting this plays the config queued up above
         }
 
-        public static void StopCutscene()
-        {
-            Memory.WriteByte(0xC4C4C, 0x02);
-        }
+        //public static void StopCutscene()
+        //{
+        //    Memory.WriteByte(0xC4C4C, 0x02);
+        //}
     }
 }
