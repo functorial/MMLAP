@@ -660,8 +660,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 ],
                 [
                     ExitData("Uptown"),
-                    ExitData("Uptown - Hospital (Ira's Room)", can_defeat_marlwolf()), #can_steal_red_refractor()),
-                    ExitData("Uptown - Hospital (Missing woman turn-in)", can_open_main_gate()),
+                    ExitData("Uptown - Hospital (Ira's Room)", can_defeat_marlwolf()), #can_steal_red_refractor()),  # Moving this to earlier in the story
+                    ExitData("Uptown - Hospital (Missing woman turn-in)", can_fix_flutter()) #can_open_main_gate()), # Moving this to earlier in the story
                 ]
             ),
         "Uptown - Hospital (Ira's Room)": 

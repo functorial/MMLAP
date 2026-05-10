@@ -222,7 +222,8 @@ namespace MMLAP.Helpers
 
                 case var data when data.AreaName == "Uptown":
                     bool hasUnlockedSubCitiesUptown = ItemHelpers.HasReceivedItem(0x0002);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardUptown(currentProgressionCounter, hasUnlockedSubCitiesUptown));
+                    bool hasShownRollRedRefractorUptown = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardUptown(currentProgressionCounter, hasUnlockedSubCitiesUptown, hasShownRollRedRefractorUptown));
                     break;
 
                 case var data when data.AreaName == "Old City":
@@ -244,8 +245,8 @@ namespace MMLAP.Helpers
                 //    break;
 
                 case var data when data.AreaName == "City Hall (Indoors)":
-                    bool hasActivatedEmergencySystemcityHallIndoors = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardCityHallIndoors(currentProgressionCounter, hasActivatedEmergencySystemcityHallIndoors));
+                    bool hasActivatedEmergencySystemCityHallIndoors = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCityHallIndoors(currentProgressionCounter, hasActivatedEmergencySystemCityHallIndoors));
                     break;
 
                 case var data when data.AreaName == "Yass Plains":
