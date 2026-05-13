@@ -217,8 +217,9 @@ namespace MMLAP.Helpers
                 case var data when data.AreaName == "Apple Market":
                     bool hasRescuedShopOwnersHusbandApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasRescuedShopOwnersHusband);
                     bool hasEarnedClassBLicenseApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
+                    bool hasEarnedClassALicenseApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
                     bool hasShownRollRedRefractorApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusbandApple, hasEarnedClassBLicenseApple, hasShownRollRedRefractorApple));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusbandApple, hasEarnedClassBLicenseApple, hasEarnedClassALicenseApple, hasShownRollRedRefractorApple));
                     break;
 
                 case var data when data.AreaName == "Underground Ruins":
@@ -305,8 +306,8 @@ namespace MMLAP.Helpers
                     break;
 
                 case var data when data.AreaName == "Lake Jyun":
-                    bool hasDefeatedBalkonGeratLake = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyun(hasDefeatedBalkonGeratLake));
+                    bool hasWatchedBalkonGeratDefeatCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedBalkonGeratDefeatCutscene);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyun(hasWatchedBalkonGeratDefeatCutscene));
                     break;
 
                 case var data when data.AreaName == "Flutter Takeoff":

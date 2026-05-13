@@ -40,7 +40,7 @@ namespace MMLAP
 
             // Restore branch statement noped in EnableFixBoatCallRoll code which is used elsewhere
             if (
-                currentLevelData.AreaName != "Wily's Boat: Outside Boat Shop" &&
+                levelName != "Wily's Boat: Outside Boat Shop" &&
                 Memory.ReadUInt(Addresses.FixBoatCallRollUtil.Address) == 0x00000000 &&
                 MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat)
             )
@@ -49,8 +49,7 @@ namespace MMLAP
             }
 
             if (
-                levelName != "Lake Jyun: On the Lake" &&
-                levelName != "Lake Jyun: Side River" &&
+                currentLevelData.AreaName != "Lake Jyun" &&
                 MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat) &&
                 Memory.ReadUInt(0x0001FBCC) != Restore1FBCC.Instruction
             )
@@ -295,11 +294,12 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardAppleMarket(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband, bool hasEarnedClassBLicense, bool hasShownRollRedRefractor)
+        public static OpCode[] FastForwardAppleMarket(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasShownRollRedRefractor)
         {
             //byte fastForwardShopOwner = hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01;
             byte fastForwardState = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 : 
-                                    !hasShownRollRedRefractor ? (byte)0x01 :
+                                    !hasEarnedClassALicense ? (byte)0x01 :
+                                    !hasShownRollRedRefractor ? (byte)0x02 :
                                     Math.Max((byte)0x08, currentProgressionCounter); // Moving this state early to red refractor
             return [
                 // 
@@ -619,9 +619,9 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardLakeJyun(bool hasDefeatedBalkonGerat)
+        public static OpCode[] FastForwardLakeJyun(bool hasWatchedBalkonGeratDefeatCutscene)
         {
-            OpCode[] code = hasDefeatedBalkonGerat ? [
+            OpCode[] code = hasWatchedBalkonGeratDefeatCutscene ? [
                 // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
                 LoadHalfImmediate(0x0010059C, MMLEnums.Register.v1, 0x06),
                 // Prevents crash after starting phase 1

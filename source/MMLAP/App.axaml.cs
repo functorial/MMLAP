@@ -198,8 +198,7 @@ public partial class App : Application
                 string goalText;
                 if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goalValueObj))
                 {
-                    int goalValue = goalValueObj as int? ?? 0;
-                    CompletionGoal goal = (CompletionGoal)goalValue;
+                    CompletionGoal goal = (CompletionGoal)int.Parse(goalValueObj.ToString());
                     goalText = goal switch
                     {
                         CompletionGoal.JUNO => "Defeat Juno.",
@@ -211,7 +210,20 @@ public partial class App : Application
                 {
                     goalText = "Unknown";
                 }
-                Log.Logger.Information($"Your goal is: {goalText}.");
+                Log.Logger.Information($"Your goal is: {goalText}");
+                break;
+            case "!options":
+                if (APClient != null && APClient.Options != null)
+                {
+                    foreach (string option in APClient.Options.Keys)
+                    {
+                        Log.Logger.Information($"{option}: {APClient.Options[option]}");
+                    }
+                }
+                else
+                {
+                    Log.Logger.Information("Options not found.");
+                }
                 break;
             default:
                 APClient?.SendMessage(a.Command);
