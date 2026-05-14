@@ -210,19 +210,24 @@ namespace MMLAP.Helpers
                 ItemCategory.Normal 
             ];
             byte[] itemByteArray = [];
-            switch (itemData.Category)
+            switch (itemData)
             {
-                case ItemCategory category when displayedItemCategories.Contains(category):
+                case var data when displayedItemCategories.Contains(data.Category):
                     itemByteArray = AddTextColor(EncodeItemDisplay(itemData.ItemCode ?? 0), textColorGreen);
                     break;
-                case ItemCategory.Nothing:
+                case var data when data.Category == ItemCategory.Nothing:
                     itemByteArray = nothing; 
                     break;
-                case ItemCategory.Zenny:
+                case var data when data.Category == ItemCategory.Zenny:
                     itemByteArray = EncodeSimpleString(itemData.Name);
                     break;
-                case ItemCategory.AP:
+                case var data when data.Category == ItemCategory.AP:
                     itemByteArray = redAPItem;
+                    break;
+                case var data when data.NickName != null:
+                    itemByteArray = AddTextColor(EncodeSimpleString(itemData.NickName ?? ""), textColorGreen);
+                    break;
+                default:
                     break;
             }
             byte[] spaceFill = [];
