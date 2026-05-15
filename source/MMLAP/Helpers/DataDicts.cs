@@ -696,7 +696,7 @@ namespace MMLAP.Helpers
             { 107, new(107, "Race Straight Course Rank A",                                   LocationCategory.Quest,     LevelDataDict[0x0500], ItemDataDict[0x024A], new AddressData(0xBE3B8, 6, null), null, false, null,    0x153BC3) },
             { 108, new(108, "Race Left Curve Course Rank A",                                 LocationCategory.Quest,     LevelDataDict[0x0500], ItemDataDict[0x0219], new AddressData(0xBE3B8, 5, null), null, false, null,    0x153BC3) },
             { 109, new(109, "Race Technical Course Rank A",                                  LocationCategory.Quest,     LevelDataDict[0x0500], ItemDataDict[0x024F], new AddressData(0xBE3B8, 4, null), null, false, null,    0x153BC3) },
-            { 110, new(110, "Save the missing woman",                                        LocationCategory.Quest,     LevelDataDict[0x0801], ItemDataDict[0x0273], Addresses.HasSavedTheMissingWoman, null, false, null,    0x1539A2) },
+            { 110, new(110, "Take Anna to the hospital",                                        LocationCategory.Quest,     LevelDataDict[0x0801], ItemDataDict[0x0273], Addresses.HasSavedTheMissingWoman, null, false, null,    0x1539A2) },
             { 111, new(111, "Cure Ira's illness",                                            LocationCategory.Quest,     LevelDataDict[0x0805], ItemDataDict[0x0278], new AddressData(0xBE3BE, 3, null), null, false, null,    0x154657) },
           //{ 112, new(112, "Tell painter she needs red"
           //{ 113, new(112, "Get lipstick"

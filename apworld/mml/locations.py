@@ -132,7 +132,7 @@ LOCATION_DATA_DICT = {
     "Race Straight Course Rank A"                                   : LocationData(107, LocationCategory.QUEST,     False),
     "Race Left Curve Course Rank A"                                 : LocationData(108, LocationCategory.QUEST,     False),
     "Race Technical Course Rank A"                                  : LocationData(109, LocationCategory.QUEST,     False),
-    "Save the missing woman"                                        : LocationData(110, LocationCategory.QUEST,     False),
+    "Take Anna to the hospital"                                     : LocationData(110, LocationCategory.QUEST,     False),
     "Cure Ira's illness"                                            : LocationData(111, LocationCategory.QUEST,     False),
    #"Tell painter she needs red"                                    : LocationData(112, LocationCategory.QUEST,     False),
    #"Get lipstick"                                                  : LocationData(113, LocationCategory.QUEST,     False),

@@ -676,7 +676,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Uptown - Hospital (Missing woman turn-in)": 
             GameRegionData(
                 [
-                    "Save the missing woman",
+                    "Take Anna to the hospital",
                 ],
                 [
                     ExitData("Uptown - Hospital"),
