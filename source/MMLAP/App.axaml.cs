@@ -909,7 +909,7 @@ public partial class App : Application
             APClient.CurrentSession != null
         )
         {
-            if (!LocationManager_EnableLocationsCondition())
+            if (!LocationManager_EnableLocationsCondition() && !HasSubmittedGoal)
             {
                 Log.Logger.Error("Check sent while not in game. Please report this in the Discord thread!");
             }
