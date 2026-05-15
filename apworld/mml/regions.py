@@ -69,7 +69,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         return has_item("Jump Springs")
 
     def has_jet_skates() -> Callable[[CollectionState], bool]:
-        return has_all_items(["Rollerboard", "Old Hoverjets"])
+        return has_all([can_fix_support_car(), has_all_items(["Rollerboard", "Old Hoverjets"])])
     
     def has_citizens_card() -> Callable[[CollectionState], bool]:
         return has_item("Citizen's Card")
