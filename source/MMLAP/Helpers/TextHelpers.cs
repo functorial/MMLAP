@@ -113,6 +113,7 @@ namespace MMLAP.Helpers
             { '/', 0x4E },
             { ' ', 0x4F },
             { '~', 0x51 },
+            { '-', 0x52 },
             { ',', 0x5C },
             { '"', 0x5D },
             { '.', 0x5E },
@@ -120,7 +121,7 @@ namespace MMLAP.Helpers
             { '%', 0x62 },
             { ';', 0x82 },
             { '=', 0x83 },
-            { '\n', 0x86 }
+            { '\n', 0x86 },
            };
 
         public static string TranslateEncoding(byte[] encodedText)

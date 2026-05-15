@@ -492,11 +492,33 @@ namespace MMLAP.Helpers
 
         public static void HandleAreaExitLocks(LevelData currentLevelData)
         {
+            HandleCitizensCardExitUnlocks(currentLevelData);
+            HandleClassBLicenseExitUnlocks(currentLevelData);
+            HandleClassALicenseExitUnlocks(currentLevelData);
+
             HandleCitizensCardExitLocks(currentLevelData);
             HandleClassBLicenseExitLocks(currentLevelData);
             HandleClassALicenseExitLocks(currentLevelData);
             HandleMainGateExitLocks(currentLevelData);
             HandleSubCityUnlockExitLocks(currentLevelData);
+        }
+
+        public static void HandleAreaExitUnlocks(LevelData currentLevelData, long itemId)
+        {
+            switch (itemId)
+            {
+                case 0x022A:
+                    HandleCitizensCardExitUnlocks(currentLevelData);
+                    break;
+                case 0x022B:
+                    HandleClassALicenseExitUnlocks(currentLevelData);
+                    break;
+                case 0x022C:
+                    HandleClassBLicenseExitUnlocks(currentLevelData);
+                    break;
+                default:
+                    break;
+            }
         }
 
         private static void TryLockExitWithDebug(string exitName, ExitData exitData)
@@ -524,6 +546,65 @@ namespace MMLAP.Helpers
             TryLockExitWithDebug(exitName, exitData);
         }
 
+        private static void TryUnlockExitWithDebug(string exitName, ExitData exitData)
+        {
+            bool didUnlock = exitData.UnlockExit();
+            if (!didUnlock)
+            {
+                //Log.Logger.Information($"UnlockExit failed for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+            }
+            else
+            {
+                //Log.Logger.Information($"UnlockExit succeeded for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+            }
+        }
+
+        private static void TryUnlockExitByName(string exitName)
+        {
+            if (!DataDicts.ExitDataDict.TryGetValue(exitName, out var exitData))
+            {
+                Log.Logger.Information($"UnlockExit skipped because exit '{exitName}' was not found in ExitDataDict.");
+                return;
+            }
+
+            TryUnlockExitWithDebug(exitName, exitData);
+        }
+
+        public static void HandleCitizensCardExitUnlocks(LevelData currentLevelData)
+        {
+            if (!ItemHelpers.HasReceivedItem(0x022A))
+            {
+                return;
+            }
+
+            switch (currentLevelData.AreaName)
+            {
+                case "Apple Market":
+                    TryUnlockExitByName("Apple Market -> Downtown");
+                    break;
+
+                case "Yass Plains":
+                    TryUnlockExitByName("Yass Plains -> City Hall");
+                    break;
+
+                case "Outside Main Gate":
+                    TryUnlockExitByName("Outside Main Gate -> Old City");
+                    break;
+
+                case "Wily's Boat":
+                    TryUnlockExitByName("Wily's Boat, Outside (Walkway) -> Uptown");
+                    break;
+
+                case "Underground ruins":
+                    TryUnlockExitByName("Underground Ruins, Room 3 (Sewer) -> Downtown");
+                    TryUnlockExitByName("Underground Ruins, Room 4  -> Old City");
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
         public static void HandleCitizensCardExitLocks(LevelData currentLevelData)
         {
             if (ItemHelpers.HasReceivedItem(0x022A))
@@ -538,7 +619,7 @@ namespace MMLAP.Helpers
                     break;
 
                 case "Yass Plains":
-                    TryLockExitByName("Clozer Woods With Bridge -> Underground Ruins");
+                    TryLockExitByName("Yass Plains -> City Hall");
                     break;
 
                 case "Outside Main Gate":
@@ -559,6 +640,53 @@ namespace MMLAP.Helpers
             }
         }
 
+        public static void HandleClassBLicenseExitUnlocks(LevelData currentLevelData)
+        {
+            if (!ItemHelpers.HasReceivedItem(0x022C))
+            {
+                return;
+            }
+
+            switch (currentLevelData.AreaName)
+            {
+                case "Clozer Woods With Bridge":
+                    TryUnlockExitByName("Clozer Woods With Bridge -> Underground Ruins");
+                    break;
+
+                case "Cardon Forest (Flutter Broken)":
+                    TryUnlockExitByName("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2");
+                    break;
+
+                case "Cardon Forest (Flutter Fixed)":
+                    TryUnlockExitByName("Cardon Forest South (Flutter Fixed) -> Underground Ruins, Room 2");
+                    break;
+
+                case "Cardon Forest Sub-Gate":
+                    TryUnlockExitByName("Cardon Forest Sub-Gate, Room 1 (N) -> Underground Ruins");
+                    break;
+
+                case "Lake Jyun Sub-Gate":
+                    TryUnlockExitByName("Lake Jyun Sub-Gate, Room 4 (W) -> Underground Ruins (NW)");
+                    TryUnlockExitByName("Lake Jyun Sub-Gate, Room 4 (E) -> Underground Ruins (NE)");
+                    break;
+
+                case "Clozer Woods Sub-Gate":
+                    TryUnlockExitByName("Clozer Woods Sub-Gate, Room 10 -> Underground Ruins");
+                    break;
+
+                case "Main Gate":
+                    TryUnlockExitByName("East Door Console Room -> Underground Ruins, NE Area 2");
+                    break;
+
+                case "Underground Ruins":
+                    TryUnlockExitByName("Underground Ruins, Room 1 (Junk Store Man Area) -> Room 2");
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
         public static void HandleClassBLicenseExitLocks(LevelData currentLevelData)
         {
             if (ItemHelpers.HasReceivedItem(0x022C))
@@ -569,20 +697,17 @@ namespace MMLAP.Helpers
             switch (currentLevelData.AreaName)
             {
                 case "Clozer Woods With Bridge":
-                    TryLockExitByName("Yass Plains -> City Hall");
+                    TryLockExitByName("Clozer Woods With Bridge -> Underground Ruins");
                     break;
 
                 case "Cardon Forest (Flutter Broken)":
                     TryLockExitByName("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2");
-                    //if (DataDicts.ExitDataDict.TryGetValue("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2", out var exitDataCardonForestBrokenToRuins2))
-                    //{
-                    //    _ = exitDataCardonForestBrokenToRuins2.LockExit();
-                    //}
+
                     break;
 
                 case "Cardon Forest (Flutter Fixed)":
-                    TryLockExitByName("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2");
-                    //TryLockExitByName("Cardon Forest South (Flutter Fixed) -> Underground Ruins, Room 2");
+                    //TryLockExitByName("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2");
+                    TryLockExitByName("Cardon Forest South (Flutter Fixed) -> Underground Ruins, Room 2");
                     break;
 
                 //case "Old City":
@@ -609,6 +734,39 @@ namespace MMLAP.Helpers
 
                 case "Underground Ruins":
                     TryLockExitByName("Underground Ruins, Room 1 (Junk Store Man Area) -> Room 2");
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        public static void HandleClassALicenseExitUnlocks(LevelData currentLevelData)
+        {
+            if (!ItemHelpers.HasReceivedItem(0x022B))
+            {
+                return;
+            }
+
+            switch (currentLevelData.AreaName)
+            {
+                case "Outside Cardon Forest Sub-Gate":
+                    TryUnlockExitByName("Outside Cardon Forest Sub-Gate -> Cardon Forest Sub-Gate");
+                    break;
+
+                case "Lake Jyun":
+                    TryUnlockExitByName("On the Lake -> Lake Jyun Sub-Gate");
+                    break;
+
+                case "Clozer Woods Sub-Gate":
+                    TryUnlockExitByName("Flutter Lobby -> Clozer Woods Sub-Gate");
+                    break;
+
+                case "Underground Ruins":
+                    TryUnlockExitByName("Underground Ruins, Room 2 -> Cardon Forest Sub-gate");
+                    TryUnlockExitByName("Underground Ruins, Room 7 -> Lake Jyun Sub-Gate (W)");
+                    TryUnlockExitByName("Underground Ruins, Room 7 -> Lake Jyun Sub-Gate (E)");
+                    TryUnlockExitByName("Underground Ruins, Room 9 -> Clozer Woods Sub-Gate");
                     break;
 
                 default:

@@ -25,6 +25,7 @@ namespace MMLAP.Models
         public byte[] TargetCoordinatesValue {get; set;} = targetCoordinatesValue; // 8 bytes: XX XX ZZ ZZ YY YY AA AA
         public uint TargetCoordinatesAddress {get; set;} = targetCoordinatesAddress;
         public bool IsDoor {get; set;} = isDoor;
+        public byte? OriginalSourceZCoordinateValue { get; private set; } = null;
         
         public bool LockExit()
         {
@@ -34,7 +35,30 @@ namespace MMLAP.Models
                 return false;
             }
             uint sourceZCoordinateAddress = TargetCoordinatesAddress - 5; // xx xx zz zz yy yy aa aa *XX XX ZZ ZZ YY YY AA AA
+
+            if (OriginalSourceZCoordinateValue == null)
+            {
+                OriginalSourceZCoordinateValue = Memory.ReadByte(sourceZCoordinateAddress);
+            }
+
             Memory.WriteByte(sourceZCoordinateAddress, (byte)(0x80));
+            return true;
+        }
+
+        public bool UnlockExit()
+        {
+            if (!IsDoor)
+            {
+                return false;
+            }
+
+            if (OriginalSourceZCoordinateValue == null)
+            {
+                return false;
+            }
+
+            uint sourceZCoordinateAddress = TargetCoordinatesAddress - 5; // xx xx zz zz yy yy aa aa *XX XX ZZ ZZ YY YY AA AA
+            Memory.WriteByte(sourceZCoordinateAddress, OriginalSourceZCoordinateValue.Value);
             return true;
         }
     }

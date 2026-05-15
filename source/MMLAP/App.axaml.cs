@@ -874,6 +874,18 @@ public partial class App : Application
         )
         {
             ItemHelpers.ReceiveGenericItem(itemData);
+
+            if (
+                args.Item.Id is 0x022A or 0x022B or 0x022C
+            )
+            {
+                ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+                if (DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData))
+                {
+                    LoopHelpers.HandleAreaExitUnlocks(currentLevelData, args.Item.Id);
+                }
+            }
+
             UpdateItemLog();
         }
         return;

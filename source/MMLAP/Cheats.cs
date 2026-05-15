@@ -257,6 +257,8 @@ namespace MMLAP
                 LoadHalfImmediate(0x00100C98, MMLEnums.Register.v0, !hasEarnedCitizenship ? (byte)0x00 : (byte)0x01),
                 // For starting servbot cutscene if skipped some stuff
                 hasStartedTronDogCutscene && hasEarnedCitizenship ? Nop(0x00100CA0) : new OpCode(0x00100CA0, 0x1040000D),
+                // Delete code that gives Citizen's Card at cutscene start/skip
+                Nop(0x00105120),
 
             ];
         }
@@ -350,6 +352,8 @@ namespace MMLAP
                 LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, 0x02),
                 // Opens doors during Tron / dog scene
                 LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, 0x02),
+                // Don't check whether talked to Tron before talking to dog
+                LoadHalfImmediate(0x00117C98, MMLEnums.Register.v0, 0x01),
             ];
         }
 
@@ -419,6 +423,11 @@ namespace MMLAP
                 LoadHalfImmediate(0x001007BC, MMLEnums.Register.v1, fastForwardState),
                 // Loading in from Marlwolf cutscene
                 LoadHalfImmediate(0x00101088, MMLEnums.Register.v0, fastForwardState),
+                // Delete code that gives Class B License at cutscene start/skip
+                Nop(0x00105CC4),
+                Nop(0x000553C4),
+                // Delete code that gives Class A License at cutscene start/skip
+                Nop(0x001069D4),
             ];
         }
 
