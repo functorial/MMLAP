@@ -121,9 +121,9 @@ namespace MMLAP
                 //MemoryHelpers.WriteCode(Restore1FC54); // Actually don't want to restore this one...
                 // The game seems to crash if your progression counter is too high and trying to load into the tank with our fast forwarding
                 // So actually want to pre-load this before loading
-                bool hasDefeatedFerdinand = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand);
+                bool hasDefeatedBonBonne = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBonBonne);
                 bool hasCompletedCardonTankEvent = MemoryHelpers.ReadAddressDataBit(Addresses.HasCompletedCardonTankEvent);
-                byte fastForwardState = !hasDefeatedFerdinand ? (byte)0x00 :
+                byte fastForwardState = !hasDefeatedBonBonne ? (byte)0x00 :
                                         !hasCompletedCardonTankEvent ? (byte)0x03 :
                                         (byte)0x04;
                 OpCode code = LoadHalfImmediate(0x0001FC54, MMLEnums.Register.v0, fastForwardState);
@@ -131,17 +131,17 @@ namespace MMLAP
             }
         }
 
-        public static OpCode[] FastForwardOutsideCardonSubgate(byte currentProgressionCounter, bool hasDefeatedFerdinand, bool hasCompletedCardonTankEvent)
+        public static OpCode[] FastForwardOutsideCardonSubgate(byte currentProgressionCounter, bool hasDefeatedBonBonne, bool hasCompletedCardonTankEvent)
         {
             // Needs to be written fast during loading screen
-            byte fastForwardState = !hasDefeatedFerdinand ? (byte)0x00 :
+            byte fastForwardState = !hasDefeatedBonBonne ? (byte)0x00 :
                                     !hasCompletedCardonTankEvent ? (byte)0x03 :
                                     (byte)0x04;
             return [
-                // Unlock Door
-                LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, fastForwardState),//0x04),
-                //
+                // Load assets
                 LoadHalfImmediate(0x0001FC54, MMLEnums.Register.v0, fastForwardState), // Also see special case in restore1fxxxwrites
+                // Unlock Door if >= 2
+                LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, Math.Max((byte)0x02, fastForwardState)),
                 //
                 LoadHalfImmediate(0x00100CE0, MMLEnums.Register.v0, fastForwardState),
                 LoadHalfImmediate(0x00100E8C, MMLEnums.Register.v1, fastForwardState),

@@ -162,9 +162,9 @@ namespace MMLAP.Helpers
                     break;
 
                 case var data when data.AreaName == "Outside Cardon Forest Sub-Gate":
-                    bool hasDefeatedFerdinand = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand);
+                    bool hasDefeatedBonBonne = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBonBonne);
                     bool hasCompletedCardonTankEvent = MemoryHelpers.ReadAddressDataBit(Addresses.HasCompletedCardonTankEvent);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardOutsideCardonSubgate(currentProgressionCounter, hasDefeatedFerdinand, hasCompletedCardonTankEvent));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardOutsideCardonSubgate(currentProgressionCounter, hasDefeatedBonBonne, hasCompletedCardonTankEvent));
                     break;
 
                 case var data when data.AreaName == "Cardon Forest Sub-Gate":
@@ -539,7 +539,7 @@ namespace MMLAP.Helpers
         {
             if (!DataDicts.ExitDataDict.TryGetValue(exitName, out var exitData))
             {
-                Log.Logger.Information($"LockExit skipped because exit '{exitName}' was not found in ExitDataDict.");
+                //Log.Logger.Information($"LockExit skipped because exit '{exitName}' was not found in ExitDataDict.");
                 return;
             }
 
@@ -551,11 +551,11 @@ namespace MMLAP.Helpers
             bool didUnlock = exitData.UnlockExit();
             if (!didUnlock)
             {
-                Log.Logger.Information($"UnlockExit failed for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+                //Log.Logger.Information($"UnlockExit failed for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
             }
             else
             {
-                Log.Logger.Information($"UnlockExit succeeded for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+                //Log.Logger.Information($"UnlockExit succeeded for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
             }
         }
 
