@@ -41,7 +41,8 @@ namespace MMLAP.Models
                 OriginalSourceZCoordinateValue = Memory.ReadByte(sourceZCoordinateAddress);
             }
 
-            Memory.WriteByte(sourceZCoordinateAddress, (byte)(0x80));
+            byte movedSourceZCoordinateValue = (byte)((OriginalSourceZCoordinateValue ?? 0) ^ 0xFF);
+            Memory.WriteByte(sourceZCoordinateAddress, movedSourceZCoordinateValue);
             return true;
         }
 

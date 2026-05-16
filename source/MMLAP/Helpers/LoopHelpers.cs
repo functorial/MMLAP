@@ -539,7 +539,7 @@ namespace MMLAP.Helpers
         {
             if (!DataDicts.ExitDataDict.TryGetValue(exitName, out var exitData))
             {
-                //Log.Logger.Information($"LockExit skipped because exit '{exitName}' was not found in ExitDataDict.");
+                Log.Logger.Information($"LockExit skipped because exit '{exitName}' was not found in ExitDataDict.");
                 return;
             }
 
@@ -551,11 +551,11 @@ namespace MMLAP.Helpers
             bool didUnlock = exitData.UnlockExit();
             if (!didUnlock)
             {
-                //Log.Logger.Information($"UnlockExit failed for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+                Log.Logger.Information($"UnlockExit failed for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
             }
             else
             {
-                //Log.Logger.Information($"UnlockExit succeeded for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+                Log.Logger.Information($"UnlockExit succeeded for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
             }
         }
 
@@ -595,9 +595,9 @@ namespace MMLAP.Helpers
                     TryUnlockExitByName("Wily's Boat, Outside (Walkway) -> Uptown");
                     break;
 
-                case "Underground ruins":
+                case "Underground Ruins":
                     TryUnlockExitByName("Underground Ruins, Room 3 (Sewer) -> Downtown");
-                    TryUnlockExitByName("Underground Ruins, Room 4  -> Old City");
+                    TryUnlockExitByName("Underground Ruins, Room 4 -> Old City");
                     break;
 
                 default:
@@ -630,9 +630,9 @@ namespace MMLAP.Helpers
                     TryLockExitByName("Wily's Boat, Outside (Walkway) -> Uptown");
                     break;
 
-                case "Underground ruins":
+                case "Underground Ruins":
                     TryLockExitByName("Underground Ruins, Room 3 (Sewer) -> Downtown");
-                    TryLockExitByName("Underground Ruins, Room 4  -> Old City");
+                    TryLockExitByName("Underground Ruins, Room 4 -> Old City");
                     break;
 
                 default:
@@ -706,7 +706,6 @@ namespace MMLAP.Helpers
                     break;
 
                 case "Cardon Forest (Flutter Fixed)":
-                    //TryLockExitByName("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2");
                     TryLockExitByName("Cardon Forest South (Flutter Fixed) -> Underground Ruins, Room 2");
                     break;
 
