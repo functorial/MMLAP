@@ -864,6 +864,21 @@ namespace MMLAP.Helpers
                 }
             }
         }
+        
+        // Handling weird edge case where Class B License is given like 5 times during the cutscene in a loop which makes it hard to prevent giving out otherwise
+        public static void HandleLicenseRemovalInCityHall()
+        {
+            if (
+                !ItemHelpers.HasReceivedItem(0x022C) && // hasReceivedClassBLicense
+                (Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) is 0x0601 or 0x0604) &&   // In Amelia's Office
+                DataDicts.ItemDataDict.TryGetValue(0x022C, out var data) && 
+                data != null && 
+                data.InventoryAddressData != null
+            )
+            {
+                MemoryHelpers.WriteAddressDataBit(data.InventoryAddressData, false);
+            }
+        }
 
         public static void PlayCutscene(byte cutsceneID, byte subID)
         {

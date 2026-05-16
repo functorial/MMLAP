@@ -298,11 +298,12 @@ namespace MMLAP
 
         public static OpCode[] FastForwardAppleMarket(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasShownRollRedRefractor)
         {
+            // TODO: Figure out shop item progression and how that logic should work
             //byte fastForwardShopOwner = hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01;
-            byte fastForwardState = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 : 
+            byte fastForwardState = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 :
+                                    hasShownRollRedRefractor ? Math.Max((byte)0x08, currentProgressionCounter) :
                                     !hasEarnedClassALicense ? (byte)0x01 :
-                                    !hasShownRollRedRefractor ? (byte)0x02 :
-                                    Math.Max((byte)0x08, currentProgressionCounter); // Moving this state early to red refractor
+                                    (byte)0x02; // Moving this state early to red refractor
             return [
                 // 
                 LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, fastForwardState),
@@ -323,7 +324,6 @@ namespace MMLAP
                 LoadHalfImmediate(0x00100688, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
                 // 0xBE378 bit checks, shop
                 LoadHalfImmediate(0x001008B0, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
-                
             ];
         }
 
@@ -370,7 +370,7 @@ namespace MMLAP
             //byte fastForwardState = Math.Max((byte)0x06, currentProgressionCounter);
             byte fastForwardState = hasUnlockedSubCities ? (byte)0x09 :
                                     hasShownRollRedRefractor ? (byte)0x08 : // Moving this state early to red refractor
-                                    (byte)0x02; 
+                                    (byte)0x05; 
             return [
                 // Check slt 6, else check slt 8
                 LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, fastForwardState),
@@ -391,6 +391,7 @@ namespace MMLAP
                 //Nop(0x00101328),
                 // Missing woman quest check
                 LoadHalfImmediate(0x0010129C, MMLEnums.Register.v0, fastForwardState),
+                // 
             ];
         }
 
@@ -425,7 +426,7 @@ namespace MMLAP
                 LoadHalfImmediate(0x00101088, MMLEnums.Register.v0, fastForwardState),
                 // Delete code that gives Class B License at cutscene start/skip
                 Nop(0x00105CC4),
-                Nop(0x000553C4),
+                //Nop(0x000553C4), // This is used for writing all kinds of bits so really dont want to nop this
                 // Delete code that gives Class A License at cutscene start/skip
                 Nop(0x001069D4),
             ];

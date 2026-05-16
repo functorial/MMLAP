@@ -589,6 +589,7 @@ public partial class App : Application
                         LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack);
                         // Fix cutscene
                         LoopHelpers.HandleRedRefractorInSupportCar();
+                        //LoopHelpers.HandleLicenseRemovalInCityHall(); // Moving to slowgameloop
                     }
 
                     // Run these after loading
@@ -646,6 +647,7 @@ public partial class App : Application
                 {
                     // Task 1: Read useful memory
                     CheckGoalCondition();
+                    LoopHelpers.HandleLicenseRemovalInCityHall();
                     CurrentProgressionCounter = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
 
                     // Task 2: Do things when changing rooms
@@ -702,6 +704,7 @@ public partial class App : Application
                         }
                     }
                 }
+
 
                 // Task 4: Handle receiving items after loading a save (leaving title screen)
                 // Logic:
