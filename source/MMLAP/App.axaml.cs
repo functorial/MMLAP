@@ -659,7 +659,7 @@ public partial class App : Application
                         LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack);
                         // Fix cutscene
                         LoopHelpers.HandleRedRefractorInSupportCar();
-                        //LoopHelpers.HandleLicenseRemovalInCityHall(); // Moving to slowgameloop
+                        //LoopHelpers.HandleCutsceneSkipItemObtains(); // Moving to slowgameloop
                     }
 
                     // Run these after loading
@@ -717,7 +717,6 @@ public partial class App : Application
                 {
                     // Task 1: Read useful memory
                     CheckGoalCondition();
-                    LoopHelpers.HandleLicenseRemovalInCityHall();
                     CurrentProgressionCounter = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
 
                     // Task 2: Do things when changing rooms
@@ -734,8 +733,9 @@ public partial class App : Application
 
                     if (DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData))
                     {
-                        VisitedAreaNames.TryAdd(currentLevelData.AreaName, 0);
                         System.Threading.Thread.Sleep(50);
+                        VisitedAreaNames.TryAdd(currentLevelData.AreaName, 0);
+                        LoopHelpers.HandleCutsceneSkipItemObtains(currentLevelData);
 
                         // Task 2.b: Based on current level, do things like overwrite text, write code that isnt needed during loading, and locking doors
                         if (

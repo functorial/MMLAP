@@ -105,6 +105,7 @@ namespace MMLAP.Helpers
                         iraLocationData.TextBoxStartAddress != null
                     )
                     {
+                        Log.Logger.Information("Ira text handling");
                         textDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData)));
                     }
                     break;
@@ -879,18 +880,49 @@ namespace MMLAP.Helpers
             }
         }
         
-        // Handling weird edge case where Class B License is given like 5 times during the cutscene in a loop which makes it hard to prevent giving out otherwise
-        public static void HandleLicenseRemovalInCityHall()
+        // Handling edge case where Class B License is given like 5 times during the cutscene in a loop and also if you skip the cutscene which makes it hard to prevent giving out otherwise. This also applies to the refractors
+        public static void HandleCutsceneSkipItemObtains(LevelData currentLevelData)
         {
-            if (
-                !ItemHelpers.HasReceivedItem(0x022C) && // hasReceivedClassBLicense
-                (Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) is 0x0601 or 0x0604) &&   // In Amelia's Office
-                DataDicts.ItemDataDict.TryGetValue(0x022C, out var data) && 
-                data != null && 
-                data.InventoryAddressData != null
-            )
+            switch (currentLevelData)
             {
-                MemoryHelpers.WriteAddressDataBit(data.InventoryAddressData, false);
+                case var levelData when levelData.AreaName == "City Hall" && (levelData.RoomName is "Amelia's Office" or "Amelia's Office (wrecked)"):
+                    if (
+                        !ItemHelpers.HasReceivedItem(0x022C) && // hasReceivedClassBLicense
+                        (Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) is 0x0601 or 0x0604) &&
+                        DataDicts.ItemDataDict.TryGetValue(0x022C, out var itemDataCBL) &&
+                        itemDataCBL != null &&
+                        itemDataCBL.InventoryAddressData != null
+                    )
+                    {
+                        MemoryHelpers.WriteAddressDataBit(itemDataCBL.InventoryAddressData, false);
+                    }
+                    break;
+                case var levelData when levelData.AreaName == "Cardon Forest Sub-Gate" && levelData.RoomName == "Refractor Room":
+                    if (
+                        !ItemHelpers.HasReceivedItem(0x0228) && // Yellow Refractor
+                        (Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) is 0x0601 or 0x0604) &&
+                        DataDicts.ItemDataDict.TryGetValue(0x0228, out var itemDataYF) &&
+                        itemDataYF != null &&
+                        itemDataYF.InventoryAddressData != null
+                    )
+                    {
+                        MemoryHelpers.WriteAddressDataBit(itemDataYF.InventoryAddressData, false);
+                    }
+                    break;
+                case var levelData when levelData.AreaName == "Lake Jyun Sub-Gate" && levelData.RoomName == "Refractor Room":
+                    if (
+                        !ItemHelpers.HasReceivedItem(0x0228) && // Yellow Refractor
+                        (Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) is 0x0601 or 0x0604) &&
+                        DataDicts.ItemDataDict.TryGetValue(0x0228, out var itemDataRF) &&
+                        itemDataRF != null &&
+                        itemDataRF.InventoryAddressData != null
+                    )
+                    {
+                        MemoryHelpers.WriteAddressDataBit(itemDataRF.InventoryAddressData, false);
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 
