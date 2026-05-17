@@ -636,7 +636,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                 [
                     ExitData("Downtown - Outside"),
                     ExitData("Uptown - Hospital"),
-                    ExitData("Museum - Floor 1"), # TODO: has lipstick
+                    ExitData("Museum - Floor 1", can_defeat_bon_bonne()), # TODO: has lipstick
                     ExitData("Wily's Boat - Walkway"),
                     ExitData("Uptown - TV Station"),
                     ExitData("Uptown Sub-City - City", has_unlocked_sub_cities()),

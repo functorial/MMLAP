@@ -20,9 +20,9 @@ namespace MMLAP.Helpers
             string areaName = currentLevelData.AreaName;
             string roomName = currentLevelData.RoomName;
             string levelName = areaName + ": " + roomName;
-            switch (levelName)
+            switch (currentLevelData)
             {
-                case "Apple Market: Junk Shop":
+                case var data when data.AreaName == "Apple Market":
                     // "Rescue the shop owner's husband" location text handling
                     if (
                         scoutedLocationItemData != null &&
@@ -37,9 +37,23 @@ namespace MMLAP.Helpers
                         byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, prefix: TextHelpers.newPage, suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]);
                         Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                     }
+                    // Handle case when trying to get the lipstick
+                    if (
+                        MemoryHelpers.ReadAddressDataBit(Addresses.IsGatheringLipstick) &&
+                        !MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense)
+                    )
+                    {
+                        byte[] veggieManText = TextHelpers.ConcatArrayList([
+                            [0x8C, 0x40, 0x00, 0xA2, 0x00, 0x10, 0x03, 0x93, 0x00, 0x08],
+                            TextHelpers.EncodeSimpleString("Red paint? Hmmm..."),
+                            TextHelpers.newPage,
+                            TextHelpers.EncodeSimpleString("I've heard that pirate\nattacks have caused\nsupply chain issues!"),
+                            TextHelpers.endWindow,
+                        ]);
+                        Memory.WriteByteArray(0x00155FC2, veggieManText);
+                    }
                     break;
-
-                case "City Hall: Amelia's Office":
+                case var data when data.AreaName == "City Hall" && data.RoomName == "Amelia's Office":
                     // Class B License text handling
                     if (
                         scoutedLocationItemData != null &&
@@ -65,7 +79,7 @@ namespace MMLAP.Helpers
                     }
                     break;
 
-                case "City Hall: City Hall Outdoors":
+                case var data when data.AreaName == "City Hall" && data.RoomName == "City Hall Outdoors":
                     // Handle worker dialogue for Pick
                     // Currently talking to this guy is not a location, but the Pick item is randomized in the pool
                     List<byte[]> substrs =
@@ -81,7 +95,7 @@ namespace MMLAP.Helpers
                     Memory.WriteByteArray(Addresses.WorkerGetPickTextStart.Address, workerTextChange);
                     break;
 
-                case "Uptown: Ira's Room":
+                case var data when data.AreaName == "Uptown" && data.RoomName == "Ira's Room":
                     // "Cure Ira's illness" location text handling
                     if (
                         scoutedLocationItemData != null &&
@@ -95,7 +109,7 @@ namespace MMLAP.Helpers
                     }
                     break;
 
-                case "Cardon Forest (Flutter Broken): City Entrance":
+                case var data when data.AreaName == "Cardon Forest (Flutter Broken)" && data.RoomName == "City Entrance":
                     // "Earning citizenship" location text handling
                     if (
                         scoutedLocationItemData != null &&
@@ -112,7 +126,7 @@ namespace MMLAP.Helpers
                     }
                     break;
 
-                case "Cardon Forest (Flutter Fixed): Crash Site":
+                case var data when data.AreaName == "Cardon Forest (Flutter Fixed)" && data.RoomName == "Crash Site":
                     // Prevent starting ending cutscene at Roll if Goal isn't completed
                     List<byte[]> rollInitiateEndingCutsceneTextArrs = [
                         TextHelpers.EncodeSimpleString("Have you completed your\n"),

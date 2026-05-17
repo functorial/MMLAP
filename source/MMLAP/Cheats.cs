@@ -301,9 +301,9 @@ namespace MMLAP
             // TODO: Figure out shop item progression and how that logic should work
             //byte fastForwardShopOwner = hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01;
             byte fastForwardState = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 :
-                                    hasShownRollRedRefractor ? Math.Max((byte)0x08, currentProgressionCounter) :
-                                    !hasEarnedClassALicense ? (byte)0x01 :
-                                    (byte)0x02; // Moving this state early to red refractor
+                                    hasShownRollRedRefractor ? Math.Max((byte)0x08, currentProgressionCounter) : // Moving this state early to red refractor
+                                    //!hasEarnedClassALicense ? (byte)0x01 :
+                                    (byte)0x02; 
             return [
                 // 
                 LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, fastForwardState),

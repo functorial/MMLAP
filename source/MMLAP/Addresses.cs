@@ -68,6 +68,7 @@ namespace MMLAP
         public static readonly AddressData HasStartedFlutterFixFromJunoCutscene = new(0xBE381, 2, null);
         public static readonly AddressData HasWatchedFlutterFixFromJunoCutscene = new(0xBE386, 7, null);
         // Side quest flags
+        public static readonly AddressData IsGatheringLipstick = new(0xBE37E, 1, null);
         public static readonly AddressData HasSavedTheMissingWoman = new(0xBE3BE, 7, null);
         // Utility addresses for codes
         public static readonly AddressData FixBoatCallRollUtil = new(0x5545C, null, 4);
