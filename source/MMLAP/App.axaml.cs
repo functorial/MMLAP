@@ -52,6 +52,7 @@ public partial class App : Application
     private static ConcurrentStack<TextData> TextDataToWriteStack { get; set; } = new();
     private static ushort? PreviousLevelID { get; set; }
     private static byte CurrentProgressionCounter { get; set; } = 0x0;
+    private static ConcurrentDictionary<string, byte> VisitedAreaNames { get; set; } = new();
     private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
     private static bool IsReceivingItemsAfterLoad { get; set; } = false;
@@ -179,6 +180,7 @@ public partial class App : Application
                 Log.Logger.Information("!help - Show this help message.");
                 Log.Logger.Information("!reload - Force reload all items.  Use this if you think you may have missed received items.  Please reconnect to the server while in game to refresh received items.");
                 Log.Logger.Information("!goal - Check your current goal.");
+                Log.Logger.Information("!debug - Print debugging information about current game and client state.");
                 break;
             case "!reload":
                 Log.Logger.Information($"> {a.Command}");
@@ -212,6 +214,10 @@ public partial class App : Application
                 }
                 Log.Logger.Information($"Your goal is: {goalText}");
                 break;
+            case "!debug":
+                Log.Logger.Information($"> {a.Command}");
+                LogDebugInfo();
+                break;
             case "!options":
                 if (APClient != null && APClient.Options != null)
                 {
@@ -230,6 +236,69 @@ public partial class App : Application
                 break;
         }
         return;
+    }
+
+    private static void LogDebugInfo()
+    {
+        try
+        {
+            ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+            byte memoryProgressionCounter = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
+            string currentLevelName = DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
+                ? $"{currentLevelData.AreaName}: {currentLevelData.RoomName}"
+                : "Unknown";
+
+            bool hasRescuedShopOwnersHusband = MemoryHelpers.ReadAddressDataBit(Addresses.HasRescuedShopOwnersHusband);
+            bool hasEarnedCitizenship = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenship);
+            bool hasDefeatedBonBonne = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBonBonne);
+            bool hasEarnedClassBLicense = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
+            bool hasEarnedClassALicense = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
+            bool hasCompletedCardonTankEvent = MemoryHelpers.ReadAddressDataBit(Addresses.HasCompletedCardonTankEvent);
+            bool hasTakenYellowRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenYellowRefractor);
+            bool hasCalledRollToFixBoat = MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat);
+            bool hasDefeatedBalkonGerat = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
+            bool hasTakenRedRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
+            bool hasShownRollRedRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
+            bool hasActivatedEmergencySystem = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
+            bool hasDefeatedJuno = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno);
+            bool hasUnlockedMainGate = ItemHelpers.HasReceivedItem(0x0001);
+            bool hasUnlockedSubCities = ItemHelpers.HasReceivedItem(0x0002);
+
+            bool isLoading = MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag);
+            bool isScreenWipe = MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag);
+            bool isCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.CutsceneFlag);
+            bool isInTitleScreen = MemoryHelpers.IsInTitleScreen();
+            bool isInSaveMenu = MemoryHelpers.ReadAddressDataBit(Addresses.SaveDataMenuFlag);
+
+            int checkedLocations = APClient?.CurrentSession?.Locations.AllLocationsChecked.Count ?? 0;
+            int receivedItems = APClient?.CurrentSession?.Items.AllItemsReceived.Count ?? 0;
+            List<string> visitedAreas = VisitedAreaNames.Keys.OrderBy(x => x).ToList();
+
+            Log.Logger.Information("===== DEBUG INFO =====");
+            Log.Logger.Information($"Progression: tracked=0x{CurrentProgressionCounter:X2}, memory=0x{memoryProgressionCounter:X2}");
+            Log.Logger.Information($"Level: 0x{currentLevelID:X4} ({currentLevelName})");
+            Log.Logger.Information($"Connection: connected={APClient?.IsConnected ?? false}, loggedIn={APClient?.IsLoggedIn ?? false}, inGameSyncInitialized={IsInGameSyncInitialized}");
+            Log.Logger.Information($"Loop state: isManagingLevelChange={IsManagingLevelChange}, isReceivingItemsAfterLoad={IsReceivingItemsAfterLoad}, previousLevelID={(PreviousLevelID != null ? $"0x{PreviousLevelID.Value:X4}" : "null")}");
+            Log.Logger.Information($"Game state: loading={isLoading}, screenWipe={isScreenWipe}, cutscene={isCutscene}, titleScreen={isInTitleScreen}, saveMenu={isInSaveMenu}");
+            Log.Logger.Information($"AP state: checkedLocations={checkedLocations}, receivedItems={receivedItems}, pendingTextRestores={TextDataToWriteStack.Count}");
+
+            Log.Logger.Information("Cheat argument booleans:");
+            Log.Logger.Information($"- hasRescuedShopOwnersHusband={hasRescuedShopOwnersHusband}, hasEarnedCitizenship={hasEarnedCitizenship}");
+            Log.Logger.Information($"- hasEarnedClassBLicense={hasEarnedClassBLicense}, hasEarnedClassALicense={hasEarnedClassALicense}");
+            Log.Logger.Information($"- hasDefeatedBonBonne={hasDefeatedBonBonne}, hasCompletedCardonTankEvent={hasCompletedCardonTankEvent}");
+            Log.Logger.Information($"- hasTakenYellowRefractor={hasTakenYellowRefractor}, hasCalledRollToFixBoat={hasCalledRollToFixBoat}");
+            Log.Logger.Information($"- hasDefeatedBalkonGerat={hasDefeatedBalkonGerat}, hasTakenRedRefractor={hasTakenRedRefractor}, hasShownRollRedRefractor={hasShownRollRedRefractor}");
+            Log.Logger.Information($"- hasActivatedEmergencySystem={hasActivatedEmergencySystem}, hasDefeatedJuno={hasDefeatedJuno}");
+            Log.Logger.Information($"- hasUnlockedMainGate={hasUnlockedMainGate}, hasUnlockedSubCities={hasUnlockedSubCities}");
+
+            Log.Logger.Information($"Visited areas this session ({visitedAreas.Count}):\n{(visitedAreas.Count > 0 ? string.Join("\n- ", visitedAreas) : "None")}");
+            Log.Logger.Information("======================");
+        }
+        catch (Exception ex)
+        {
+            Log.Logger.Warning("Failed to gather debug information.");
+            Log.Logger.Warning(ex.ToString());
+        }
     }
 
     private async void Context_ConnectClicked(object? sender, ConnectClickedEventArgs e)
@@ -420,6 +489,7 @@ public partial class App : Application
         FastGameLoopTimer?.Enabled = false;
         HasSubmittedGoal = false;
         ScoutedLocationItemData = null;
+        VisitedAreaNames.Clear();
         System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
         return;
     }
@@ -664,6 +734,7 @@ public partial class App : Application
 
                     if (DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData))
                     {
+                        VisitedAreaNames.TryAdd(currentLevelData.AreaName, 0);
                         System.Threading.Thread.Sleep(50);
 
                         // Task 2.b: Based on current level, do things like overwrite text, write code that isnt needed during loading, and locking doors

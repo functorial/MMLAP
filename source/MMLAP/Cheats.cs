@@ -42,7 +42,10 @@ namespace MMLAP
             if (
                 levelName != "Wily's Boat: Outside Boat Shop" &&
                 Memory.ReadUInt(Addresses.FixBoatCallRollUtil.Address) == 0x00000000 &&
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat)
+                (
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat) ||
+                    currentLevelData.AreaName != "Wily's Boat"
+                )
             )
             {
                 MemoryHelpers.WriteCode(RestoreFixBoatCallRoll());
