@@ -412,18 +412,19 @@ namespace MMLAP
                 // Four tiers: checks if = 1. else checks = 0 (and 0xBE43E?), else checks 2 <= .. <= 5, else checks >= 6
                 // Each tier writes a different value to $gp + 0x98A = 0x800981EE which is written to 0xC1B7A
                 LoadHalfImmediate(0x0001FA9C, MMLEnums.Register.v1, fastForwardState),
-                // Check if = 0
-                LoadHalfImmediate(0x001005D8, MMLEnums.Register.v1, fastForwardState),
                 // lb a1 0x0(s0), unlocks doors if >0
                 LoadHalfImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardState)),
+                // lb v0 0x0(s0), check if = 0, unlock door to yass during pirate event
+                LoadHalfImmediate(0x001006FC, MMLEnums.Register.v0, Math.Max((byte)0x01, fastForwardState)),
+                // Check if = 0
+                LoadHalfImmediate(0x001005D8, MMLEnums.Register.v1, fastForwardState),
                 // check if = 0, In a complex branch structure
                 LoadHalfImmediate(0x00119FA4, MMLEnums.Register.v1, fastForwardState),
                 // check if = 0, In a complex branch structure
                 LoadHalfImmediate(0x00119FDC, MMLEnums.Register.v1, fastForwardState),
                 // In internal game loop, checks if = 0, spawns NPCs if >0
                 LoadHalfImmediate(0x00100778, MMLEnums.Register.v1, fastForwardState),
-                // lb v0 0x0(s0), check if = 0
-                LoadHalfImmediate(0x001006FC, MMLEnums.Register.v0, Math.Max((byte)0x01, fastForwardState)),
+                //
                 LoadHalfImmediate(0x001007BC, MMLEnums.Register.v1, fastForwardState),
                 // Loading in from Marlwolf cutscene
                 LoadHalfImmediate(0x00101088, MMLEnums.Register.v0, fastForwardState),

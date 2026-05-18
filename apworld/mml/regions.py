@@ -301,7 +301,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Flutter - Barrell's Room"),
                     ExitData("Flutter - Mega Man's Room"),
                     ExitData("Flutter - Roll's Room"),
-                    ExitData("Clozer Woods Sub-Gate - Entrance"),
+                    ExitData("Clozer Woods Sub-Gate - Entrance", has_class_a_license()),
                 ]
             ),
         "Flutter - Barrell's Room": 
