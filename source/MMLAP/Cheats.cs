@@ -181,9 +181,9 @@ namespace MMLAP
         public static OpCode[] DecoupleCardonForestSubGateKeys()
         {
             // See related code in 
-            AddressData jakkoKeyAddressData = DataDicts.LocationDataDict[60].CheckAddressData;
-            AddressData conveyorKeyAddressData = DataDicts.LocationDataDict[61].CheckAddressData;
-            AddressData switchesKeyAddressData = DataDicts.LocationDataDict[62].CheckAddressData;
+            AddressData jakkoKeyAddressData = Addresses.CardonForestSubGateJakkoStarterKeyPickup;
+            AddressData conveyorKeyAddressData = Addresses.CardonForestSubGateConveyorStarterKeyPickup;
+            AddressData switchesKeyAddressData = Addresses.CardonForestSubGateThreeSwitchStarterKeyPickup;
             short jakkoKeyBitNumberOffset = (short)((jakkoKeyAddressData.Address - 0xBE378) * 8 + 7 - (jakkoKeyAddressData.BitNumber ?? 0));
             short conveyorKeyBitNumberOffset = (short)((conveyorKeyAddressData.Address - 0xBE378) * 8 + 7 - (conveyorKeyAddressData.BitNumber ?? 1));
             short switchesKeyBitNumberOffset = (short)((switchesKeyAddressData.Address - 0xBE378) * 8 + 7 - (switchesKeyAddressData.BitNumber ?? 2));
@@ -192,22 +192,22 @@ namespace MMLAP
             short switchesRefractorTerminalVirtualOffset = (short)((Addresses.YellowRefractorTerminalVirtual.Address - 0xBE378) * 8);
             return [
                 // These will make the key pickups write to addresses, set to be distinct from "has key" addresses
-                LoadHalfImmediate(0x00108F5C, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // replace write 0xBE41D with 0xBE377 (jakko key)
-                LoadHalfImmediate(0x00108F64, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // replace write 0xBE41D with 0xBE377 (conveyor key)
-                LoadHalfImmediate(0x00108F4C, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // replace write 0xBE41E with 0xBE377 (switches key)
+                LoadHalfImmediate(0x00108F5C, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // replace write 0xBE41D with 0xBE2E7 (jakko key)
+                LoadHalfImmediate(0x00108F64, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // replace write 0xBE41D with 0xBE2E7 (conveyor key)
+                LoadHalfImmediate(0x00108F4C, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // replace write 0xBE41E with 0xBE2E7 (switches key)
 
                 // These execute on loading into a room, determining if the key is there, so we change to the same values above
-                LoadHalfImmediate(0x0010CA24, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // load keys, switch read 0xBE41D with 0xBE377 (jakko key)
-                LoadHalfImmediate(0x0010C9B0, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // load keys, switch read 0xBE41D with 0xBE377 (conveyor key)
-                LoadHalfImmediate(0x0010CA44, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // load keys, switch read 0xBE41E with 0xBE377 (switches key)
+                LoadHalfImmediate(0x0010CA24, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // load keys, switch read 0xBE41D with 0xBE2E7 (jakko key)
+                LoadHalfImmediate(0x0010C9B0, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // load keys, switch read 0xBE41D with 0xBE2E7 (conveyor key)
+                LoadHalfImmediate(0x0010CA44, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // load keys, switch read 0xBE41E with 0xBE2E7 (switches key)
 
                 // TODO: Figure out what these do. There is still an issue where Roll says the wrong line after picking up the third key
-                //LoadHalfImmediate(0x0010C784, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // replace read 0xBE41D with 0xBE377
-                //LoadHalfImmediate(0x0010C79C, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // replace read 0xBE41D with 0xBE377
-                //LoadHalfImmediate(0x0010C7B4, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // replace read 0xBE41E with 0xBE377
+                //LoadHalfImmediate(0x0010C784, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // replace read 0xBE41D with 0xBE2E7
+                //LoadHalfImmediate(0x0010C79C, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // replace read 0xBE41D with 0xBE2E7
+                //LoadHalfImmediate(0x0010C7B4, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // replace read 0xBE41E with 0xBE2E7
 
                 // ?? These should make the sprite go away when picked up and control Roll's voice line
-                //LoadHalfImmediate(0x00108F94, MMLEnums.Register.a0, yellowRefractorTerminalVirtualOffset), // key pickup, switch read 0xBE41D with 0xBE376
+                //LoadHalfImmediate(0x00108F94, MMLEnums.Register.a0, yellowRefractorTerminalVirtualOffset), // key pickup, switch read 0xBE41D with 0xBE2E6
 
                 // These should prevent the game writing to the terminal address based on your current key count when changing levels. Handled elsewhere
                 Nop(0x0010C7DC),

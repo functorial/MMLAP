@@ -409,15 +409,11 @@ namespace MMLAP.Helpers
                 bool hasCardonKey3 = MemoryHelpers.ReadAddressDataBit(cardonKey3Data.InventoryAddressData);
                 focusedKeyCount = new[] { hasCardonKey1, hasCardonKey2, hasCardonKey3 }.Count(t => t);
             }
-            else if (
-                DataDicts.LocationDataDict.TryGetValue(60, out var hasPickedUpCardonKey1LocationData) &&
-                DataDicts.LocationDataDict.TryGetValue(61, out var hasPickedUpCardonKey2LocationData) &&
-                DataDicts.LocationDataDict.TryGetValue(62, out var hasPickedUpCardonKey3LocationData)
-            )
+            else
             {
-                bool hasPickedUpCardonKey1 = MemoryHelpers.ReadAddressDataBit(hasPickedUpCardonKey1LocationData.CheckAddressData);
-                bool hasPickedUpCardonKey2 = MemoryHelpers.ReadAddressDataBit(hasPickedUpCardonKey2LocationData.CheckAddressData);
-                bool hasPickedUpCardonKey3 = MemoryHelpers.ReadAddressDataBit(hasPickedUpCardonKey3LocationData.CheckAddressData);
+                bool hasPickedUpCardonKey1 = MemoryHelpers.ReadAddressDataBit(Addresses.CardonForestSubGateJakkoStarterKeyPickup);
+                bool hasPickedUpCardonKey2 = MemoryHelpers.ReadAddressDataBit(Addresses.CardonForestSubGateConveyorStarterKeyPickup);
+                bool hasPickedUpCardonKey3 = MemoryHelpers.ReadAddressDataBit(Addresses.CardonForestSubGateThreeSwitchStarterKeyPickup);
                 focusedKeyCount = new[] { hasPickedUpCardonKey1, hasPickedUpCardonKey2, hasPickedUpCardonKey3 }.Count(t => t);
             }
 

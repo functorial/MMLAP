@@ -55,7 +55,7 @@ public partial class App : Application
     private static ConcurrentDictionary<string, byte> VisitedAreaNames { get; set; } = new();
     private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
-    private static bool IsReceivingItemsAfterLoad { get; set; } = false;
+    private static bool IsLoadingIntoGame { get; set; } = false;
     //private static int YellowRefractorTerminalVal { get; set; } = 0x00;
     private static readonly object _lockObject = new object();
 
@@ -278,7 +278,7 @@ public partial class App : Application
             Log.Logger.Information($"Progression: tracked=0x{CurrentProgressionCounter:X2}, memory=0x{memoryProgressionCounter:X2}");
             Log.Logger.Information($"Level: 0x{currentLevelID:X4} ({currentLevelName})");
             Log.Logger.Information($"Connection: connected={APClient?.IsConnected ?? false}, loggedIn={APClient?.IsLoggedIn ?? false}, inGameSyncInitialized={IsInGameSyncInitialized}");
-            Log.Logger.Information($"Loop state: isManagingLevelChange={IsManagingLevelChange}, isReceivingItemsAfterLoad={IsReceivingItemsAfterLoad}, previousLevelID={(PreviousLevelID != null ? $"0x{PreviousLevelID.Value:X4}" : "null")}");
+            Log.Logger.Information($"Loop state: isManagingLevelChange={IsManagingLevelChange}, isLoadingIntoGame={IsLoadingIntoGame}, previousLevelID={(PreviousLevelID != null ? $"0x{PreviousLevelID.Value:X4}" : "null")}");
             Log.Logger.Information($"Game state: loading={isLoading}, screenWipe={isScreenWipe}, cutscene={isCutscene}, titleScreen={isInTitleScreen}, saveMenu={isInSaveMenu}");
             Log.Logger.Information($"AP state: checkedLocations={checkedLocations}, receivedItems={receivedItems}, pendingTextRestores={TextDataToWriteStack.Count}");
             LogRestoreOpCodeState();
@@ -801,8 +801,6 @@ public partial class App : Application
                         }
                     }
                 }
-
-
                 // Task 4: Handle receiving items after loading a save (leaving title screen)
                 // Logic:
                 // - Receive all non-zenny items after moving from title screen to in-game
@@ -816,15 +814,17 @@ public partial class App : Application
                     !isCurrentlyInTitleScreen
                 )
                 {
-                    IsReceivingItemsAfterLoad = true;
+                    IsLoadingIntoGame = true;
                 }
                 IsPreviouslyInTitleScreen = isCurrentlyInTitleScreen;
 
                 if (
-                    IsReceivingItemsAfterLoad &&
+                    IsLoadingIntoGame &&
                     LocationManager_EnableLocationsCondition()
                 )
                 {
+                    SyncSyntheticLocations();
+
                     IReadOnlyCollection<long> allLocationsChecked = APClient.CurrentSession.Locations.AllLocationsChecked;
                     if (allLocationsChecked.Count > 0)
                     {
@@ -870,7 +870,7 @@ public partial class App : Application
                             }
                         }
                     }
-                    IsReceivingItemsAfterLoad = false;
+                    IsLoadingIntoGame = false;
                 }
             }
         }
@@ -885,6 +885,19 @@ public partial class App : Application
             System.Threading.Interlocked.Exchange(ref IsSlowLoopRunning, 0);
         }
         return;
+    }
+
+    private static void SyncSyntheticLocations()
+    {
+        IReadOnlyCollection<long>? allLocationsChecked = APClient?.CurrentSession?.Locations?.AllLocationsChecked;
+        if (allLocationsChecked == null)
+        {
+            return;
+        }
+
+        _ = MemoryHelpers.WriteAddressDataBit(Addresses.CardonForestSubGateJakkoStarterKeyPickup, allLocationsChecked.Contains(60));
+        _ = MemoryHelpers.WriteAddressDataBit(Addresses.CardonForestSubGateConveyorStarterKeyPickup, allLocationsChecked.Contains(61));
+        _ = MemoryHelpers.WriteAddressDataBit(Addresses.CardonForestSubGateThreeSwitchStarterKeyPickup, allLocationsChecked.Contains(62));
     }
 
     private static void CheckGoalCondition()

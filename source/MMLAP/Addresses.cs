@@ -73,6 +73,9 @@ namespace MMLAP
         // Utility addresses for codes
         public static readonly AddressData FixBoatCallRollUtil = new(0x5545C, null, 4);
         public static readonly AddressData YellowRefractorTerminal = new(0xBE439, null, 1);
-        public static readonly AddressData YellowRefractorTerminalVirtual = new(0xBE376, null, 1);
+        public static readonly AddressData YellowRefractorTerminalVirtual = new(0xBE2E6, null, 1);
+        public static readonly AddressData CardonForestSubGateJakkoStarterKeyPickup = new(0xBE2E7, 0, null);
+        public static readonly AddressData CardonForestSubGateConveyorStarterKeyPickup = new(0xBE2E7, 1, null);
+        public static readonly AddressData CardonForestSubGateThreeSwitchStarterKeyPickup = new(0xBE2E7, 2, null);
     }
 }
