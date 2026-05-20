@@ -281,6 +281,7 @@ public partial class App : Application
             Log.Logger.Information($"Loop state: isManagingLevelChange={IsManagingLevelChange}, isReceivingItemsAfterLoad={IsReceivingItemsAfterLoad}, previousLevelID={(PreviousLevelID != null ? $"0x{PreviousLevelID.Value:X4}" : "null")}");
             Log.Logger.Information($"Game state: loading={isLoading}, screenWipe={isScreenWipe}, cutscene={isCutscene}, titleScreen={isInTitleScreen}, saveMenu={isInSaveMenu}");
             Log.Logger.Information($"AP state: checkedLocations={checkedLocations}, receivedItems={receivedItems}, pendingTextRestores={TextDataToWriteStack.Count}");
+            LogRestoreOpCodeState();
 
             Log.Logger.Information("Cheat argument booleans:");
             Log.Logger.Information($"- hasRescuedShopOwnersHusband={hasRescuedShopOwnersHusband}, hasEarnedCitizenship={hasEarnedCitizenship}");
@@ -298,6 +299,31 @@ public partial class App : Application
         {
             Log.Logger.Warning("Failed to gather debug information.");
             Log.Logger.Warning(ex.ToString());
+        }
+    }
+
+    private static void LogRestoreOpCodeState()
+    {
+        List<string> notRestored = [];
+        foreach (var (name, code) in Cheats.GetAllRestoreOpCodes())
+        {
+            uint actualInstruction = Memory.ReadUInt(code.StartAddress);
+            if (actualInstruction != code.Instruction)
+            {
+                notRestored.Add($"- {name} @ 0x{code.StartAddress:X8}: expected=0x{code.Instruction:X8}, actual=0x{actualInstruction:X8}");
+            }
+        }
+
+        if (notRestored.Count == 0)
+        {
+            Log.Logger.Information("Restore OpCode check: all restore opcodes are currently restored.");
+            return;
+        }
+
+        Log.Logger.Warning("Restore OpCode check: some restore opcodes are not restored:");
+        foreach (string line in notRestored)
+        {
+            Log.Logger.Warning(line);
         }
     }
 

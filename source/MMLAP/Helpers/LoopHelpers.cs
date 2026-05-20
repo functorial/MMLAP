@@ -301,28 +301,26 @@ namespace MMLAP.Helpers
                     MemoryHelpers.WriteCode(Cheats.FastForwardClozerWoods(currentProgressionCounter, hasEarnedClassBLicenseClozer, hasEarnedClassALicenseClozer));
                     break;
 
-                case var data when data.AreaName == "Wily's Boat" && data.RoomName != "Outside Boat Shop":
+                case var data when data.AreaName == "Wily's Boat":
                     if (MemoryHelpers.ReadAddressDataBit(Addresses.HasYellowRefractor))
                     {
-                        bool boatIsFixed = MemoryHelpers.ReadAddressDataBit(Addresses.BoatIsFixed);
+                        bool HasFixedBoat = MemoryHelpers.ReadAddressDataBit(Addresses.HasFixedBoat);
                         bool hasDefeatedBalkonGeratWily = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
-                        MemoryHelpers.WriteCode(Cheats.FastForwardWilysBoat(currentProgressionCounter, boatIsFixed, hasDefeatedBalkonGeratWily));
-                    }
-                    break;
-
-                case var data when data.AreaName == "Wily's Boat" && data.RoomName == "Outside Boat Shop":
-                    if (
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasYellowRefractor) &&
-                        !MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat)
-                    )
-                    {
-                        MemoryHelpers.WriteCode(Cheats.EnableFixBoatCallRoll());
+                        MemoryHelpers.WriteCode(Cheats.FastForwardWilysBoat(currentProgressionCounter, HasFixedBoat, hasDefeatedBalkonGeratWily));
+                        if (
+                            data.RoomName == "Outside Boat Shop" &&
+                            !MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat)
+                        )
+                        {
+                            MemoryHelpers.WriteCode(Cheats.EnableFixBoatCallRoll());
+                        }
                     }
                     break;
 
                 case var data when data.AreaName == "Lake Jyun":
+                    bool hasFixedBoat = MemoryHelpers.ReadAddressDataBit(Addresses.HasFixedBoat);
                     bool hasWatchedBalkonGeratDefeatCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedBalkonGeratDefeatCutscene);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyun(hasWatchedBalkonGeratDefeatCutscene));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardLakeJyun(hasFixedBoat, hasWatchedBalkonGeratDefeatCutscene));
                     break;
 
                 case var data when data.AreaName == "Flutter Takeoff":

@@ -26,11 +26,29 @@ namespace MMLAP
         public static readonly OpCode Restore1FDB0 = new(0x0001FDB0, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FDE8 = new(0x0001FDE8, 0x80631B62); // lb v1, 0x1B62(v1)
 
-        public static OpCode[] RestoreFixBoatCallRoll()
+        public static readonly OpCode RestoreFixBoatCallRoll = new(Addresses.FixBoatCallRollUtil.Address, 0x10400006); // beq v0, zero, 0x80055478
+
+        public static (string Name, OpCode Code)[] GetAllRestoreOpCodes()
         {
-            // This is what is overwritten by EnableFixBoatCallRoll
-            return [
-                new OpCode(Addresses.FixBoatCallRollUtil.Address, 0x10400006),  // beq v0, zero, 0x80055478
+            return
+            [
+                (nameof(Restore1F830), Restore1F830),
+                (nameof(Restore1F8E0), Restore1F8E0),
+                (nameof(Restore1FA08), Restore1FA08),
+                (nameof(Restore1FA9C), Restore1FA9C),
+                (nameof(Restore1FB28), Restore1FB28),
+                (nameof(Restore1FB58), Restore1FB58),
+                (nameof(Restore1FB90), Restore1FB90),
+                (nameof(Restore1FBCC), Restore1FBCC),
+                (nameof(Restore1FC54), Restore1FC54),
+                (nameof(Restore1FCE8), Restore1FCE8),
+                (nameof(Restore1FCA8), Restore1FCA8),
+                (nameof(Restore1FD40), Restore1FD40),
+                (nameof(Restore1FD5C), Restore1FD5C),
+                (nameof(Restore1FD94), Restore1FD94),
+                (nameof(Restore1FDB0), Restore1FDB0),
+                (nameof(Restore1FDE8), Restore1FDE8),
+                (nameof(RestoreFixBoatCallRoll), RestoreFixBoatCallRoll),
             ];
         }
 
@@ -48,13 +66,11 @@ namespace MMLAP
                 )
             )
             {
-                MemoryHelpers.WriteCode(RestoreFixBoatCallRoll());
+                MemoryHelpers.WriteCode(RestoreFixBoatCallRoll);
             }
 
             if (
-                currentLevelData.AreaName != "Lake Jyun" &&
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat) &&
-                Memory.ReadUInt(0x0001FBCC) != Restore1FBCC.Instruction
+                currentLevelData.AreaName != "Lake Jyun"
             )
             {
                 //Memory.Write(0x0001FBC8, 0x3C03800C);
@@ -481,17 +497,19 @@ namespace MMLAP
         //    ];
         //}
 
-        public static OpCode[] FastForwardWilysBoat(byte currentProgressionCounter, bool boatIsFixed, bool hasDefeatedBalkonGerat)
+        public static OpCode[] FastForwardWilysBoat(byte currentProgressionCounter, bool HasFixedBoat, bool hasDefeatedBalkonGerat)
         {
             // This could go in slow loop, but put in fast loop since NPCs spawn on progression check
-            byte fastForwardState = (byte)(hasDefeatedBalkonGerat ? Math.Max((byte)0x06, currentProgressionCounter) : (boatIsFixed ? 0x05 : 0x04));
+            byte fastForwardState = (byte)(hasDefeatedBalkonGerat ? Math.Max((byte)0x06, currentProgressionCounter) : (HasFixedBoat ? 0x05 : 0x04));
             return [
+                // 
+                LoadHalfImmediate(0x0001FCA8, MMLEnums.Register.v1, fastForwardState),
                 // Loads people into the zone (they were evacuated)
                 LoadHalfImmediate(0x001003A8, MMLEnums.Register.v1, fastForwardState),
                 // 
                 LoadHalfImmediate(0x00100374, MMLEnums.Register.a1, fastForwardState),
-                // 
-                LoadHalfImmediate(0x0001FCA8, MMLEnums.Register.v1, fastForwardState),
+                // ?? 
+                //LoadHalfImmediate(0x0001FCA8, MMLEnums.Register.v1, fastForwardState),
             ];
         }
         public static OpCode[] EnableFixBoatCallRoll()
@@ -633,24 +651,20 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardLakeJyun(bool hasWatchedBalkonGeratDefeatCutscene)
+        public static OpCode[] FastForwardLakeJyun(bool HasFixedBoat, bool hasWatchedBalkonGeratDefeatCutscene)
         {
-            OpCode[] code = hasWatchedBalkonGeratDefeatCutscene ? [
+            byte fastForwardState = !HasFixedBoat ? (byte)0x04 :
+                                    !hasWatchedBalkonGeratDefeatCutscene ? (byte)0x05 :
+                                    (byte)0x06;
+            OpCode[] code = [
                 // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
-                LoadHalfImmediate(0x0010059C, MMLEnums.Register.v1, 0x06),
+                LoadHalfImmediate(0x0010059C, MMLEnums.Register.v1, fastForwardState),
                 // Prevents crash after starting phase 1
-                LoadHalfImmediate(0x0001FBCC, MMLEnums.Register.v1, 0x06),
+                LoadHalfImmediate(0x0001FBCC, MMLEnums.Register.v1, fastForwardState),
                 // Lets phase 1 load
-                //LoadHalfImmediate(0x0011674C, MMLEnums.Register.v1, 0x06),
+                LoadHalfImmediate(0x0011674C, MMLEnums.Register.v1, fastForwardState),
                 // Lets after phase 2 load
-                LoadHalfImmediate(0x00101A70, MMLEnums.Register.v1, 0x01),
-            ] : [
-                // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
-                LoadHalfImmediate(0x0010059C, MMLEnums.Register.v1, 0x05),
-                // Prevents crash after starting phase 1
-                LoadHalfImmediate(0x0001FBCC, MMLEnums.Register.v1, 0x05),
-                // Lets phase 1 load
-                LoadHalfImmediate(0x0011674C, MMLEnums.Register.v1, 0x05),
+                LoadHalfImmediate(0x00101A68, MMLEnums.Register.v0, (HasFixedBoat && hasWatchedBalkonGeratDefeatCutscene) ? (byte)0x01 : (byte)0x00),
             ];
             return code;
         }
