@@ -857,7 +857,10 @@ public partial class App : Application
                             {
                                 while (TextDataToWriteStack.TryPop(out var overwrittenTextData))
                                 {
-                                    Memory.WriteByteArray(overwrittenTextData.StartAddress, overwrittenTextData.TextByteArr);
+                                    if (overwrittenTextData.SourceLevelId == null || overwrittenTextData.SourceLevelId == currentLevelID)
+                                    {
+                                        Memory.WriteByteArray(overwrittenTextData.StartAddress, overwrittenTextData.TextByteArr);
+                                    }
                                 }
                             }
                         }

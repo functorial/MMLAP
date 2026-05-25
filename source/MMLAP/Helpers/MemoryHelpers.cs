@@ -14,7 +14,7 @@ namespace MMLAP.Helpers
 
         public static bool IsOutOfTitleScreen()
         {
-            bool isInGameOrCutscene = Memory.ReadByte(Addresses.TitleScreen.Address) == 0xA4;
+            bool isInGameOrCutscene = Memory.ReadByte(Addresses.TitleScreen.Address) == 0xA4 && MemoryHelpers.ReadAddressDataBit(Addresses.OutOfTitleLoading);
             short currentLevelID = Memory.ReadShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
             bool isInTitleScreenCutscene = new short[]
             {

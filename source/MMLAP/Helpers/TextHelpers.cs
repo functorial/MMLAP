@@ -266,7 +266,8 @@ namespace MMLAP.Helpers
 
         public static TextData OverwriteText(ulong startAddress, byte[] text)
         {
-            TextData overwrittenTextData = new(startAddress, Memory.ReadByteArray(startAddress, text.Length));
+            ushort sourceLevelId = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+            TextData overwrittenTextData = new(startAddress, Memory.ReadByteArray(startAddress, text.Length), sourceLevelId);
             Memory.WriteByteArray(startAddress, text);
             return overwrittenTextData;
         }
