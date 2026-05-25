@@ -42,7 +42,12 @@ public partial class App : Application
     private static Dictionary<long, ItemData>? ScoutedLocationItemData { get; set; }
     private static List<ILocation>? GameLocations { get; set; }
     private static string? PlayerName { get; set; }
-    public static bool HasSubmittedGoal { get; set; } = false;
+    private static int _hasSubmittedGoal = 0;
+    public static bool HasSubmittedGoal
+    {
+        get => _hasSubmittedGoal == 1;
+        set => _hasSubmittedGoal = value ? 1 : 0;
+    }
     private static int IsInGameSyncInitialized = 0;
     private static Timer? SlowGameLoopTimer { get; set; }
     private static int IsSlowLoopRunning = 0;
@@ -50,12 +55,15 @@ public partial class App : Application
     private static int IsFastLoopRunning = 0;
     private static Timer? StartMMLTimer { get; set; }
     private static ConcurrentStack<TextData> TextDataToWriteStack { get; set; } = new();
-    private static ushort? PreviousLevelID { get; set; }
+    private static ushort? PreviousLevelID_Slow { get; set; }
+    private static ushort? PreviousLevelID_Fast { get; set; }
     private static byte CurrentProgressionCounter { get; set; } = 0x0;
     private static ConcurrentDictionary<string, byte> VisitedAreaNames { get; set; } = new();
     private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
     private static bool IsLoadingIntoGame { get; set; } = false;
+    private static bool WasSaving { get; set; } = false;
+    private static uint? APZennyCommittedToSave { get; set; } = null;
     //private static int YellowRefractorTerminalVal { get; set; } = 0x00;
     private static readonly object _lockObject = new object();
 
@@ -144,6 +152,7 @@ public partial class App : Application
                 lastConnectionDetails["host"] = "";
             }
         }
+
         catch (Exception ex)
         {
             Log.Logger.Verbose($"Could not load connection details file.\r\n{ex.ToString()}");
@@ -272,15 +281,20 @@ public partial class App : Application
 
             int checkedLocations = APClient?.CurrentSession?.Locations.AllLocationsChecked.Count ?? 0;
             int receivedItems = APClient?.CurrentSession?.Items.AllItemsReceived.Count ?? 0;
-            List<string> visitedAreas = VisitedAreaNames.Keys.OrderBy(x => x).ToList();
+            ItemInfo? lastReceivedItem = APClient?.CurrentSession?.Items?.AllItemsReceived.LastOrDefault();
+            string lastReceivedItemText = lastReceivedItem != null
+                ? $"{lastReceivedItem.ItemName} (0x{lastReceivedItem.ItemId:X4})"
+                : "None";
+            List<string> visitedAreas = VisitedAreaNames.Keys.ToList();
 
             Log.Logger.Information("===== DEBUG INFO =====");
             Log.Logger.Information($"Progression: tracked=0x{CurrentProgressionCounter:X2}, memory=0x{memoryProgressionCounter:X2}");
             Log.Logger.Information($"Level: 0x{currentLevelID:X4} ({currentLevelName})");
             Log.Logger.Information($"Connection: connected={APClient?.IsConnected ?? false}, loggedIn={APClient?.IsLoggedIn ?? false}, inGameSyncInitialized={IsInGameSyncInitialized}");
-            Log.Logger.Information($"Loop state: isManagingLevelChange={IsManagingLevelChange}, isLoadingIntoGame={IsLoadingIntoGame}, previousLevelID={(PreviousLevelID != null ? $"0x{PreviousLevelID.Value:X4}" : "null")}");
+            Log.Logger.Information($"Loop state: isManagingLevelChange={IsManagingLevelChange}, isLoadingIntoGame={IsLoadingIntoGame}, previousLevelIDSlow={(PreviousLevelID_Slow != null ? $"0x{PreviousLevelID_Slow.Value:X4}" : "null")}, previousLevelIDFast={(PreviousLevelID_Fast != null ? $"0x{PreviousLevelID_Fast.Value:X4}" : "null")}");
             Log.Logger.Information($"Game state: loading={isLoading}, screenWipe={isScreenWipe}, cutscene={isCutscene}, titleScreen={isInTitleScreen}, saveMenu={isInSaveMenu}");
             Log.Logger.Information($"AP state: checkedLocations={checkedLocations}, receivedItems={receivedItems}, pendingTextRestores={TextDataToWriteStack.Count}");
+            Log.Logger.Information($"Last item received: {lastReceivedItemText}");
             LogRestoreOpCodeState();
 
             Log.Logger.Information("Cheat argument booleans:");
@@ -327,14 +341,59 @@ public partial class App : Application
         }
     }
 
+    private static void StopAndDisposeTimers()
+    {
+        if (StartMMLTimer != null)
+        {
+            StartMMLTimer.Enabled = false;
+            StartMMLTimer.Dispose();
+            StartMMLTimer = null;
+        }
+
+        if (SlowGameLoopTimer != null)
+        {
+            SlowGameLoopTimer.Enabled = false;
+            SlowGameLoopTimer.Dispose();
+            SlowGameLoopTimer = null;
+        }
+
+        if (FastGameLoopTimer != null)
+        {
+            FastGameLoopTimer.Enabled = false;
+            FastGameLoopTimer.Dispose();
+            FastGameLoopTimer = null;
+        }
+    }
+
+    private static void ResetGlobalRuntimeState()
+    {
+        HasSubmittedGoal = false;
+        ScoutedLocationItemData = null;
+        GameLocations = null;
+        PlayerName = null;
+        PreviousLevelID_Slow = null;
+        PreviousLevelID_Fast = null;
+        CurrentProgressionCounter = 0x0;
+        IsManagingLevelChange = false;
+        IsPreviouslyInTitleScreen = false;
+        IsLoadingIntoGame = false;
+        WasSaving = false;
+        APZennyCommittedToSave = null;
+        TextDataToWriteStack = new();
+        VisitedAreaNames.Clear();
+
+        System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
+        System.Threading.Interlocked.Exchange(ref IsSlowLoopRunning, 0);
+        System.Threading.Interlocked.Exchange(ref IsFastLoopRunning, 0);
+    }
+
     private async void Context_ConnectClicked(object? sender, ConnectClickedEventArgs e)
     {
         Context.ConnectButtonEnabled = false;
-        System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
         Log.Logger.Information("Connecting...");
+        StopAndDisposeTimers();
 
         // Refreshing subscriptions
-        ScoutedLocationItemData = null;
         if (APClient != null)
         {
             APClient.Connected -= Client_Connected;
@@ -355,6 +414,8 @@ public partial class App : Application
                 APClient.CurrentSession.Locations.CheckedLocationsUpdated -= CurrentSession_CheckedLocationsUpdated;
             }
         }
+
+        ResetGlobalRuntimeState();
 
         // Connect to Duckstation
         GameClient? gameClient = null;
@@ -401,7 +462,7 @@ public partial class App : Application
             Context.ConnectButtonEnabled = true;
             return;
         }
-        PlayerName = e.Slot ?? "".Trim();
+        PlayerName = (e.Slot ?? "").Trim();
         await APClient.Login(PlayerName, !string.IsNullOrWhiteSpace(e.Password) ? e.Password : null);
         if (!APClient.IsLoggedIn)
         {
@@ -409,6 +470,8 @@ public partial class App : Application
             Context.ConnectButtonEnabled = true;
             return;
         }
+
+        APZennyCommittedToSave = (uint?)APClient.CurrentSession.DataStorage[Scope.Slot, "mml_ap_zenny_committed"];
 
         // Subscribe to item and location events
         APClient.ItemManager.ItemReceived += ItemManager_ItemReceived;
@@ -463,9 +526,12 @@ public partial class App : Application
 
     private static async void Client_Connected(object? sender, EventArgs args)
     {
-        if (APClient != null)
+        ArchipelagoClient? apClient = APClient;
+        if (apClient != null)
         {
-            // Ensure player is in game before starting gameplay loop
+            StopAndDisposeTimers();
+
+            // Ensure player is in game before starting gameplay loops
             StartMMLTimer = new Timer();
             StartMMLTimer.Elapsed += new ElapsedEventHandler(StartMMLGame);
             StartMMLTimer.Interval = 500;
@@ -473,7 +539,6 @@ public partial class App : Application
 
             System.Threading.Thread.Sleep(250);
 
-            // Start gameplay loop
             SlowGameLoopTimer = new Timer();
             SlowGameLoopTimer.Elapsed += new ElapsedEventHandler(SlowGameLoop);
             SlowGameLoopTimer.Interval = 500;
@@ -485,7 +550,7 @@ public partial class App : Application
             FastGameLoopTimer.Enabled = true;
 
             Log.Logger.Information("Connected to Archipelago");
-            Log.Logger.Information($"Playing {APClient.CurrentSession.ConnectionInfo.Game} as {APClient.CurrentSession.Players.GetPlayerName(APClient.CurrentSession.ConnectionInfo.Slot)}");
+            Log.Logger.Information($"Playing {apClient.CurrentSession.ConnectionInfo.Game} as {apClient.CurrentSession.Players.GetPlayerName(apClient.CurrentSession.ConnectionInfo.Slot)}");
 
             Dictionary<String, String> lastConnectionDetails = new();
             lastConnectionDetails["slot"] = Context.Slot;
@@ -500,7 +565,7 @@ public partial class App : Application
             }
             // Repopulate hint list.  There is likely a better way to do this using the Get network protocol
             // with keys=[$"hints_{team}_{slot}"].
-            APClient?.SendMessage("!hint");
+            apClient.SendMessage("!hint");
             UpdateItemLog();
         }
         return;
@@ -510,30 +575,26 @@ public partial class App : Application
     {
         Log.Logger.Information("Disconnected from Archipelago");
         // Avoid ongoing timers affecting a new game.
-        StartMMLTimer?.Enabled = false;
-        SlowGameLoopTimer?.Enabled = false;
-        FastGameLoopTimer?.Enabled = false;
-        HasSubmittedGoal = false;
-        ScoutedLocationItemData = null;
-        VisitedAreaNames.Clear();
-        System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
+        StopAndDisposeTimers();
+        ResetGlobalRuntimeState();
         return;
     }
 
     private static async void StartMMLGame(object? sender, ElapsedEventArgs e)
     {
+        ArchipelagoClient? apClient = APClient;
+        List<ILocation>? gameLocations = GameLocations;
         if (
-            APClient != null &&
-            APClient.ItemManager != null &&
-            APClient.CurrentSession != null &&
-            GameLocations != null &&
+            apClient?.ItemManager != null &&
+            apClient?.CurrentSession != null &&
+            gameLocations != null &&
             LocationManager_EnableLocationsCondition() &&
             System.Threading.Interlocked.CompareExchange(ref IsInGameSyncInitialized, 1, 0) == 0 // Only start the game loop once per connection
         )
         {
             StartMMLTimer?.Enabled = false;
-            APClient.MonitorLocationsAsync(GameLocations);
-            await APClient.ReceiveReady();
+            apClient.MonitorLocationsAsync(gameLocations);
+            await apClient.ReceiveReady();
             Log.Logger.Debug("In-game confirmed. Location monitoring and item receive are now enabled.");
         }
         return;
@@ -661,12 +722,25 @@ public partial class App : Application
         }
         try
         {
+            ArchipelagoClient? apClient = APClient;
             if (
-                APClient != null &&
-                APClient.ItemManager != null &&
-                APClient.CurrentSession != null
+                apClient?.ItemManager != null &&
+                apClient?.CurrentSession != null
             )
             {
+                // Do things after saving the game
+                bool isSaving = MemoryHelpers.ReadAddressDataBit(Addresses.SavingFlag);
+                if (isSaving != WasSaving)
+                {
+                    bool isInSaveDataMenu = MemoryHelpers.ReadAddressDataBit(Addresses.SaveDataMenuFlag);
+                }
+                if (WasSaving && !isSaving)
+                {
+                    APZennyCommittedToSave = GetReceivedAPZennyTotal(apClient.CurrentSession.Items.AllItemsReceived);
+                    APClient?.CurrentSession.DataStorage[Scope.Slot, "mml_ap_zenny_committed"] = APZennyCommittedToSave;
+                }
+                WasSaving = isSaving;
+
                 ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
                 if (
                     DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
@@ -694,16 +768,13 @@ public partial class App : Application
                     // (e.g. overwriting things happening in the internal game loop)
                     else
                     {
-                        switch (currentLevelData.AreaName)
+                        if (currentLevelID != PreviousLevelID_Fast)
                         {
-                            case "Cardon Forest Sub-Gate":
-                                // Part of the decoupling of cardon sub-gate keys with the yellow refractor terminal
-                                LoopHelpers.HandleYellowRefractorTerminal();
-                                break;
-
-                            default:
-                                break;
+                            Cheats.Restore1FXXXWrites(currentLevelData);
+                            PreviousLevelID_Fast = currentLevelID;
                         }
+
+                        LoopHelpers.HandleYellowRefractorTerminal(currentLevelData);
                     }
                 }
             }
@@ -729,64 +800,58 @@ public partial class App : Application
         }
         try
         {
+            ArchipelagoClient? apClient = APClient;
             if (
-                APClient != null &&
-                APClient.ItemManager != null &&
-                APClient.CurrentSession != null
+                apClient?.ItemManager != null &&
+                apClient?.CurrentSession != null
             )
             {
-                // Pause these loop actions if in title menu or save menu
+                // Don't do these loop actions if in title menu or save menu
                 if (
                     MemoryHelpers.IsOutOfTitleScreen() &&
                     !MemoryHelpers.ReadAddressDataBit(Addresses.SaveDataMenuFlag)
                 )
                 {
                     // Task 1: Read useful memory
-                    CheckGoalCondition();
                     CurrentProgressionCounter = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
+                    CheckGoalCondition();
 
-                    // Task 2: Do things when changing rooms
-                    // Task 2.a: Check if level has changed, and if so, set flag to manage level change
+
                     ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
-
-                    if (currentLevelID != PreviousLevelID)
+                    if (currentLevelID != PreviousLevelID_Slow)
                     {
-                        APClient.CurrentSession.DataStorage[Scope.Slot, "MML_ROOM"] = currentLevelID;
+                        apClient.CurrentSession.DataStorage[Scope.Slot, "MML_ROOM"] = currentLevelID;
                         IsManagingLevelChange = true;
                     }
-
-                    PreviousLevelID = currentLevelID;
-
+                    PreviousLevelID_Slow = currentLevelID;
                     if (DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData))
                     {
-                        System.Threading.Thread.Sleep(50);
                         VisitedAreaNames.TryAdd(currentLevelData.AreaName, 0);
-                        LoopHelpers.HandleCutsceneSkipItemObtains(currentLevelData);
 
-                        // Task 2.b: Based on current level, do things like overwrite text, write code that isnt needed during loading, and locking doors
-                        if (
-                            IsManagingLevelChange &&
+                        bool isSafeToManageAndRestoreMemory =
                             !MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag) &&
                             !MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag) &&
-                            !MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag)
-                        )
+                            !MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag);
+
+                        if (isSafeToManageAndRestoreMemory)
                         {
-                            // Do slow code writes, typically ones that cause problems in fast write
-                            LoopHelpers.HandleSlowCodeWrites(currentLevelData, CurrentProgressionCounter);
-                            // Lock doors based on items received
-                            LoopHelpers.HandleFlutterFixedBrokenDistinction(currentLevelData);
-                            LoopHelpers.HandleAreaExitLocks(currentLevelData);
-                            LoopHelpers.HandleOddPails(currentLevelData);
-                            IsManagingLevelChange = false;
-                        }
-                        // Task 3: Do things regardless of level change
-                        // Task 3.a: Restore overwritten memory
-                        if (
-                            !MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag) &&
-                            !MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag) &&
-                            !MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag)
-                        )
-                        {
+                            // Remove items that may be given from skipping cutscenes
+                            LoopHelpers.HandleCutsceneSkipItemObtains(currentLevelData);
+
+                            //Log.Logger.Information($"IsManagingLevelChange: {IsManagingLevelChange}");
+                            // Task 2.b: Do things when changing level like overwrite text, write code that isnt needed during loading, and locking doors
+                            if (IsManagingLevelChange)
+                            {
+                                // Do slow memory writes, typically ones that are low priority or cause problems in fast write
+                                LoopHelpers.HandleSlowCodeWrites(currentLevelData, CurrentProgressionCounter);
+                                LoopHelpers.HandleAreaExitLocks(currentLevelData);
+                                LoopHelpers.HandleFlutterFixedBrokenDistinction(currentLevelData);
+                                LoopHelpers.HandleOddPails(currentLevelData);
+                                IsManagingLevelChange = false;
+                            }
+
+                            // Task 3: Do things regardless of level change
+                            // Task 3.a: Restore overwritten memory
                             // If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
                             if (!MemoryHelpers.ReadAddressDataBit(Addresses.TextBoxOpenFlag))
                             {
@@ -795,9 +860,6 @@ public partial class App : Application
                                     Memory.WriteByteArray(overwrittenTextData.StartAddress, overwrittenTextData.TextByteArr);
                                 }
                             }
-
-                            // Restore non-area-specific code writes (i.e. functions that may be used in multiple areas)
-                            Cheats.Restore1FXXXWrites(currentLevelData);
                         }
                     }
                 }
@@ -825,51 +887,12 @@ public partial class App : Application
                 {
                     SyncSyntheticLocations();
 
-                    IReadOnlyCollection<long> allLocationsChecked = APClient.CurrentSession.Locations.AllLocationsChecked;
-                    if (allLocationsChecked.Count > 0)
-                    {
-                        Log.Logger.Information("Re-checking previously checked container locations...");
-                        foreach (long locationID in allLocationsChecked)
-                        {
-                            if (DataDicts.LocationDataDict.TryGetValue((int)locationID, out LocationData? locationData))
-                            {
-                                if (new[] { LocationCategory.Container, LocationCategory.Hole, LocationCategory.Pickup }.Contains(locationData.Category))
-                                {
-                                    if (locationData.CheckAddressData.BitNumber != null)
-                                    {
-                                        MemoryHelpers.WriteAddressDataBit(locationData.CheckAddressData, true);
-                                    }
-                                    else
-                                    {
-                                        Log.Logger.Warning($"No check bit defined for location ID {locationID}. Please report this in the Discord thread!");
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                Log.Logger.Warning($"Failed to receive item for location ID {locationID} after loading save. Please report this in the Discord thread!");
-                            }
-                        }
-                    }
-                    IReadOnlyCollection<ItemInfo> allItemsReceived = APClient.CurrentSession.Items.AllItemsReceived;
-                    if (allItemsReceived.Count > 0)
-                    {
-                        Log.Logger.Information("Receiving non-zenny items from previously received items...");
-                        foreach (ItemInfo itemInfo in allItemsReceived)
-                        {
-                            if (DataDicts.ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData))
-                            {
-                                if (itemData.Category != ItemCategory.Zenny)
-                                {
-                                    ItemHelpers.ReceiveGenericItem(itemData);
-                                }
-                            }
-                            else
-                            {
-                                Log.Logger.Warning($"Failed to receive item ID {itemInfo.ItemId} after loading save. Please report this in the Discord thread!");
-                            }
-                        }
-                    }
+                    IReadOnlyCollection<long> allLocationsChecked = apClient.CurrentSession.Locations.AllLocationsChecked;
+                    RecheckPreviouslyCheckedContainerLocations(allLocationsChecked);
+
+                    IReadOnlyCollection<ItemInfo> allItemsReceived = apClient.CurrentSession.Items.AllItemsReceived;
+                    ReceivePreviouslyReceivedItems(allItemsReceived);
+
                     IsLoadingIntoGame = false;
                 }
             }
@@ -878,7 +901,6 @@ public partial class App : Application
         {
             Log.Logger.Warning("Encountered an error while managing the game loop.");
             Log.Logger.Warning(ex.ToString());
-            Log.Logger.Warning("This is not necessarily a problem if it happens during release or collect.");
         }
         finally
         {
@@ -900,38 +922,148 @@ public partial class App : Application
         _ = MemoryHelpers.WriteAddressDataBit(Addresses.CardonForestSubGateThreeSwitchStarterKeyPickup, allLocationsChecked.Contains(62));
     }
 
-    private static void CheckGoalCondition()
+    private static void RecheckPreviouslyCheckedContainerLocations(IReadOnlyCollection<long> allLocationsChecked)
     {
-        if (
-            APClient != null && (
-                !HasSubmittedGoal ||
-                LocationManager_EnableLocationsCondition()
-            )
-        )
+        if (allLocationsChecked.Count == 0)
         {
-            if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goal))
+            return;
+        }
+
+        foreach (long locationID in allLocationsChecked)
+        {
+            if (DataDicts.LocationDataDict.TryGetValue((int)locationID, out LocationData? locationData))
             {
-                bool isGoalComplete = (CompletionGoal)int.Parse(goal.ToString()) switch
+                if (new[] { LocationCategory.Container, LocationCategory.Hole, LocationCategory.Pickup }.Contains(locationData.Category))
                 {
-                    CompletionGoal.JUNO => MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
-                    CompletionGoal.ALL_BOSSES => 
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand) &&
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBonBonne) &&
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedMarlwolf) &&
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat) &&
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedGarudoriten) &&
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedKarumunaBashTrio) &&
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFockeWulf) &&
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedTheodoreBruno) &&
-                        MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
-                    _ => false
-                };
-                if (isGoalComplete)
-                {
-                    APClient.SendGoalCompletion();
-                    HasSubmittedGoal = true;
+                    if (locationData.CheckAddressData.BitNumber != null)
+                    {
+                        MemoryHelpers.WriteAddressDataBit(locationData.CheckAddressData, true);
+                    }
+                    else
+                    {
+                        Log.Logger.Warning($"No check bit defined for location ID {locationID}. Please report this in the Discord thread!");
+                    }
                 }
             }
+            else
+            {
+                Log.Logger.Warning($"Failed to receive item for location ID {locationID} after loading save. Please report this in the Discord thread!");
+            }
+        }
+    }
+
+    private static uint GetReceivedAPZennyTotal(IReadOnlyCollection<ItemInfo> allItemsReceived)
+    {
+        uint total = 0;
+        foreach (ItemInfo itemInfo in allItemsReceived)
+        {
+            if (
+                DataDicts.ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData) &&
+                itemData.Category == ItemCategory.Zenny
+            )
+            {
+                total += itemData.Quantity;
+            }
+        }
+        return total;
+    }
+
+    private static void ReceivePreviouslyReceivedItems(IReadOnlyCollection<ItemInfo> allItemsReceived)
+    {
+        if (allItemsReceived.Count == 0)
+        {
+            return;
+        }
+
+
+        foreach (ItemInfo itemInfo in allItemsReceived)
+        {
+            if (DataDicts.ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData))
+            {
+
+                // Prevent giving duplicate item if buster part is equipped
+                byte equippedBusterPart1 = Memory.ReadByte(0xB5600);
+                byte equippedBusterPart2 = Memory.ReadByte(0xB5601);
+                byte equippedBusterPart3 = Memory.ReadByte(0xB5602);
+                if (itemData.Category == ItemCategory.Buster && itemData.ItemCode != null)
+                {
+                    // Equipped buster slots use the same +1 encoding used by inventory slots
+                    byte equippedItemCode = (byte)(itemData.ItemCode.Value + 1);
+                    if (
+                        equippedItemCode == equippedBusterPart1 ||
+                        equippedItemCode == equippedBusterPart2 ||
+                        equippedItemCode == equippedBusterPart3
+                    )
+                    {
+                        continue;
+                    }
+                }
+
+                // Zenny is handled below
+                if (itemData.Category == ItemCategory.Zenny)
+                {
+                    continue;
+                }
+
+                // Else give item
+                ItemHelpers.ReceiveGenericItem(itemData);
+            }
+            else
+            {
+                Log.Logger.Warning($"Failed to receive item ID {itemInfo.ItemId} after loading save. Please report this in the Discord thread!");
+            }
+        }
+
+        uint receivedAPZennyTotal = GetReceivedAPZennyTotal(allItemsReceived);
+        if (APZennyCommittedToSave == null)
+        {
+            APZennyCommittedToSave = receivedAPZennyTotal;
+            return;
+        }
+
+        if (receivedAPZennyTotal > APZennyCommittedToSave.Value)
+        {
+            uint missingZenny = receivedAPZennyTotal - APZennyCommittedToSave.Value;
+            ItemHelpers.ReceiveGenericItem(new ItemData(ItemCategory.Zenny, "Zenny", missingZenny));
+        }
+    }
+
+    private static void CheckGoalCondition()
+    {
+        ArchipelagoClient? apClient = APClient;
+        if (
+            HasSubmittedGoal ||
+            apClient?.Options == null ||
+            !LocationManager_EnableLocationsCondition() ||
+            !apClient.Options.TryGetValue("goal", out var goal)
+        )
+        {
+            return;
+        }
+
+        bool isGoalComplete = (CompletionGoal)int.Parse(goal.ToString()) switch
+        {
+            CompletionGoal.JUNO => MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
+            CompletionGoal.ALL_BOSSES =>
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand) &&
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBonBonne) &&
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedMarlwolf) &&
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat) &&
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedGarudoriten) &&
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedKarumunaBashTrio) &&
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFockeWulf) &&
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedTheodoreBruno) &&
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
+            _ => false
+        };
+
+        if (isGoalComplete)
+        {
+            if (System.Threading.Interlocked.CompareExchange(ref _hasSubmittedGoal, 1, 0) != 0)
+            {
+                return;
+            }
+            apClient.SendGoalCompletion();
         }
         return;
     }
@@ -980,14 +1112,15 @@ public partial class App : Application
 
     private static void ItemManager_ItemReceived(object? sender, ItemReceivedEventArgs args)
     {
+        ArchipelagoClient? apClient = APClient;
         if (
-            APClient != null &&
-            APClient.CurrentSession != null &&
+            apClient?.CurrentSession != null &&
             DataDicts.ItemDataDict.TryGetValue(args.Item.Id, out ItemData? itemData)
         )
         {
             ItemHelpers.ReceiveGenericItem(itemData);
 
+            // Unlock regions for items which do so
             if (
                 args.Item.Id is 0x022A or 0x022B or 0x022C
             )
@@ -1016,10 +1149,10 @@ public partial class App : Application
 
     private static async void CurrentSession_CheckedLocationsUpdated(System.Collections.ObjectModel.ReadOnlyCollection<long> newCheckedLocations)
     {
+        ArchipelagoClient? apClient = APClient;
         if (
-            APClient != null &&
-            APClient.ItemManager != null &&
-            APClient.CurrentSession != null
+            apClient?.ItemManager != null &&
+            apClient?.CurrentSession != null
         )
         {
             if (!LocationManager_EnableLocationsCondition() && !HasSubmittedGoal)

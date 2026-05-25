@@ -53,7 +53,7 @@ namespace MMLAP.Helpers
                         Memory.WriteByteArray(0x00155FC2, veggieManText);
                     }
                     break;
-                case var data when data.AreaName == "City Hall" && data.RoomName == "Amelia's Office":
+                case var data when data.AreaName == "City Hall" && (data.RoomName == "Amelia's Office" || data.RoomName == "Amelia's Office (wrecked)"):
                     // Class B License text handling
                     if (
                         scoutedLocationItemData != null &&
@@ -377,8 +377,13 @@ namespace MMLAP.Helpers
             }
         }
 
-        public static void HandleYellowRefractorTerminal()
+        public static void HandleYellowRefractorTerminal(LevelData currentLevelData)
         {
+            if (currentLevelData.AreaName != "Cardon Forest Sub-Gate")
+            {
+                return;
+            }
+
             // Basically we want this byte to reflect key in inventory when interacting with terminal and key sprites picked up elsewhere
             // This byte is used for multiple things in the subgate which makes it a big pain in the ass to do with MIPS edits. But this seems to win the race condition in the fast game loop, so whatever
             bool terminalInteractionBitSet = Memory.ReadBit(Addresses.YellowRefractorTerminal.Address, 7);
@@ -879,25 +884,29 @@ namespace MMLAP.Helpers
         {
             switch (currentLevelData)
             {
-                case var levelData when levelData.AreaName == "City Hall" && (levelData.RoomName is "Amelia's Office" or "Amelia's Office (wrecked)"):
+                case var levelData when levelData.AreaName == "City Hall": // && (levelData.RoomName is "Amelia's Office" or "Amelia's Office (wrecked)"):
                     if (
                         !ItemHelpers.HasReceivedItem(0x022C) && // hasReceivedClassBLicense
-                        (Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) is 0x0601 or 0x0604) &&
                         DataDicts.ItemDataDict.TryGetValue(0x022C, out var itemDataCBL) &&
-                        itemDataCBL != null &&
-                        itemDataCBL.InventoryAddressData != null
+                        itemDataCBL?.InventoryAddressData != null
                     )
                     {
                         MemoryHelpers.WriteAddressDataBit(itemDataCBL.InventoryAddressData, false);
+                    }
+                    if (
+                        !ItemHelpers.HasReceivedItem(0x022B) && // hasReceivedClassALicense
+                        DataDicts.ItemDataDict.TryGetValue(0x022B, out var itemDataCAL) &&
+                        itemDataCAL?.InventoryAddressData != null
+                    )
+                    {
+                        MemoryHelpers.WriteAddressDataBit(itemDataCAL.InventoryAddressData, false);
                     }
                     break;
                 case var levelData when levelData.AreaName == "Cardon Forest Sub-Gate" && levelData.RoomName == "Refractor Room":
                     if (
                         !ItemHelpers.HasReceivedItem(0x0228) && // Yellow Refractor
-                        (Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) is 0x0601 or 0x0604) &&
                         DataDicts.ItemDataDict.TryGetValue(0x0228, out var itemDataYF) &&
-                        itemDataYF != null &&
-                        itemDataYF.InventoryAddressData != null
+                        itemDataYF?.InventoryAddressData != null
                     )
                     {
                         MemoryHelpers.WriteAddressDataBit(itemDataYF.InventoryAddressData, false);
@@ -905,11 +914,9 @@ namespace MMLAP.Helpers
                     break;
                 case var levelData when levelData.AreaName == "Lake Jyun Sub-Gate" && levelData.RoomName == "Refractor Room":
                     if (
-                        !ItemHelpers.HasReceivedItem(0x0228) && // Yellow Refractor
-                        (Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) is 0x0601 or 0x0604) &&
-                        DataDicts.ItemDataDict.TryGetValue(0x0228, out var itemDataRF) &&
-                        itemDataRF != null &&
-                        itemDataRF.InventoryAddressData != null
+                        !ItemHelpers.HasReceivedItem(0x0229) && // Red Refractor
+                        DataDicts.ItemDataDict.TryGetValue(0x0229, out var itemDataRF) &&
+                        itemDataRF?.InventoryAddressData != null
                     )
                     {
                         MemoryHelpers.WriteAddressDataBit(itemDataRF.InventoryAddressData, false);

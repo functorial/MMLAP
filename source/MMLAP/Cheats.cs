@@ -127,6 +127,10 @@ namespace MMLAP
             if (currentLevelData.AreaName != "City Hall")
             {
                 MemoryHelpers.WriteCode(Restore1FA9C);
+            }
+
+            if (currentLevelData.AreaName != "City Hall (Indoors)")
+            {
                 MemoryHelpers.WriteCode(Restore1FCE8);
             }
 
@@ -422,7 +426,7 @@ namespace MMLAP
             // Going to try separating Amelia's Office from here to make things easier
             byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
                                     !hasEarnedClassALicense ? (byte)0x01 :
-                                    !hasDefeatedBalkonGerat || hasTakenRedRefractor ? (byte)0x02 :
+                                    !hasDefeatedBalkonGerat || !hasTakenRedRefractor ? (byte)0x02 :
                                     Math.Max((byte)0x06, currentProgressionCounter);
             return [
                 // Four tiers: checks if = 1. else checks = 0 (and 0xBE43E?), else checks 2 <= .. <= 5, else checks >= 6
@@ -445,10 +449,10 @@ namespace MMLAP
                 // Loading in from Marlwolf cutscene
                 LoadHalfImmediate(0x00101088, MMLEnums.Register.v0, fastForwardState),
                 // Delete code that gives Class B License at cutscene start/skip
-                Nop(0x00105CC4),
+                //Nop(0x00105CC4),
                 //Nop(0x000553C4), // This is used for writing all kinds of bits so really dont want to nop this
                 // Delete code that gives Class A License at cutscene start/skip
-                Nop(0x001069D4),
+                //Nop(0x001069D4),
             ];
         }
 
@@ -553,7 +557,7 @@ namespace MMLAP
         {
             byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
                                     !hasEarnedClassALicense ? (byte)0x01 :
-                                    !hasDefeatedBalkonGerat || hasTakenRedRefractor ? (byte)0x02 :
+                                    !hasDefeatedBalkonGerat || !hasTakenRedRefractor ? (byte)0x02 :
                                     Math.Max((byte)0x06, currentProgressionCounter);
             return [
                 // ?

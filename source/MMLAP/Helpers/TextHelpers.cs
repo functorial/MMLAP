@@ -234,17 +234,22 @@ namespace MMLAP.Helpers
             byte[] spaceFill = [];
             if (guaranteedLength != null)
             {
-                int minLength = prefix.Length + youGotSound.Length + youGot.Length + itemByteArray.Length + 1 + suffix.Length;
-                if (guaranteedLength < minLength)
+                int nonItemLength = prefix.Length + youGotSound.Length + youGot.Length + 1 + suffix.Length;
+                int maxItemLength = (int)guaranteedLength - nonItemLength;
+                if (maxItemLength < 0)
                 {
-                    Serilog.Log.Logger.Warning("guaranteedLength ({GuaranteedLength}) is less than minimum encoded length ({MinLength}) in EncodeYouGotItemWindow.", guaranteedLength, minLength);
-                    guaranteedLength = null;
+                    Serilog.Log.Logger.Warning("guaranteedLength ({GuaranteedLength}) is smaller than fixed non-item text length ({NonItemLength}) in EncodeYouGotItemWindow.", guaranteedLength, nonItemLength);
+                    maxItemLength = 0;
                 }
 
-                if (guaranteedLength != null)
+                if (itemByteArray.Length > maxItemLength)
                 {
-                    spaceFill = Enumerable.Repeat((byte)0x4F, (int)guaranteedLength - minLength).ToArray();
+                    Serilog.Log.Logger.Warning("Truncating item text in EncodeYouGotItemWindow from {OriginalLength} bytes to {MaxLength} bytes to fit guaranteedLength ({GuaranteedLength}).", itemByteArray.Length, maxItemLength, guaranteedLength);
+                    itemByteArray = itemByteArray.Take(maxItemLength).ToArray();
                 }
+
+                int totalLength = nonItemLength + itemByteArray.Length;
+                spaceFill = Enumerable.Repeat((byte)0x4F, (int)guaranteedLength - totalLength).ToArray();
             }
             List<byte[]> substrs =
             [
