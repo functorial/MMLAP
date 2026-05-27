@@ -238,13 +238,11 @@ namespace MMLAP.Helpers
                 int maxItemLength = (int)guaranteedLength - nonItemLength;
                 if (maxItemLength < 0)
                 {
-                    Serilog.Log.Logger.Warning("guaranteedLength ({GuaranteedLength}) is smaller than fixed non-item text length ({NonItemLength}) in EncodeYouGotItemWindow.", guaranteedLength, nonItemLength);
                     maxItemLength = 0;
                 }
 
                 if (itemByteArray.Length > maxItemLength)
                 {
-                    Serilog.Log.Logger.Warning("Truncating item text in EncodeYouGotItemWindow from {OriginalLength} bytes to {MaxLength} bytes to fit guaranteedLength ({GuaranteedLength}).", itemByteArray.Length, maxItemLength, guaranteedLength);
                     itemByteArray = itemByteArray.Take(maxItemLength).ToArray();
                 }
 
