@@ -358,6 +358,10 @@ namespace MMLAP.Helpers
         {
             switch (currentLevelData)
             {
+                case var data when data.AreaName == "Lake Jyun":
+                    Memory.WriteByte(0xC39BC, 0x00); // This value is read at various points during boss fight and is typically 0. Gai-nee Tooren fight populates it with non-zero and doesn't clean it up ever
+                    break;
+
                 //case var data when data.AreaName == "Cardon Forest (Flutter Broken)" && data.RoomName == "City Entrance":
                 //    if (
                 //        MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedTronDogCutscene) &&
