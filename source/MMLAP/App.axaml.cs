@@ -164,11 +164,11 @@ public partial class App : Application
 
         Log.Logger.Information("This Archipelago Client is compatible only with the NTSC-U release of Mega Man Legends.");
         Log.Logger.Information("Trying to play with a different version will not work as intended.");
-        if (!IsRunningAsAdministrator())
-        {
-            Log.Logger.Warning("You do not appear to be running this client as an administrator.");
-            Log.Logger.Warning("This may result in errors or crashes when trying to connect to Duckstation.");
-        }
+        //if (!IsRunningAsAdministrator())
+        //{
+        //    Log.Logger.Warning("You do not appear to be running this client as an administrator.");
+        //    Log.Logger.Warning("This may result in errors or crashes when trying to connect to Duckstation.");
+        //}
         Log.Logger.Information("Please report any issues in the Discord thread. Thank you!");
         return;
     }
