@@ -5,6 +5,7 @@ using Archipelago.Core.AvaloniaGUI.Views;
 using Archipelago.Core.Helpers;
 using Archipelago.Core.Models;
 using Archipelago.Core.Util;
+using Archipelago.Core.Util.Overlay;
 using Archipelago.MultiClient.Net;
 using Archipelago.MultiClient.Net.Enums;
 using Archipelago.MultiClient.Net.MessageLog.Messages;
@@ -34,6 +35,13 @@ namespace MMLAP;
 
 public partial class App : Application
 {
+    private enum OverlayLoggingScope
+    {
+        Off,
+        Local,
+        Global
+    }
+
     // TODO: Remember to set this in MMLAP.Desktop as well.
     public static readonly string Version = "0.3.0";
     public static readonly List<string> SupportedVersions = ["0.3.0"];
@@ -53,6 +61,7 @@ public partial class App : Application
     private static int IsSlowLoopRunning = 0;
     private static Timer? FastGameLoopTimer { get; set; }
     private static int IsFastLoopRunning = 0;
+    private static OverlayLoggingScope OverlayScope { get; set; } = OverlayLoggingScope.Local;
     private static Timer? StartMMLTimer { get; set; }
     private static ConcurrentStack<TextData> TextDataToWriteStack { get; set; } = new();
     private static ushort? PreviousLevelID_Slow { get; set; }
@@ -114,6 +123,21 @@ public partial class App : Application
         return System.Text.Json.JsonSerializer.Deserialize<Dictionary<String, String>>(connectionDetails);
     }
 
+    private static OverlayLoggingScope ParseOverlayScope(string? value)
+    {
+        return value?.Trim().ToLowerInvariant() switch
+        {
+            "off" => OverlayLoggingScope.Off,
+            "global" => OverlayLoggingScope.Global,
+            _ => OverlayLoggingScope.Local,
+        };
+    }
+
+    private static string ToOverlayScopeString(OverlayLoggingScope scope)
+    {
+        return scope.ToString().ToLowerInvariant();
+    }
+
     /**
      * Saves a details from the most recent connection to ./connection.json.
      *
@@ -132,9 +156,9 @@ public partial class App : Application
 
         Context.ConnectClicked += Context_ConnectClicked;
         Context.CommandReceived += Context_CommandReceived;
-        Context.OverlayEnabled = true;
         Context.AutoscrollEnabled = true;
         Context.ConnectButtonEnabled = true;
+        Context.OverlayEnabled = true;
 
         Dictionary<String, String> lastConnectionDetails = new Dictionary<string, string>();
         lastConnectionDetails["slot"] = "";
@@ -151,6 +175,10 @@ public partial class App : Application
             {
                 lastConnectionDetails["host"] = "";
             }
+            if (!lastConnectionDetails.ContainsKey("overlayScope"))
+            {
+                lastConnectionDetails["overlayScope"] = "local";
+            }
         }
 
         catch (Exception ex)
@@ -159,27 +187,34 @@ public partial class App : Application
         }
         Context.Host = lastConnectionDetails["host"];
         Context.Slot = lastConnectionDetails["slot"];
+        OverlayScope = ParseOverlayScope(lastConnectionDetails["overlayScope"]);
 
         HasSubmittedGoal = false;
 
         Log.Logger.Information("This Archipelago Client is compatible only with the NTSC-U release of Mega Man Legends.");
         Log.Logger.Information("Trying to play with a different version will not work as intended.");
-        //if (!IsRunningAsAdministrator())
-        //{
-        //    Log.Logger.Warning("You do not appear to be running this client as an administrator.");
-        //    Log.Logger.Warning("This may result in errors or crashes when trying to connect to Duckstation.");
-        //}
+        if (!IsRunningAsAdministrator())
+        {
+            Log.Logger.Warning("You do not appear to be running this client as an administrator.");
+            Log.Logger.Warning("This may result in errors or crashes when trying to connect to Duckstation.");
+        }
         Log.Logger.Information("Please report any issues in the Discord thread. Thank you!");
         return;
     }
 
     private void Context_CommandReceived(object? sender, ArchipelagoCommandEventArgs a)
     {
-
         if (string.IsNullOrWhiteSpace(a.Command))
         {
             return;
         }
+
+        if (a.Command.Trim().StartsWith("!overlay", StringComparison.OrdinalIgnoreCase))
+        {
+            HandleOverlayCommand(a.Command);
+            return;
+        }
+
         string command = a.Command.Trim().ToLower();
         switch (command)
         {
@@ -190,6 +225,7 @@ public partial class App : Application
                 Log.Logger.Information("!reload - Force reload all items.  Use this if you think you may have missed received items.  Please reconnect to the server while in game to refresh received items.");
                 Log.Logger.Information("!goal - Check your current goal.");
                 Log.Logger.Information("!debug - Print debugging information about current game and client state.");
+                Log.Logger.Information("!overlay <off|local|global|status> - Set overlay logging scope.");
                 break;
             case "!reload":
                 Log.Logger.Information($"> {a.Command}");
@@ -245,6 +281,52 @@ public partial class App : Application
                 break;
         }
         return;
+    }
+
+    private static void HandleOverlayCommand(string rawCommand)
+    {
+        string[] parts = rawCommand.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        string requestedMode = parts.Length > 1 ? parts[1].ToLowerInvariant() : "status";
+
+        switch (requestedMode)
+        {
+            case "global":
+                OverlayScope = OverlayLoggingScope.Global;
+                Log.Logger.Information("Overlay logging scope set to global (all multiworld item send events).");
+                break;
+            case "off":
+                OverlayScope = OverlayLoggingScope.Off;
+                Log.Logger.Information("Overlay logging scope set to off.");
+                break;
+            case "local":
+                OverlayScope = OverlayLoggingScope.Local;
+                Log.Logger.Information("Overlay logging scope set to local (your sent checks and received items).");
+                break;
+            case "status":
+                Log.Logger.Information($"Overlay logging scope is currently {ToOverlayScopeString(OverlayScope)}.");
+                break;
+            default:
+                Log.Logger.Warning("Unknown overlay mode. Use !overlay <off|local|global|status>.");
+                break;
+        }
+
+        try
+        {
+            Dictionary<String, String> lastConnectionDetails = GetLastConnectionDetails();
+            if (!lastConnectionDetails.ContainsKey("slot"))
+            {
+                lastConnectionDetails["slot"] = Context?.Slot ?? "";
+            }
+            if (!lastConnectionDetails.ContainsKey("host"))
+            {
+                lastConnectionDetails["host"] = Context?.Host ?? "";
+            }
+            lastConnectionDetails["overlayScope"] = ToOverlayScopeString(OverlayScope);
+            SaveLastConnectionDetails(lastConnectionDetails);
+        }
+        catch
+        {
+        }
     }
 
     private static void LogDebugInfo()
@@ -454,8 +536,29 @@ public partial class App : Application
         APClient.Disconnected += Client_Disconnected;
         APClient.MessageReceived += Client_MessageReceived;
 
+        var gameOverlay = new WindowsOverlayService(new OverlayOptions
+        {
+            XOffset = 30,
+            YOffset = 100,
+            FontSize = 24,
+            DefaultTextColor = Archipelago.Core.Util.Overlay.Color.Yellow,
+            FadeDuration = 10.0f
+        });
+        APClient.IntializeOverlayService(gameOverlay);
+
         // Connect to host and log in to slot => init Options, ItemManager, LocationManager
-        await APClient.Connect((e.Host ?? "localhost:38281").Trim(), "Mega Man Legends");
+        string host = (e.Host ?? "localhost:38281").Trim();
+        try
+        {
+            APClient.CurrentSession ??= ArchipelagoSessionFactory.CreateSession(host);
+            await APClient.Connect(host, "Mega Man Legends");
+        }
+        catch (NullReferenceException ex)
+        {
+            Log.Logger.Error(ex, "Failed to connect due to a client initialization error.");
+            Context.ConnectButtonEnabled = true;
+            return;
+        }
         if (!APClient.IsConnected)
         {
             Log.Logger.Error("Your host seems to be invalid.  Please confirm that you have entered it correctly.");
@@ -555,6 +658,7 @@ public partial class App : Application
             Dictionary<String, String> lastConnectionDetails = new();
             lastConnectionDetails["slot"] = Context.Slot;
             lastConnectionDetails["host"] = Context.Host;
+            lastConnectionDetails["overlayScope"] = ToOverlayScopeString(OverlayScope);
             try
             {
                 SaveLastConnectionDetails(lastConnectionDetails);
@@ -1140,8 +1244,70 @@ public partial class App : Application
         return;
     }
 
+    private static string BuildOverlayText(LogMessage message)
+    {
+        return string.Concat(message.Parts.Select(part => part.Text))
+            .Replace("\r", " ")
+            .Replace("\n", " ")
+            .Trim();
+    }
+
+    private static bool TryOverlayMessage(LogMessage message)
+    {
+        string messageTypeName = message.GetType().Name;
+        if (!messageTypeName.Contains("ItemSend", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        string overlayText = BuildOverlayText(message);
+        if (string.IsNullOrWhiteSpace(overlayText))
+        {
+            return false;
+        }
+
+        switch (OverlayScope)
+        {
+            case OverlayLoggingScope.Off:
+                return false;
+
+            case OverlayLoggingScope.Global:
+                APClient?.AddRichOverlayMessage(message);
+                //APClient?.AddOverlayMessage(overlayText);
+                return true;
+
+            case OverlayLoggingScope.Local:
+                ArchipelagoClient? apClient = APClient;
+                string? localPlayerName = apClient?.CurrentSession?.Players?.GetPlayerName(apClient.CurrentSession.ConnectionInfo.Slot);
+                if (string.IsNullOrWhiteSpace(localPlayerName))
+                {
+                    return false;
+                }
+
+                bool isLocalItemEvent = message.Parts.Any(part =>
+                    !string.IsNullOrWhiteSpace(part.Text) &&
+                    part.Text.Contains(localPlayerName, StringComparison.OrdinalIgnoreCase));
+
+                if (!isLocalItemEvent)
+                {
+                    return false;
+                }
+
+                APClient?.AddRichOverlayMessage(message);
+                //APClient?.AddOverlayMessage(overlayText);
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
     private static async void Client_MessageReceived(object? sender, MessageReceivedEventArgs e)
     {
+        bool x = TryOverlayMessage(e.Message);
+        Log.Logger.Information($"{x}: " + e.Message.ToString());
+
+
         if (e.Message.Parts.Any(x => x.Text == "[Hint]: "))
         {
             LogHint(e.Message);
