@@ -62,6 +62,7 @@ public partial class App : Application
     private static Timer? FastGameLoopTimer { get; set; }
     private static int IsFastLoopRunning = 0;
     private static OverlayLoggingScope OverlayScope { get; set; } = OverlayLoggingScope.Local;
+    private static IOverlayService? SharedOverlayService { get; set; } = null;
     private static Timer? StartMMLTimer { get; set; }
     private static ConcurrentStack<TextData> TextDataToWriteStack { get; set; } = new();
     private static ushort? PreviousLevelID_Slow { get; set; }
@@ -73,7 +74,6 @@ public partial class App : Application
     private static bool IsLoadingIntoGame { get; set; } = false;
     private static bool WasSaving { get; set; } = false;
     private static uint? APZennyCommittedToSave { get; set; } = null;
-    //private static int YellowRefractorTerminalVal { get; set; } = 0x00;
     private static readonly object _lockObject = new object();
 
     public override void Initialize()
@@ -198,7 +198,7 @@ public partial class App : Application
             Log.Logger.Warning("You do not appear to be running this client as an administrator.");
             Log.Logger.Warning("This may result in errors or crashes when trying to connect to Duckstation.");
         }
-        Log.Logger.Information("Please report any issues in the Discord thread. Thank you!");
+        Log.Logger.Information("Please report any issues in the Archipelago Discord MML thread. Thank you!");
         return;
     }
 
@@ -447,6 +447,58 @@ public partial class App : Application
         }
     }
 
+    private static void TearDownCurrentConnection()
+    {
+        ArchipelagoClient? client = APClient;
+        APClient = null;
+
+        if (client == null)
+        {
+            return;
+        }
+
+        client.Connected -= Client_Connected;
+        client.Disconnected -= Client_Disconnected;
+        client.GameDisconnected -= Client_GameDisconnected;
+        client.MessageReceived -= Client_MessageReceived;
+
+        if (client.ItemManager != null)
+        {
+            client.ItemManager.ItemReceived -= ItemManager_ItemReceived;
+        }
+
+        if (client.LocationManager != null)
+        {
+            client.LocationManager.EnableLocationsCondition = null;
+            client.LocationManager.LocationCompleted -= LocationManager_LocationCompleted;
+            try
+            {
+                client.LocationManager.CancelMonitors();
+            }
+            catch (ObjectDisposedException) { }
+            catch (Exception ex)
+            {
+                Log.Logger.Debug($"CancelMonitors failed during teardown: {ex}");
+            }
+            // Null out so client.Dispose() -> Disconnect() does not call CancelMonitors() a second time.
+            client.LocationManager = null;
+        }
+
+        if (client.CurrentSession != null)
+        {
+            client.CurrentSession.Locations.CheckedLocationsUpdated -= CurrentSession_CheckedLocationsUpdated;
+        }
+
+        try
+        {
+            client.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Log.Logger.Debug($"Client dispose failed during teardown: {ex}");
+        }
+    }
+
     private static void ResetGlobalRuntimeState()
     {
         HasSubmittedGoal = false;
@@ -474,28 +526,7 @@ public partial class App : Application
         Context.ConnectButtonEnabled = false;
         Log.Logger.Information("Connecting...");
         StopAndDisposeTimers();
-
-        // Refreshing subscriptions
-        if (APClient != null)
-        {
-            APClient.Connected -= Client_Connected;
-            APClient.Disconnected -= Client_Disconnected;
-            APClient.MessageReceived -= Client_MessageReceived;
-            if (APClient.ItemManager != null)
-            {
-                APClient.ItemManager.ItemReceived -= ItemManager_ItemReceived;
-            }
-            if (APClient.LocationManager != null)
-            {
-                APClient.LocationManager.CancelMonitors();
-                APClient.LocationManager.EnableLocationsCondition = null;
-                APClient.LocationManager.LocationCompleted -= LocationManager_LocationCompleted;
-            }
-            if (APClient.CurrentSession != null)
-            {
-                APClient.CurrentSession.Locations.CheckedLocationsUpdated -= CurrentSession_CheckedLocationsUpdated;
-            }
-        }
+        TearDownCurrentConnection();
 
         ResetGlobalRuntimeState();
 
@@ -534,9 +565,11 @@ public partial class App : Application
         APClient = new ArchipelagoClient(gameClient);
         APClient.Connected += Client_Connected;
         APClient.Disconnected += Client_Disconnected;
+        APClient.GameDisconnected += Client_GameDisconnected;
         APClient.MessageReceived += Client_MessageReceived;
 
-        var gameOverlay = new WindowsOverlayService(new OverlayOptions
+        bool isFirstOverlayAttach = SharedOverlayService == null;
+        SharedOverlayService ??= new WindowsOverlayService(new OverlayOptions
         {
             XOffset = 30,
             YOffset = 100,
@@ -544,7 +577,7 @@ public partial class App : Application
             DefaultTextColor = Archipelago.Core.Util.Overlay.Color.Yellow,
             FadeDuration = 10.0f
         });
-        APClient.IntializeOverlayService(gameOverlay);
+        APClient.IntializeOverlayService(new NonDisposingOverlayProxy(SharedOverlayService, isFirstOverlayAttach));
 
         // Connect to host and log in to slot => init Options, ItemManager, LocationManager
         string host = (e.Host ?? "localhost:38281").Trim();
@@ -556,12 +589,14 @@ public partial class App : Application
         catch (NullReferenceException ex)
         {
             Log.Logger.Error(ex, "Failed to connect due to a client initialization error.");
+            TearDownCurrentConnection();
             Context.ConnectButtonEnabled = true;
             return;
         }
         if (!APClient.IsConnected)
         {
             Log.Logger.Error("Your host seems to be invalid.  Please confirm that you have entered it correctly.");
+            TearDownCurrentConnection();
             Context.ConnectButtonEnabled = true;
             return;
         }
@@ -570,6 +605,7 @@ public partial class App : Application
         if (!APClient.IsLoggedIn)
         {
             Log.Logger.Error("Failed to login.  Please check your host, name, and password.");
+            TearDownCurrentConnection();
             Context.ConnectButtonEnabled = true;
             return;
         }
@@ -678,10 +714,18 @@ public partial class App : Application
     private static async void Client_Disconnected(object? sender, EventArgs args)
     {
         Log.Logger.Information("Disconnected from Archipelago");
-        // Avoid ongoing timers affecting a new game.
         StopAndDisposeTimers();
+        TearDownCurrentConnection();
         ResetGlobalRuntimeState();
         return;
+    }
+
+    private static void Client_GameDisconnected(object? sender, EventArgs args)
+    {
+        Log.Logger.Warning("Duckstation disconnected.");
+        StopAndDisposeTimers();
+        TearDownCurrentConnection();
+        ResetGlobalRuntimeState();
     }
 
     private static async void StartMMLGame(object? sender, ElapsedEventArgs e)
@@ -699,7 +743,6 @@ public partial class App : Application
             StartMMLTimer?.Enabled = false;
             apClient.MonitorLocationsAsync(gameLocations);
             await apClient.ReceiveReady();
-            Log.Logger.Debug("In-game confirmed. Location monitoring and item receive are now enabled.");
         }
         return;
     }
@@ -1186,7 +1229,7 @@ public partial class App : Application
         return conditions.All(value => value);
     }
 
-    private void LocationManager_LocationCompleted(object? sender, LocationCompletedEventArgs e)
+    private static void LocationManager_LocationCompleted(object? sender, LocationCompletedEventArgs e)
     {
         if (
             APClient != null &&
@@ -1244,24 +1287,10 @@ public partial class App : Application
         return;
     }
 
-    private static string BuildOverlayText(LogMessage message)
-    {
-        return string.Concat(message.Parts.Select(part => part.Text))
-            .Replace("\r", " ")
-            .Replace("\n", " ")
-            .Trim();
-    }
-
     private static bool TryOverlayMessage(LogMessage message)
     {
         string messageTypeName = message.GetType().Name;
         if (!messageTypeName.Contains("ItemSend", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        string overlayText = BuildOverlayText(message);
-        if (string.IsNullOrWhiteSpace(overlayText))
         {
             return false;
         }
@@ -1273,7 +1302,6 @@ public partial class App : Application
 
             case OverlayLoggingScope.Global:
                 APClient?.AddRichOverlayMessage(message);
-                //APClient?.AddOverlayMessage(overlayText);
                 return true;
 
             case OverlayLoggingScope.Local:
@@ -1294,7 +1322,6 @@ public partial class App : Application
                 }
 
                 APClient?.AddRichOverlayMessage(message);
-                //APClient?.AddOverlayMessage(overlayText);
                 return true;
 
             default:
@@ -1304,14 +1331,12 @@ public partial class App : Application
 
     private static async void Client_MessageReceived(object? sender, MessageReceivedEventArgs e)
     {
-        bool x = TryOverlayMessage(e.Message);
-        Log.Logger.Information($"{x}: " + e.Message.ToString());
-
-
         if (e.Message.Parts.Any(x => x.Text == "[Hint]: "))
         {
             LogHint(e.Message);
         }
+        // Try to send to overlay if it's an ItemSend message matching the current scope
+        TryOverlayMessage(e.Message);
         Log.Logger.Information(JsonConvert.SerializeObject(e.Message));
         return;
     }
@@ -1331,5 +1356,27 @@ public partial class App : Application
 
         }
         return;
+    }
+
+    // Wraps an IOverlayService so the library's client.Dispose() cannot destroy
+    // the shared overlay window. The real overlay is owned and disposed by App.
+    // AttachToWindow is only forwarded on the first connect; on reconnects the
+    // overlay is already running so calling it again would reset its render state.
+    private sealed class NonDisposingOverlayProxy : IOverlayService
+    {
+        private readonly IOverlayService _inner;
+        private readonly bool _shouldAttach;
+        public NonDisposingOverlayProxy(IOverlayService inner, bool shouldAttach)
+        {
+            _inner = inner;
+            _shouldAttach = shouldAttach;
+        }
+        public bool AttachToWindow(nint targetWindowHandle) => _shouldAttach ? _inner.AttachToWindow(targetWindowHandle) : true;
+        public void AddTextPopup(string text) => _inner.AddTextPopup(text);
+        public void AddRichTextPopup(List<ColoredTextSpan> spans) => _inner.AddRichTextPopup(spans);
+        public void SetPosition(float x, float y) => _inner.SetPosition(x, y);
+        public void SetSize(float width, float height) => _inner.SetSize(width, height);
+        public void SetSizeAndPosition(float x, float y, float width, float height) => _inner.SetSizeAndPosition(x, y, width, height);
+        public void Dispose() { /* intentionally no-op: lifetime managed by App */ }
     }
 }
