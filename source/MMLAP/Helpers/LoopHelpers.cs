@@ -1,25 +1,25 @@
+using Archipelago.Core;
 using Archipelago.Core.Util;
+using Avalonia.Rendering;
 using MMLAP.Models;
+using Serilog;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Serilog;
 using System.Linq;
-using System.Collections;
-using Avalonia.Rendering;
 
 namespace MMLAP.Helpers
 {
     public class LoopHelpers
     {
-        public static void HandleOddLocationText(
+        public static List<int> HandleOddLocationText(
             LevelData currentLevelData,
             Dictionary<long, ItemData>? scoutedLocationItemData,
-            ConcurrentStack<TextData> textDataToWriteStack
+            ConcurrentStack<TextData> textDataToWriteStack,
+            List<long>? completedLocationIds = null
         )
         {
-            string areaName = currentLevelData.AreaName;
-            string roomName = currentLevelData.RoomName;
-            string levelName = areaName + ": " + roomName;
+            List<int> processedLocationIds = [];
             switch (currentLevelData)
             {
                 case var data when data.AreaName == "Apple Market":
@@ -32,10 +32,12 @@ namespace MMLAP.Helpers
                         rescueLocationData.TextBoxStartAddress != null
                     )
                     {
+                        ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(104) ? DataDicts.ItemDataDict[0x00FF] : rescueScoutedItemData;
                         // Being careful about text box overflow. Replacing new text window from man -> "You got" with a newpage, which saves a bunch of bytes.
                         // Not bothering to restore this text
-                        byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(rescueScoutedItemData, prefix: TextHelpers.newPage, suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]);
+                        byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(itemDataToWrite, prefix: TextHelpers.newPage, suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x84]);
                         Memory.WriteByteArray(rescueLocationData.TextBoxStartAddress ?? 0, writeTextArr);
+                        processedLocationIds.Add(104);
                     }
                     // Handle case when trying to get the lipstick
                     if (
@@ -61,10 +63,12 @@ namespace MMLAP.Helpers
                         !MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense)
                     )
                     {
+                        ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(131) ? DataDicts.ItemDataDict[0x00FF] : classBScoutedItemData;
                         uint textStartAddress = 0x154500;
                         uint textEndAddress = 0x154521;
-                        byte[] hasEarnedClassBLicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(classBScoutedItemData, prefix: TextHelpers.newPage, guaranteedLength: textEndAddress - textStartAddress);
+                        byte[] hasEarnedClassBLicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(itemDataToWrite, prefix: TextHelpers.newPage, guaranteedLength: textEndAddress - textStartAddress);
                         Memory.WriteByteArray(textStartAddress, hasEarnedClassBLicenseTextOverwrite);
+                        processedLocationIds.Add(131);
                     }
                     // Class A License text handling
                     if (
@@ -73,9 +77,11 @@ namespace MMLAP.Helpers
                         !MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense)
                     )
                     {
+                        ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(132) ? DataDicts.ItemDataDict[0x00FF] : classAScoutedItemData;
                         uint textStartAddress = 0x154E1D;
-                        byte[] hasEarnedClassALicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(classAScoutedItemData);
+                        byte[] hasEarnedClassALicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(itemDataToWrite);
                         Memory.WriteByteArray(textStartAddress, hasEarnedClassALicenseTextOverwrite);
+                        processedLocationIds.Add(132);
                     }
                     break;
 
@@ -105,8 +111,9 @@ namespace MMLAP.Helpers
                         iraLocationData.TextBoxStartAddress != null
                     )
                     {
-                        Log.Logger.Information("Ira text handling");
-                        textDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData)));
+                        ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(111) ? DataDicts.ItemDataDict[0x00FF] : iraScoutedItemData;
+                        textDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemDataToWrite)));
+                        processedLocationIds.Add(111);
                     }
                     break;
 
@@ -120,10 +127,12 @@ namespace MMLAP.Helpers
                         citizensCardLocationData.TextBoxStartAddress != null
                     )
                     {
+                        ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(130) ? DataDicts.ItemDataDict[0x00FF] : citizensCardScoutedItemData;
                         // Being careful about text box overflow. Replacing new text window from man -> "You got" with a newpage, which saves a bunch of bytes.
                         // Not bothering to restore this text
-                        byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(citizensCardScoutedItemData, prefix: TextHelpers.newPage, suffix: TextHelpers.endWindow); // suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x89, 0x00]);
+                        byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(itemDataToWrite, prefix: TextHelpers.newPage, suffix: TextHelpers.endWindow); // suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x89, 0x00]);
                         Memory.WriteByteArray(citizensCardLocationData.TextBoxStartAddress ?? 0, writeTextArr);
+                        processedLocationIds.Add(130);
                     }
                     break;
 
@@ -142,6 +151,61 @@ namespace MMLAP.Helpers
                 default:
                     break;
             }
+            return processedLocationIds;
+        }
+
+        public static List<int> UpdateTextBoxesForCompletedLocationsNonOdd(LevelData currentLevelData, ushort currentLevelID, ConcurrentStack<TextData> textDataToWriteStack, List<int> ignoreIds)
+        {
+            // This function proactively overwrites text boxes for already-completed locations with Nothing
+            // to prevent players from receiving vanilla items when replaying old saves
+            List<int> processedCompletedLocationIds = [];
+
+            ArchipelagoClient? apClient = App.APClient;
+            if (
+                apClient?.CurrentSession == null ||
+                currentLevelData == null
+            )
+            {
+                return processedCompletedLocationIds;
+            }
+
+            IReadOnlyCollection<long> allLocationsChecked = apClient.CurrentSession.Locations.AllLocationsChecked;
+            if (allLocationsChecked.Count == 0)
+            {
+                return processedCompletedLocationIds;
+            }
+
+            foreach (var locationDataKV in DataDicts.LocationDataDict)
+            {
+                int locationId = locationDataKV.Key;
+                LocationData locationData = locationDataKV.Value;
+
+                // Overwrite if:
+                // 1. Already completed
+                // 2. In the current area
+                // 3. Has a text box address
+                if (
+                    allLocationsChecked.Contains(locationId) &&
+                    locationData.LevelData?.AreaName == currentLevelData.AreaName
+                )
+                {
+                    if (locationData.TextBoxStartAddress != null)
+                    {
+                        TextData overwrittenText = TextHelpers.OverwriteText(
+                            locationData.TextBoxStartAddress.Value,
+                            TextHelpers.EncodeYouGotItemWindow(new ItemData(MMLEnums.ItemCategory.Nothing, "Nothing"))
+                        );
+                        textDataToWriteStack.Push(overwrittenText);
+                    }
+                    if (locationData.ChestItemSignatureAddress != null)
+                    {
+                        Memory.WriteByteArray((locationData.ChestItemSignatureAddress??0) + 1, [0x02, 0xFF], Enums.Endianness.Little);
+                    }
+                    processedCompletedLocationIds.Add(locationId);
+                }
+            }
+
+            return processedCompletedLocationIds;
         }
 
         public static void HandleLoadingFastCodeWrites(LevelData currentLevelData, byte currentProgressionCounter)

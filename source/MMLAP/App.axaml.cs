@@ -903,7 +903,7 @@ public partial class App : Application
                         // Write fast forward area cheats which do things like unlock doors and prevent black screens
                         LoopHelpers.HandleLoadingFastCodeWrites(currentLevelData, CurrentProgressionCounter);
                         // Handle text and possible overflows from locations that give items during text windows Mine Parts Kit from the rescue shop owner's husband location
-                        LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack);
+                        //LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack); // Moving to slowgameloop
                         // Fix cutscene
                         LoopHelpers.HandleRedRefractorInSupportCar();
                         //LoopHelpers.HandleCutsceneSkipItemObtains(); // Moving to slowgameloop
@@ -997,11 +997,18 @@ public partial class App : Application
                                 IsManagingLevelChange = false;
                             }
 
-                            // Task 3: Do things regardless of level change
-                            // Task 3.a: Restore overwritten memory
+                            // Task 3: Do memory things regardless of level change
+
+                            // Task 3.a: Proactively overwrite text boxes for already-completed locations
+                            // This prevents vanilla items from being given when replaying old saves
+                            // Task 3.b: Restore overwritten memory
                             // If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
-                            if (!MemoryHelpers.ReadAddressDataBit(Addresses.TextBoxOpenFlag))
+                            bool textBoxOpen = MemoryHelpers.ReadAddressDataBit(Addresses.TextBoxOpenFlag);
+                            if (!textBoxOpen)
                             {
+                                List<long>? completedLocationIds = apClient?.CurrentSession?.Locations?.AllLocationsChecked?.ToList();
+                                List<int> processedOddLocationIds = LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack, completedLocationIds);
+                                List<int> processedCompletedLocationIds = LoopHelpers.UpdateTextBoxesForCompletedLocationsNonOdd(currentLevelData, currentLevelID, TextDataToWriteStack, processedOddLocationIds);
                                 while (TextDataToWriteStack.TryPop(out var overwrittenTextData))
                                 {
                                     if (overwrittenTextData.SourceLevelId == null || overwrittenTextData.SourceLevelId == currentLevelID)
