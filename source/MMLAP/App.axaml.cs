@@ -1234,25 +1234,18 @@ public partial class App : Application
         if (
             APClient != null &&
             APClient.LocationManager != null &&
-            APClient.CurrentSession != null &&
-            ScoutedLocationItemData != null
+            APClient.CurrentSession != null
         )
         {
             // Use scouted location item to rewrite textbox
-            if (!DataDicts.LocationDataDict.TryGetValue(e.CompletedLocation.Id, out LocationData? locationData))
+            if (
+                ScoutedLocationItemData != null &&
+                ScoutedLocationItemData.TryGetValue(e.CompletedLocation.Id, out ItemData? itemData) &&
+                DataDicts.LocationDataDict.TryGetValue(e.CompletedLocation.Id, out LocationData? locationData) &&
+                locationData.LevelData != null &&
+                Memory.ReadByte(Addresses.CurrentLevel.Address) == locationData.LevelData.AreaCode
+            )
             {
-                Log.Logger.Warning($"Completed location {e.CompletedLocation.Id} was not found in LocationDataDict.");
-                return;
-            }
-
-            if (locationData.TextBoxStartAddress != null)
-            {
-                if (!ScoutedLocationItemData.TryGetValue(e.CompletedLocation.Id, out ItemData? itemData))
-                {
-                    Log.Logger.Warning($"Scouted item data is missing for completed location {e.CompletedLocation.Id}.");
-                    return;
-                }
-
                 TextData overwrittenText = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));
                 TextDataToWriteStack.Push(overwrittenText);
             }
@@ -1362,6 +1355,7 @@ public partial class App : Application
     // the shared overlay window. The real overlay is owned and disposed by App.
     // AttachToWindow is only forwarded on the first connect; on reconnects the
     // overlay is already running so calling it again would reset its render state.
+    // Solves the problem of multiple overlay services being created across reconnections.
     private sealed class NonDisposingOverlayProxy : IOverlayService
     {
         private readonly IOverlayService _inner;
