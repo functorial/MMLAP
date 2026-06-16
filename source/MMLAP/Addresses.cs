@@ -9,6 +9,9 @@ namespace MMLAP
         public static readonly AddressData CurrentProgressionCounter                      = new(0xC1B62, null, 1); // Was previously C1B63
         public static readonly AddressData CurrentZenny                                   = new(0xC1B2C, null, 4);
         public static readonly AddressData UnequippedBusterInvStart                       = new(0xB5604, null, 34);
+        public static readonly AddressData EquippedBusterPart1                            = new(0xB5600, null, 1);
+        public static readonly AddressData EquippedBusterPart2                            = new(0xB5601, null, 1);
+        public static readonly AddressData EquippedBusterPart3                            = new(0xB5602, null, 1);
         // Game status
         public static readonly AddressData ScreenWipeFlag                                 = new(0x1FF3E2, 0, null);
         public static readonly AddressData LoadingFlag                                    = new(0x98A70, 0, null);
@@ -22,6 +25,25 @@ namespace MMLAP
         public static readonly AddressData SupportCarRnDFlag                              = new(0x14C433, 0, null);
         public static readonly AddressData CutsceneFlag                                   = new(0xC4C48, 0, null);
         public static readonly AddressData SavingFlag                                     = new(0x7568, 2, null);
+        // Special Weapons
+        public static readonly AddressData HasNormalArm                                   = new(0xBE410, 7, null);
+        public static readonly AddressData HasMachineBuster                               = new(0xBE410, 5, null);
+        public static readonly AddressData HasPoweredBuster                               = new(0xBE410, 4, null);
+        public static readonly AddressData HasDrillArm                                    = new(0xBE410, 3, null);
+        public static readonly AddressData HasGrenadeArm                                  = new(0xBE410, 2, null);
+        public static readonly AddressData HasSpreadBuster                                = new(0xBE410, 1, null);
+        public static readonly AddressData HasVacuumArm                                   = new(0xBE410, 0, null);
+        public static readonly AddressData HasActiveBuster                                = new(0xBE411, 7, null);
+        public static readonly AddressData HasBladeArm                                    = new(0xBE411, 6, null);
+        public static readonly AddressData HasGrandGrenade                                = new(0xBE411, 5, null);
+        public static readonly AddressData HasSplashMine                                  = new(0xBE411, 4, null);
+        public static readonly AddressData HasShieldArm                                   = new(0xBE411, 3, null);
+        public static readonly AddressData HasShiningLaser                                = new(0xBE411, 2, null);
+        // Special Items
+        public static readonly AddressData HasHelmet                                      = new(0xBE41C, 7, null);
+        public static readonly AddressData HasJumpSprings                                 = new(0xBE41C, 6, null);
+        public static readonly AddressData HasJetSkates                                   = new(0xBE41C, 5, null);
+        public static readonly AddressData HasAdapterPlug                                 = new(0xBE41C, 1, null);
         // Main story flags
         public static readonly AddressData HasRescuedShopOwnersHusband                    = new(0xBE3D6, 4, null);
         public static readonly AddressData HasEarnedCitizenship                           = new(0xBE380, 1, null); //new(0xBE37C, 4, null);
@@ -62,15 +84,29 @@ namespace MMLAP
         // Side quest flags
         public static readonly AddressData IsGatheringLipstick                            = new(0xBE37E, 1, null);
         public static readonly AddressData HasSavedTheMissingWoman                        = new(0xBE3BE, 7, null);
+        public static readonly AddressData HasGiftedFlower                                = new(0xBE3B4, 7, null);
+        public static readonly AddressData HasGiftedMusicBox                              = new(0xBE3B4, 6, null);
+        public static readonly AddressData HasGiftedRing                                  = new(0xBE3B4, 5, null);
         // Hideout quest
         public static readonly AddressData WorkerGetPickTextStart                         = new(0x154A78, null, 0x48); // Huh? A pick? ...
+        public static readonly AddressData HasTurnedInPick                                = new(0xBE3BA, 0, null);
         public static readonly AddressData SawWorkerDialogueIsReady                       = new(0xBE3BC, 0, null);
         public static readonly AddressData SawPailIsReady                                 = new(0xBE3BD, 7, null);
-        public static readonly AddressData TurnedInSaw                                    = new(0xBE3BB, 5, null);
+        public static readonly AddressData HasTurnedInSaw                                 = new(0xBE3BB, 5, null);
         // Inspector quest
         public static readonly AddressData StartBombQuest                                 = new(0xBE3B8, 3, null); // bombs go off = 0xBE3B8 2 and 1, BE3D4 1, turn in to inspector 0xBE3B8 0
         public static readonly AddressData StartBagQuest                                  = new(0xBE3B9, 6, null); // lobby man = 0xBE3B9 5, electric = 0xBE3B9 4, baker = 0xBE3B9 2, librarian = 0xBE3B9 3, vending = 0xBE3B9 1, boy1 = 0xBE3B9 0, boy2 = 0xBE3BA 7, talk to inspector with bag 0xBE3BA 6
         public static readonly AddressData BagPailIsReady                                 = new(0xBE3BA, 7, null);
+        public static readonly AddressData HasTurnedInBag                                 = new(0xBE3BA, 6, null);
+        // Museum quest
+        public static readonly AddressData HasTurnedInOldBone                            = new(0xBE37F, 7, null);
+        public static readonly AddressData HasTurnedInOldHeater                          = new(0xBE37F, 6, null);
+        public static readonly AddressData HasTurnedInOldDoll                            = new(0xBE37F, 5, null);
+        public static readonly AddressData HasTurnedInAntiqueBell                        = new(0xBE37F, 4, null);
+        public static readonly AddressData HasTurnedInGiantHorn                          = new(0xBE37F, 3, null);
+        public static readonly AddressData HasTurnedInShinyObject                        = new(0xBE37F, 2, null);
+        public static readonly AddressData HasTurnedInOldShield                          = new(0xBE37F, 1, null);
+        public static readonly AddressData HasTurnedInShinyRedStone                      = new(0xBE37F, 0, null);
         // Utility addresses for codes
         public static readonly AddressData FixBoatCallRollUtil                            = new(0x5545C, null, 4);
         public static readonly AddressData YellowRefractorTerminal                        = new(0xBE439, null, 1);

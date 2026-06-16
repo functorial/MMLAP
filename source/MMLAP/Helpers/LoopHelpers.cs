@@ -1,5 +1,6 @@
 using Archipelago.Core;
 using Archipelago.Core.Util;
+using Archipelago.MultiClient.Net.Models;
 using Avalonia.Rendering;
 using MMLAP.Models;
 using Serilog;
@@ -7,6 +8,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using static MMLAP.Models.MMLEnums;
 
 namespace MMLAP.Helpers
 {
@@ -199,7 +201,7 @@ namespace MMLAP.Helpers
                     }
                     if (locationData.ChestItemSignatureAddress != null)
                     {
-                        Memory.WriteByteArray((locationData.ChestItemSignatureAddress??0) + 1, [0x02, 0xFF], Enums.Endianness.Little);
+                        Memory.WriteByteArray((locationData.ChestItemSignatureAddress ?? 0) + 1, [0x02, 0xFF], Enums.Endianness.Little);
                     }
                     processedCompletedLocationIds.Add(locationId);
                 }
@@ -224,7 +226,7 @@ namespace MMLAP.Helpers
                     bool hasWatchedFlutterFixFromJunoCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedFlutterFixFromJunoCutscene);
                     bool hasCompletedGoal = App.HasSubmittedGoal;
                     MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(currentProgressionCounter, hasDefeatedJunoFlutterFixed, hasWatchedFlutterFixFromJunoCutscene, hasCompletedGoal));
-                    if(
+                    if (
                         MemoryHelpers.ReadAddressDataBit(Addresses.HasFinishedWatchingJunoDefeatCutscene) &&
                         !MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedFlutterFixFromJunoCutscene)
                     )
@@ -516,7 +518,7 @@ namespace MMLAP.Helpers
                     // Handle library pail in case player can't trigger worker dialogue because they already have the Saw
                     if (
                         MemoryHelpers.ReadAddressDataBit(Addresses.SawWorkerDialogueIsReady) ||
-                        MemoryHelpers.ReadAddressDataBit(Addresses.TurnedInSaw)
+                        MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInSaw)
                     )
                     {
                         MemoryHelpers.WriteAddressDataBit(Addresses.SawPailIsReady, true);
@@ -946,7 +948,7 @@ namespace MMLAP.Helpers
                 }
             }
         }
-        
+
         // Handling edge case where Class B License is given like 5 times during the cutscene in a loop and also if you skip the cutscene which makes it hard to prevent giving out otherwise. This also applies to the refractors
         public static void HandleCutsceneSkipItemObtains(LevelData currentLevelData)
         {
@@ -1012,5 +1014,362 @@ namespace MMLAP.Helpers
         //{
         //    Memory.WriteByte(0xC4C4C, 0x02);
         //}
+
+        public static void SyncSyntheticLocations()
+        {
+            IReadOnlyCollection<long>? allLocationsChecked = App.APClient?.CurrentSession?.Locations?.AllLocationsChecked;
+            if (allLocationsChecked == null)
+            {
+                return;
+            }
+
+            _ = MemoryHelpers.WriteAddressDataBit(Addresses.CardonForestSubGateJakkoStarterKeyPickup, allLocationsChecked.Contains(60));
+            _ = MemoryHelpers.WriteAddressDataBit(Addresses.CardonForestSubGateConveyorStarterKeyPickup, allLocationsChecked.Contains(61));
+            _ = MemoryHelpers.WriteAddressDataBit(Addresses.CardonForestSubGateThreeSwitchStarterKeyPickup, allLocationsChecked.Contains(62));
+        }
+
+        public static void RecheckPreviouslyCheckedContainerLocations(IReadOnlyCollection<long> allLocationsChecked)
+        {
+            if (allLocationsChecked.Count == 0)
+            {
+                return;
+            }
+
+            foreach (long locationID in allLocationsChecked)
+            {
+                if (DataDicts.LocationDataDict.TryGetValue((int)locationID, out LocationData? locationData))
+                {
+                    if (new[] { LocationCategory.Container, LocationCategory.Hole, LocationCategory.Pickup }.Contains(locationData.Category))
+                    {
+                        if (locationData.CheckAddressData.BitNumber != null)
+                        {
+                            MemoryHelpers.WriteAddressDataBit(locationData.CheckAddressData, true);
+                        }
+                        else
+                        {
+                            Log.Logger.Warning($"No check bit defined for location ID {locationID}. Please report this in the Discord thread!");
+                        }
+                    }
+                }
+                else
+                {
+                    Log.Logger.Warning($"Failed to receive item for location ID {locationID} after loading save. Please report this in the Discord thread!");
+                }
+            }
+        }
+
+        public static uint GetReceivedAPZennyTotal(IReadOnlyCollection<ItemInfo> allItemsReceived)
+        {
+            uint total = 0;
+            foreach (ItemInfo itemInfo in allItemsReceived)
+            {
+                if (
+                    DataDicts.ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData) &&
+                    itemData.Category == ItemCategory.Zenny
+                )
+                {
+                    total += itemData.Quantity;
+                }
+            }
+            return total;
+        }
+
+        public static void ReceivePreviouslyReceivedItems(IReadOnlyCollection<ItemInfo> allItemsReceived)
+        {
+            uint? apZennyCommittedToSave = App.APZennyCommittedToSave;
+            if (allItemsReceived.Count == 0)
+            {
+                return;
+            }
+
+            foreach (ItemInfo itemInfo in allItemsReceived)
+            {
+                if (DataDicts.ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData))
+                {
+                    // Skip giving items used in crafting/gifts/etc. if they are already used
+                    // TODO: finish this. Make sure all item names match (capitalization) and are properly grouped/exhaustive
+                    switch (itemData)
+                    {
+                        case var data when data.Category == ItemCategory.Zenny:
+                            // Zenny handled below
+                            continue;
+                        case var data when data.Name == "Flower":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasGiftedFlower))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Music Box":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasGiftedMusicBox))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Ring":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasGiftedRing))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Saw":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInSaw))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Bag":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInBag))
+                            {
+                                continue;
+                            }
+                            break;
+                        
+                        case var data when data.Name == "Pick":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInPick))
+                            {
+                                continue;
+                            }
+                            break;
+                        //case var data when data.Name == "Lipstick":
+                        //    if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInLipstick))
+                        //    {
+                        //        continue;
+                        //    }
+                        //    break;
+                        //case var data when data.Name == "Comic Book":
+                        //    if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInComicBook))
+                        //    {
+                        //        continue;
+                        //    }
+                        //    break;
+                        //case var data when data.Name == "Stag Beetle":
+                        //    if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInStagBeetle))
+                        //    {
+                        //        continue;
+                        //    }
+                        //    break;
+                        //case var data when data.Name == "Beetle":
+                        //    if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInBeetle))
+                        //    {
+                        //        continue;
+                        //    }
+                        //    break;
+
+                        case var data when data.Name == "Old Bone":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInOldBone))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Old Heater":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInOldHeater))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Old Doll":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInOldDoll))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Antique Bell":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInAntiqueBell))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Giant Horn":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInGiantHorn))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Shiny Object":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInShinyObject))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Old Shield":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInOldShield))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Shiny Red Stone":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasTurnedInShinyRedStone))
+                            {
+                                continue;
+                            }
+                            break;
+
+                        case var data when data.Name == "Blumebear Parts":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasMachineBuster))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Cannon Kit":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasPoweredBuster))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Blunted Drill":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasDrillArm))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Grenade Kit":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasGrenadeArm))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when new[] { "Arm Supporter", "Ancient Book", "Old Launcher" }.Contains(data.Name):
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasSpreadBuster))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when new[] { "Broken Cleaner", "Broken Motor", "Broken Propeller" }.Contains(data.Name):
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasVacuumArm))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Guidance Unit":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasActiveBuster))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when new[] { "Zetasabre", "Pen Light" }.Contains(data.Name):
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasBladeArm))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Bomb Schematic":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasGrandGrenade))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Mine Parts Kit":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasSplashMine))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when new[] { "Mystic Orb", "Marlwolf Shell" }.Contains(data.Name):
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasShieldArm))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when new[] { "Prism Crystal", "X Buster", "Weapon Plans" }.Contains(data.Name):
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasShiningLaser))
+                            {
+                                continue;
+                            }
+                            break;
+
+                        case var data when data.Name == "Safety Helmet":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasHelmet))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Spring Set":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasJumpSprings))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when new[] { "Old Hoverjets", "Rollerboard" }.Contains(data.Name):
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasJetSkates))
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Joint Plug":
+                            if (MemoryHelpers.ReadAddressDataBit(Addresses.HasAdapterPlug))
+                            {
+                                continue;
+                            }
+                            break;
+
+                        case var data when new[] { "Sun-light", "Broken Circuits", "Main Core Shard" }.Contains(data.Name):
+                            if (ItemHelpers.HasBusterPart(DataDicts.ItemDataDict[0x0214])) // Omni-Unit Omega
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when new[] { "Autofire Barrel", "Generator Part" }.Contains(data.Name):
+                            if (ItemHelpers.HasBusterPart(DataDicts.ItemDataDict[0x0215])) // Auto Battery
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when new[] { "Tele-lens", "Target Sensor" }.Contains(data.Name):
+                            if (ItemHelpers.HasBusterPart(DataDicts.ItemDataDict[0x0216])) // Sniper Scope
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when new[] { "Flower Pearl", "Gatling Part" }.Contains(data.Name):
+                            if (ItemHelpers.HasBusterPart(DataDicts.ItemDataDict[0x0218])) // Gatling Gun
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Bomb":
+                            if (ItemHelpers.HasBusterPart(DataDicts.ItemDataDict[0x021A])) // Power Blaster R
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Plastique":
+                            if (ItemHelpers.HasBusterPart(DataDicts.ItemDataDict[0x021B])) // Power Blaster L
+                            {
+                                continue;
+                            }
+                            break;
+                        case var data when data.Name == "Rapidfire Barrel":
+                            if (ItemHelpers.HasBusterPart(DataDicts.ItemDataDict[0x021C])) // Machine Gun
+                            {
+                                continue;
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    // Else give item
+                    ItemHelpers.ReceiveGenericItem(itemData);
+                }
+                else
+                {
+                    Log.Logger.Warning($"Failed to receive item ID {itemInfo.ItemId} after loading save. Please report this in the Discord thread!");
+                }
+            }
+
+            // Give the correct amount of zenny based on tracked amount in game loop
+            uint receivedAPZennyTotal = GetReceivedAPZennyTotal(allItemsReceived);
+            if (apZennyCommittedToSave == null)
+            {
+                App.APZennyCommittedToSave = receivedAPZennyTotal;
+                return;
+            }
+            else if (receivedAPZennyTotal > apZennyCommittedToSave.Value)
+            {
+                uint missingZenny = receivedAPZennyTotal - apZennyCommittedToSave.Value;
+                ItemHelpers.ReceiveGenericItem(new ItemData(ItemCategory.Zenny, "Zenny", missingZenny));
+            }
+        }
     }
 }

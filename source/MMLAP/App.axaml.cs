@@ -73,7 +73,7 @@ public partial class App : Application
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
     private static bool IsLoadingIntoGame { get; set; } = false;
     private static bool WasSaving { get; set; } = false;
-    private static uint? APZennyCommittedToSave { get; set; } = null;
+    public static uint? APZennyCommittedToSave { get; set; } = null;
     private static readonly object _lockObject = new object();
 
     public override void Initialize()
@@ -883,7 +883,7 @@ public partial class App : Application
                 }
                 if (WasSaving && !isSaving)
                 {
-                    APZennyCommittedToSave = GetReceivedAPZennyTotal(apClient.CurrentSession.Items.AllItemsReceived);
+                    App.APZennyCommittedToSave = LoopHelpers.GetReceivedAPZennyTotal(apClient.CurrentSession.Items.AllItemsReceived);
                     APClient?.CurrentSession.DataStorage[Scope.Slot, "mml_ap_zenny_committed"] = APZennyCommittedToSave;
                 }
                 WasSaving = isSaving;
@@ -1042,13 +1042,13 @@ public partial class App : Application
                     LocationManager_EnableLocationsCondition()
                 )
                 {
-                    SyncSyntheticLocations();
+                    LoopHelpers.SyncSyntheticLocations();
 
                     IReadOnlyCollection<long> allLocationsChecked = apClient.CurrentSession.Locations.AllLocationsChecked;
-                    RecheckPreviouslyCheckedContainerLocations(allLocationsChecked);
+                    LoopHelpers.RecheckPreviouslyCheckedContainerLocations(allLocationsChecked);
 
                     IReadOnlyCollection<ItemInfo> allItemsReceived = apClient.CurrentSession.Items.AllItemsReceived;
-                    ReceivePreviouslyReceivedItems(allItemsReceived);
+                    LoopHelpers.ReceivePreviouslyReceivedItems(allItemsReceived);
 
                     IsLoadingIntoGame = false;
                 }
@@ -1064,125 +1064,6 @@ public partial class App : Application
             System.Threading.Interlocked.Exchange(ref IsSlowLoopRunning, 0);
         }
         return;
-    }
-
-    private static void SyncSyntheticLocations()
-    {
-        IReadOnlyCollection<long>? allLocationsChecked = APClient?.CurrentSession?.Locations?.AllLocationsChecked;
-        if (allLocationsChecked == null)
-        {
-            return;
-        }
-
-        _ = MemoryHelpers.WriteAddressDataBit(Addresses.CardonForestSubGateJakkoStarterKeyPickup, allLocationsChecked.Contains(60));
-        _ = MemoryHelpers.WriteAddressDataBit(Addresses.CardonForestSubGateConveyorStarterKeyPickup, allLocationsChecked.Contains(61));
-        _ = MemoryHelpers.WriteAddressDataBit(Addresses.CardonForestSubGateThreeSwitchStarterKeyPickup, allLocationsChecked.Contains(62));
-    }
-
-    private static void RecheckPreviouslyCheckedContainerLocations(IReadOnlyCollection<long> allLocationsChecked)
-    {
-        if (allLocationsChecked.Count == 0)
-        {
-            return;
-        }
-
-        foreach (long locationID in allLocationsChecked)
-        {
-            if (DataDicts.LocationDataDict.TryGetValue((int)locationID, out LocationData? locationData))
-            {
-                if (new[] { LocationCategory.Container, LocationCategory.Hole, LocationCategory.Pickup }.Contains(locationData.Category))
-                {
-                    if (locationData.CheckAddressData.BitNumber != null)
-                    {
-                        MemoryHelpers.WriteAddressDataBit(locationData.CheckAddressData, true);
-                    }
-                    else
-                    {
-                        Log.Logger.Warning($"No check bit defined for location ID {locationID}. Please report this in the Discord thread!");
-                    }
-                }
-            }
-            else
-            {
-                Log.Logger.Warning($"Failed to receive item for location ID {locationID} after loading save. Please report this in the Discord thread!");
-            }
-        }
-    }
-
-    private static uint GetReceivedAPZennyTotal(IReadOnlyCollection<ItemInfo> allItemsReceived)
-    {
-        uint total = 0;
-        foreach (ItemInfo itemInfo in allItemsReceived)
-        {
-            if (
-                DataDicts.ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData) &&
-                itemData.Category == ItemCategory.Zenny
-            )
-            {
-                total += itemData.Quantity;
-            }
-        }
-        return total;
-    }
-
-    private static void ReceivePreviouslyReceivedItems(IReadOnlyCollection<ItemInfo> allItemsReceived)
-    {
-        if (allItemsReceived.Count == 0)
-        {
-            return;
-        }
-
-
-        foreach (ItemInfo itemInfo in allItemsReceived)
-        {
-            if (DataDicts.ItemDataDict.TryGetValue(itemInfo.ItemId, out ItemData? itemData))
-            {
-
-                // Prevent giving duplicate item if buster part is equipped
-                byte equippedBusterPart1 = Memory.ReadByte(0xB5600);
-                byte equippedBusterPart2 = Memory.ReadByte(0xB5601);
-                byte equippedBusterPart3 = Memory.ReadByte(0xB5602);
-                if (itemData.Category == ItemCategory.Buster && itemData.ItemCode != null)
-                {
-                    // Equipped buster slots use the same +1 encoding used by inventory slots
-                    byte equippedItemCode = (byte)(itemData.ItemCode.Value + 1);
-                    if (
-                        equippedItemCode == equippedBusterPart1 ||
-                        equippedItemCode == equippedBusterPart2 ||
-                        equippedItemCode == equippedBusterPart3
-                    )
-                    {
-                        continue;
-                    }
-                }
-
-                // Zenny is handled below
-                if (itemData.Category == ItemCategory.Zenny)
-                {
-                    continue;
-                }
-
-                // Else give item
-                ItemHelpers.ReceiveGenericItem(itemData);
-            }
-            else
-            {
-                Log.Logger.Warning($"Failed to receive item ID {itemInfo.ItemId} after loading save. Please report this in the Discord thread!");
-            }
-        }
-
-        uint receivedAPZennyTotal = GetReceivedAPZennyTotal(allItemsReceived);
-        if (APZennyCommittedToSave == null)
-        {
-            APZennyCommittedToSave = receivedAPZennyTotal;
-            return;
-        }
-
-        if (receivedAPZennyTotal > APZennyCommittedToSave.Value)
-        {
-            uint missingZenny = receivedAPZennyTotal - APZennyCommittedToSave.Value;
-            ItemHelpers.ReceiveGenericItem(new ItemData(ItemCategory.Zenny, "Zenny", missingZenny));
-        }
     }
 
     private static void CheckGoalCondition()
