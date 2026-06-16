@@ -76,6 +76,13 @@ public partial class App : Application
     public static uint? APZennyCommittedToSave { get; set; } = null;
     private static readonly object _lockObject = new object();
 
+    // Performance tracking for game loops
+    private static ConcurrentQueue<long> SlowGameLoopTimings { get; set; } = new();
+    private static long? LastSlowGameLoopTime { get; set; } = null;
+    private static ConcurrentQueue<long> FastGameLoopTimings { get; set; } = new();
+    private static long? LastFastGameLoopTime { get; set; } = null;
+    private static bool IsCollectingLoopMetrics { get; set; } = false;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -261,6 +268,7 @@ public partial class App : Application
                 break;
             case "!debug":
                 Log.Logger.Information($"> {a.Command}");
+                Log.Logger.Information("Debug collection started...");
                 LogDebugInfo();
                 break;
             case "!options":
@@ -333,6 +341,38 @@ public partial class App : Application
     {
         try
         {
+            // Clear and start collecting loop metrics
+            SlowGameLoopTimings = new();
+            FastGameLoopTimings = new();
+            LastSlowGameLoopTime = null;
+            LastFastGameLoopTime = null;
+            IsCollectingLoopMetrics = true;
+
+            // Collect metrics for 5 seconds
+            System.Threading.Thread.Sleep(5000);
+
+            IsCollectingLoopMetrics = false;
+
+            // Calculate statistics
+            string slowLoopStats = "";
+            string fastLoopStats = "";
+
+            if (SlowGameLoopTimings.Count > 0)
+            {
+                long[] slowTimings = SlowGameLoopTimings.ToArray();
+                long slowAvg = (long)slowTimings.Average();
+                long slowMax = slowTimings.Max();
+                slowLoopStats = $"avg={slowAvg}ms, max={slowMax}ms (n={slowTimings.Length})";
+            }
+
+            if (FastGameLoopTimings.Count > 0)
+            {
+                long[] fastTimings = FastGameLoopTimings.ToArray();
+                long fastAvg = (long)fastTimings.Average();
+                long fastMax = fastTimings.Max();
+                fastLoopStats = $"avg={fastAvg}ms, max={fastMax}ms (n={fastTimings.Length})";
+            }
+
             ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
             byte memoryProgressionCounter = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
             string currentLevelName = DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData)
@@ -370,6 +410,7 @@ public partial class App : Application
             List<string> visitedAreas = VisitedAreaNames.Keys.ToList();
 
             Log.Logger.Information("===== DEBUG INFO =====");
+            Log.Logger.Information($"Loop Performance: SlowGameLoop={slowLoopStats}, FastGameLoop={fastLoopStats}");
             Log.Logger.Information($"Progression: tracked=0x{CurrentProgressionCounter:X2}, memory=0x{memoryProgressionCounter:X2}");
             Log.Logger.Information($"Level: 0x{currentLevelID:X4} ({currentLevelName})");
             Log.Logger.Information($"Connection: connected={APClient?.IsConnected ?? false}, loggedIn={APClient?.IsLoggedIn ?? false}, inGameSyncInitialized={IsInGameSyncInitialized}");
@@ -510,16 +551,21 @@ public partial class App : Application
         CurrentProgressionCounter = 0x0;
         IsManagingLevelChange = false;
         IsPreviouslyInTitleScreen = false;
-        IsLoadingIntoGame = false;
-        WasSaving = false;
-        APZennyCommittedToSave = null;
-        TextDataToWriteStack = new();
-        VisitedAreaNames.Clear();
+            IsLoadingIntoGame = false;
+            WasSaving = false;
+            APZennyCommittedToSave = null;
+            TextDataToWriteStack = new();
+            VisitedAreaNames.Clear();
+            SlowGameLoopTimings = new();
+            LastSlowGameLoopTime = null;
+            FastGameLoopTimings = new();
+            LastFastGameLoopTime = null;
+            IsCollectingLoopMetrics = false;
 
-        System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
-        System.Threading.Interlocked.Exchange(ref IsSlowLoopRunning, 0);
-        System.Threading.Interlocked.Exchange(ref IsFastLoopRunning, 0);
-    }
+            System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
+            System.Threading.Interlocked.Exchange(ref IsSlowLoopRunning, 0);
+            System.Threading.Interlocked.Exchange(ref IsFastLoopRunning, 0);
+        }
 
     private async void Context_ConnectClicked(object? sender, ConnectClickedEventArgs e)
     {
@@ -867,6 +913,17 @@ public partial class App : Application
         {
             return; // Previous call is still running, skip this tick
         }
+
+        // Performance tracking for !debug
+        long currentTime = System.Diagnostics.Stopwatch.GetTimestamp();
+        if (IsCollectingLoopMetrics && LastFastGameLoopTime.HasValue)
+        {
+            long elapsedTicks = currentTime - LastFastGameLoopTime.Value;
+            long elapsedMs = (long)((elapsedTicks * 1000.0) / System.Diagnostics.Stopwatch.Frequency);
+            FastGameLoopTimings.Enqueue(elapsedMs);
+        }
+        LastFastGameLoopTime = currentTime;
+
         try
         {
             ArchipelagoClient? apClient = APClient;
@@ -945,6 +1002,17 @@ public partial class App : Application
         {
             return; // Previous call is still running, skip this tick
         }
+
+        // Performance tracking for !debug
+        long currentTime = System.Diagnostics.Stopwatch.GetTimestamp();
+        if (IsCollectingLoopMetrics && LastSlowGameLoopTime.HasValue)
+        {
+            long elapsedTicks = currentTime - LastSlowGameLoopTime.Value;
+            long elapsedMs = (long)((elapsedTicks * 1000.0) / System.Diagnostics.Stopwatch.Frequency);
+            SlowGameLoopTimings.Enqueue(elapsedMs);
+        }
+        LastSlowGameLoopTime = currentTime;
+
         try
         {
             ArchipelagoClient? apClient = APClient;

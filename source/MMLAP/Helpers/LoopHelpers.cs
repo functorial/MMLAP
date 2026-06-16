@@ -201,7 +201,6 @@ namespace MMLAP.Helpers
                     }
                     if (locationData.ChestItemSignatureAddress != null)
                     {
-                        //Log.Logger.Information($"{locationData.Name}: {(locationData.ChestItemSignatureAddress ?? 0) + 1}");
                         Memory.WriteByteArray((locationData.ChestItemSignatureAddress ?? 0) + 1, [0x02, 0xFF], Enums.Endianness.Little);
                     }
                     processedCompletedLocationIds.Add(locationId);
