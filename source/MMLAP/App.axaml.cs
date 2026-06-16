@@ -1131,7 +1131,7 @@ public partial class App : Application
                 ScoutedLocationItemData.TryGetValue(e.CompletedLocation.Id, out ItemData? itemData) &&
                 DataDicts.LocationDataDict.TryGetValue(e.CompletedLocation.Id, out LocationData? locationData) &&
                 locationData.LevelData != null &&
-                Memory.ReadByte(Addresses.CurrentLevel.Address) == locationData.LevelData.AreaCode
+                Memory.ReadShort(Addresses.CurrentLevel.Address) == (locationData.LevelData.AreaCode << 8 | locationData.LevelData.RoomCode)
             )
             {
                 TextData overwrittenText = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));

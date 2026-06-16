@@ -158,8 +158,7 @@ namespace MMLAP.Helpers
 
         public static List<int> UpdateTextBoxesForCompletedLocationsNonOdd(LevelData currentLevelData, ushort currentLevelID, ConcurrentStack<TextData> textDataToWriteStack, List<int> ignoreIds)
         {
-            // This function proactively overwrites text boxes for already-completed locations with Nothing
-            // to prevent players from receiving vanilla items when replaying old saves
+            // This function proactively overwrites text boxes for already-completed locations with Nothing item
             List<int> processedCompletedLocationIds = [];
 
             ArchipelagoClient? apClient = App.APClient;
@@ -184,11 +183,12 @@ namespace MMLAP.Helpers
 
                 // Overwrite if:
                 // 1. Already completed
-                // 2. In the current area
+                // 2. In the current area+room
                 // 3. Has a text box address
                 if (
                     allLocationsChecked.Contains(locationId) &&
-                    locationData.LevelData?.AreaName == currentLevelData.AreaName
+                    locationData.LevelData?.AreaName == currentLevelData.AreaName &&
+                    locationData.LevelData?.RoomName == currentLevelData.RoomName
                 )
                 {
                     if (locationData.TextBoxStartAddress != null)
@@ -201,6 +201,7 @@ namespace MMLAP.Helpers
                     }
                     if (locationData.ChestItemSignatureAddress != null)
                     {
+                        //Log.Logger.Information($"{locationData.Name}: {(locationData.ChestItemSignatureAddress ?? 0) + 1}");
                         Memory.WriteByteArray((locationData.ChestItemSignatureAddress ?? 0) + 1, [0x02, 0xFF], Enums.Endianness.Little);
                     }
                     processedCompletedLocationIds.Add(locationId);
