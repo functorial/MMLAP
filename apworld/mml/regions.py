@@ -53,6 +53,7 @@ def create_and_connect_regions(world: GameWorld) -> None:
             )
 
 def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
+
     def has_item(item_name: str) -> Callable[[CollectionState], bool]:
         return lambda state: state.has(item_name, world.player)
     
@@ -87,10 +88,16 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         return has_item("Unlock Sub-Cities")
     
     def has_drill_arm() -> Callable[[CollectionState], bool]:
-        return has_all([can_fix_support_car(), has_item("Blunted Drill")])
+        return has_any([
+            has_all([can_fix_support_car(), has_item("Blunted Drill")]),
+            lambda _: world.options.randomizeStartingSpecialWeapon and world.starting_special_weapon == 4,
+            ])
     
     def has_grand_grenade() -> Callable[[CollectionState], bool]:
-        return has_all([can_fix_support_car(), has_item("Bomb Schematic")])
+        return has_any([
+            has_all([can_fix_support_car(), has_item("Bomb Schematic")]),
+            lambda _: world.options.randomizeStartingSpecialWeapon and world.starting_special_weapon == 10,
+            ])
     
     def can_destroy_cracked_walls() -> Callable[[CollectionState], bool]:
         return has_any([has_drill_arm(), has_grand_grenade()])
@@ -100,7 +107,10 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         has_grand_grenade = has_all([can_fix_support_car(), has_item("Bomb Schematic")])
         has_active_buster = has_all([can_fix_support_car(), has_item("Guidance Unit")])
         has_spread_buster = has_all([can_fix_support_car(), has_all_items(["Ancient Book", "Old Launcher", "Arm Supporter"])])
-        return has_any([has_powered_buster, has_grand_grenade, has_active_buster, has_spread_buster])
+        return has_any([
+            has_powered_buster, has_grand_grenade, has_active_buster, has_spread_buster,
+            lambda _: world.options.randomizeStartingSpecialWeapon and world.starting_special_weapon in [3, 6, 8, 10],
+            ])
 
     def has_clubhouse_items() -> Callable[[CollectionState], bool]:
         # The reward for this quest is not randomized, but the items for it are.

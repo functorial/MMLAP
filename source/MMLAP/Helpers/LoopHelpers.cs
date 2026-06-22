@@ -14,6 +14,42 @@ namespace MMLAP.Helpers
 {
     public class LoopHelpers
     {
+        public static void CheckGoalCondition()
+        {
+            ArchipelagoClient? apClient = App.APClient;
+            if (
+                App.HasSubmittedGoal ||
+                apClient?.Options == null ||
+                !App.LocationManager_EnableLocationsCondition() ||
+                !apClient.Options.TryGetValue("goal", out var goal)
+            )
+            {
+                return;
+            }
+
+            bool isGoalComplete = (CompletionGoal)int.Parse(goal.ToString()) switch
+            {
+                CompletionGoal.JUNO => MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
+                CompletionGoal.ALL_BOSSES =>
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand) &&
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBonBonne) &&
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedMarlwolf) &&
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat) &&
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedGarudoriten) &&
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedKarumunaBashTrio) &&
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFockeWulf) &&
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedTheodoreBruno) &&
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
+                _ => false
+            };
+
+            if (isGoalComplete)
+            {
+                apClient.SendGoalCompletion();
+            }
+            return;
+        }
+
         public static List<int> HandleOddLocationText(
             LevelData currentLevelData,
             Dictionary<long, ItemData>? scoutedLocationItemData,
@@ -1370,6 +1406,29 @@ namespace MMLAP.Helpers
                 uint missingZenny = receivedAPZennyTotal - apZennyCommittedToSave.Value;
                 ItemHelpers.ReceiveGenericItem(new ItemData(ItemCategory.Zenny, "Zenny", missingZenny));
             }
+        }
+
+        public static void RandomizeStartingSpecialWeapon()
+        {
+            var apClient = App.APClient;
+            var slotData = App.SlotData;
+            if (
+                apClient == null ||
+                App.SlotData == null ||
+                !MemoryHelpers.ReadAddressDataBit(Addresses.SupportCarRnDFlag) || 
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenshipLate) ||
+                int.Parse(apClient?.Options?["randomizeStartingSpecialWeapon"].ToString()) != 1 ||
+                !slotData.TryGetValue("startingSpecialWeapon", out var startingSpecialWeapon)
+            )
+            {
+                return;
+            }
+            MemoryHelpers.WriteAddressDataBit(Addresses.HasSplashMine, false);
+            byte offset = byte.Parse(startingSpecialWeapon.ToString());
+            Memory.WriteByte((ulong)(0xBE410 + (offset >> 3)), (byte)(7 - (offset % 8)));
+            //Memory.WriteByte(Addresses.SpecialWeaponEquippedActual.Address, offset);
+            //Memory.WriteByte(Addresses.SpecialWeaponEquippedLoadout.Address, offset);
+            MemoryHelpers.WriteCode(Cheats.AlterStartingSpecialWeapon(offset));
         }
     }
 }

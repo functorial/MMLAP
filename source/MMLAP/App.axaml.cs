@@ -18,8 +18,10 @@ using DynamicData;
 using MMLAP.Helpers;
 using MMLAP.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ReactiveUI;
 using Serilog;
+using Silk.NET.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -50,12 +52,7 @@ public partial class App : Application
     private static Dictionary<long, ItemData>? ScoutedLocationItemData { get; set; }
     private static List<ILocation>? GameLocations { get; set; }
     private static string? PlayerName { get; set; }
-    private static int _hasSubmittedGoal = 0;
-    public static bool HasSubmittedGoal
-    {
-        get => _hasSubmittedGoal == 1;
-        set => _hasSubmittedGoal = value ? 1 : 0;
-    }
+    public static bool HasSubmittedGoal { get; set; }
     private static int IsInGameSyncInitialized = 0;
     private static Timer? SlowGameLoopTimer { get; set; }
     private static int IsSlowLoopRunning = 0;
@@ -82,6 +79,35 @@ public partial class App : Application
     private static ConcurrentQueue<long> FastGameLoopTimings { get; set; } = new();
     private static long? LastFastGameLoopTime { get; set; } = null;
     private static bool IsCollectingLoopMetrics { get; set; } = false;
+    public static Dictionary<string, object>? SlotData { get; set; } = null;
+
+    private static void ResetGlobalState()
+    {
+        HasSubmittedGoal = false;
+        ScoutedLocationItemData = null;
+        GameLocations = null;
+        PlayerName = null;
+        PreviousLevelID_Slow = null;
+        PreviousLevelID_Fast = null;
+        CurrentProgressionCounter = 0x0;
+        IsManagingLevelChange = false;
+        IsPreviouslyInTitleScreen = false;
+        IsLoadingIntoGame = false;
+        WasSaving = false;
+        APZennyCommittedToSave = null;
+        TextDataToWriteStack = new();
+        VisitedAreaNames.Clear();
+        SlowGameLoopTimings = new();
+        LastSlowGameLoopTime = null;
+        FastGameLoopTimings = new();
+        LastFastGameLoopTime = null;
+        IsCollectingLoopMetrics = false;
+        SlotData = null;
+
+        System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
+        System.Threading.Interlocked.Exchange(ref IsSlowLoopRunning, 0);
+        System.Threading.Interlocked.Exchange(ref IsFastLoopRunning, 0);
+    }
 
     public override void Initialize()
     {
@@ -128,21 +154,6 @@ public partial class App : Application
     {
         string connectionDetails = File.ReadAllText(@"./connection.json");
         return System.Text.Json.JsonSerializer.Deserialize<Dictionary<String, String>>(connectionDetails);
-    }
-
-    private static OverlayLoggingScope ParseOverlayScope(string? value)
-    {
-        return value?.Trim().ToLowerInvariant() switch
-        {
-            "off" => OverlayLoggingScope.Off,
-            "global" => OverlayLoggingScope.Global,
-            _ => OverlayLoggingScope.Local,
-        };
-    }
-
-    private static string ToOverlayScopeString(OverlayLoggingScope scope)
-    {
-        return scope.ToString().ToLowerInvariant();
     }
 
     /**
@@ -194,9 +205,16 @@ public partial class App : Application
         }
         Context.Host = lastConnectionDetails["host"];
         Context.Slot = lastConnectionDetails["slot"];
-        OverlayScope = ParseOverlayScope(lastConnectionDetails["overlayScope"]);
+        OverlayScope = lastConnectionDetails["overlayScope"]?.Trim().ToLower() switch
+        {
+            "off" => OverlayLoggingScope.Off,
+            "global" => OverlayLoggingScope.Global,
+            _ => OverlayLoggingScope.Local,
+        };
 
         HasSubmittedGoal = false;
+
+        Context_CommandReceived(null, new ArchipelagoCommandEventArgs { Command = "!help" });
 
         Log.Logger.Information("This Archipelago Client is compatible only with the NTSC-U release of Mega Man Legends.");
         Log.Logger.Information("Trying to play with a different version will not work as intended.");
@@ -206,6 +224,7 @@ public partial class App : Application
             Log.Logger.Warning("This may result in errors or crashes when trying to connect to Duckstation.");
         }
         Log.Logger.Information("Please report any issues in the Archipelago Discord MML thread. Thank you!");
+
         return;
     }
 
@@ -213,12 +232,6 @@ public partial class App : Application
     {
         if (string.IsNullOrWhiteSpace(a.Command))
         {
-            return;
-        }
-
-        if (a.Command.Trim().StartsWith("!overlay", StringComparison.OrdinalIgnoreCase))
-        {
-            HandleOverlayCommand(a.Command);
             return;
         }
 
@@ -244,32 +257,46 @@ public partial class App : Application
                 }
                 else
                 {
-                    Log.Logger.Warning("Please connect the client before attempting reload.");
+                    Log.Logger.Warning("Please connect the client before attempting command.");
                 }
                 break;
             case "!goal":
                 Log.Logger.Information($"> {a.Command}");
-                string goalText;
-                if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goalValueObj))
+                if (APClient != null)
                 {
-                    CompletionGoal goal = (CompletionGoal)int.Parse(goalValueObj.ToString());
-                    goalText = goal switch
+                    string goalText;
+                    if (APClient != null && APClient.Options != null && APClient.Options.TryGetValue("goal", out var goalValueObj))
                     {
-                        CompletionGoal.JUNO => "Defeat Juno.",
-                        CompletionGoal.ALL_BOSSES => "Defeat all bosses with a healthbar.",
-                        _ => "Unknown",
-                    };
+                        CompletionGoal goal = (CompletionGoal)int.Parse(goalValueObj.ToString());
+                        goalText = goal switch
+                        {
+                            CompletionGoal.JUNO => "Defeat Juno.",
+                            CompletionGoal.ALL_BOSSES => "Defeat all bosses with a healthbar.",
+                            _ => "Unknown",
+                        };
+                    }
+                    else
+                    {
+                        goalText = "Unknown";
+                    }
+                    Log.Logger.Information($"Your goal is: {goalText}");
                 }
                 else
                 {
-                    goalText = "Unknown";
+                    Log.Logger.Warning("Please connect the client before attempting command.");
                 }
-                Log.Logger.Information($"Your goal is: {goalText}");
                 break;
             case "!debug":
                 Log.Logger.Information($"> {a.Command}");
-                Log.Logger.Information("Debug collection started...");
-                LogDebugInfo();
+                if (APClient != null)
+                {
+                    Log.Logger.Information("Debug collection started...");
+                    LogDebugInfo();
+                }
+                else
+                {
+                    Log.Logger.Warning("Please connect the client before attempting command.");
+                }
                 break;
             case "!options":
                 if (APClient != null && APClient.Options != null)
@@ -284,8 +311,12 @@ public partial class App : Application
                     Log.Logger.Information("Options not found.");
                 }
                 break;
+            case var cmd when cmd.Trim().StartsWith("!overlay", StringComparison.OrdinalIgnoreCase):
+                HandleOverlayCommand(a.Command);
+                break;
             default:
                 APClient?.SendMessage(a.Command);
+                Log.Logger.Information("Command not recognized.");
                 break;
         }
         return;
@@ -294,7 +325,7 @@ public partial class App : Application
     private static void HandleOverlayCommand(string rawCommand)
     {
         string[] parts = rawCommand.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        string requestedMode = parts.Length > 1 ? parts[1].ToLowerInvariant() : "status";
+        string requestedMode = parts.Length > 1 ? parts[1].ToLower() : "status";
 
         switch (requestedMode)
         {
@@ -311,7 +342,7 @@ public partial class App : Application
                 Log.Logger.Information("Overlay logging scope set to local (your sent checks and received items).");
                 break;
             case "status":
-                Log.Logger.Information($"Overlay logging scope is currently {ToOverlayScopeString(OverlayScope)}.");
+                Log.Logger.Information($"Overlay logging scope is currently {OverlayScope.ToString().ToLower()}.");
                 break;
             default:
                 Log.Logger.Warning("Unknown overlay mode. Use !overlay <off|local|global|status>.");
@@ -329,7 +360,7 @@ public partial class App : Application
             {
                 lastConnectionDetails["host"] = Context?.Host ?? "";
             }
-            lastConnectionDetails["overlayScope"] = ToOverlayScopeString(OverlayScope);
+            lastConnectionDetails["overlayScope"] = OverlayScope.ToString().ToLower();
             SaveLastConnectionDetails(lastConnectionDetails);
         }
         catch
@@ -441,26 +472,13 @@ public partial class App : Application
 
     private static void LogRestoreOpCodeState()
     {
-        List<string> notRestored = [];
         foreach (var (name, code) in Cheats.GetAllRestoreOpCodes())
         {
             uint actualInstruction = Memory.ReadUInt(code.StartAddress);
             if (actualInstruction != code.Instruction)
             {
-                notRestored.Add($"- {name} @ 0x{code.StartAddress:X8}: expected=0x{code.Instruction:X8}, actual=0x{actualInstruction:X8}");
+                Log.Logger.Warning($"- {name} @ 0x{code.StartAddress:X8}: expected=0x{code.Instruction:X8}, actual=0x{actualInstruction:X8}");
             }
-        }
-
-        if (notRestored.Count == 0)
-        {
-            Log.Logger.Information("Restore OpCode check: all restore opcodes are currently restored.");
-            return;
-        }
-
-        Log.Logger.Warning("Restore OpCode check: some restore opcodes are not restored:");
-        foreach (string line in notRestored)
-        {
-            Log.Logger.Warning(line);
         }
     }
 
@@ -512,16 +530,7 @@ public partial class App : Application
         {
             client.LocationManager.EnableLocationsCondition = null;
             client.LocationManager.LocationCompleted -= LocationManager_LocationCompleted;
-            try
-            {
-                client.LocationManager.CancelMonitors();
-            }
-            catch (ObjectDisposedException) { }
-            catch (Exception ex)
-            {
-                Log.Logger.Debug($"CancelMonitors failed during teardown: {ex}");
-            }
-            // Null out so client.Dispose() -> Disconnect() does not call CancelMonitors() a second time.
+            client.LocationManager.CancelMonitors();
             client.LocationManager = null;
         }
 
@@ -530,42 +539,8 @@ public partial class App : Application
             client.CurrentSession.Locations.CheckedLocationsUpdated -= CurrentSession_CheckedLocationsUpdated;
         }
 
-        try
-        {
-            client.Dispose();
-        }
-        catch (Exception ex)
-        {
-            Log.Logger.Debug($"Client dispose failed during teardown: {ex}");
-        }
+        client.Dispose();
     }
-
-    private static void ResetGlobalRuntimeState()
-    {
-        HasSubmittedGoal = false;
-        ScoutedLocationItemData = null;
-        GameLocations = null;
-        PlayerName = null;
-        PreviousLevelID_Slow = null;
-        PreviousLevelID_Fast = null;
-        CurrentProgressionCounter = 0x0;
-        IsManagingLevelChange = false;
-        IsPreviouslyInTitleScreen = false;
-            IsLoadingIntoGame = false;
-            WasSaving = false;
-            APZennyCommittedToSave = null;
-            TextDataToWriteStack = new();
-            VisitedAreaNames.Clear();
-            SlowGameLoopTimings = new();
-            LastSlowGameLoopTime = null;
-            FastGameLoopTimings = new();
-            LastFastGameLoopTime = null;
-            IsCollectingLoopMetrics = false;
-
-            System.Threading.Interlocked.Exchange(ref IsInGameSyncInitialized, 0);
-            System.Threading.Interlocked.Exchange(ref IsSlowLoopRunning, 0);
-            System.Threading.Interlocked.Exchange(ref IsFastLoopRunning, 0);
-        }
 
     private async void Context_ConnectClicked(object? sender, ConnectClickedEventArgs e)
     {
@@ -574,7 +549,7 @@ public partial class App : Application
         StopAndDisposeTimers();
         TearDownCurrentConnection();
 
-        ResetGlobalRuntimeState();
+        ResetGlobalState();
 
         // Connect to Duckstation
         GameClient? gameClient = null;
@@ -682,8 +657,8 @@ public partial class App : Application
         );
 
         // Check apworld version compatibility with host and log results
-        Dictionary<string, object> slotData = await APClient.CurrentSession.DataStorage.GetSlotDataAsync(slot);
-        if (slotData.TryGetValue("apworldVersion", out var versionValue) && versionValue != null)
+        SlotData = await APClient.CurrentSession.DataStorage.GetSlotDataAsync(slot);
+        if (SlotData.TryGetValue("apworldVersion", out var versionValue) && versionValue != null)
         {
             if (SupportedVersions.Contains(versionValue.ToString().ToLower()))
             {
@@ -731,7 +706,7 @@ public partial class App : Application
 
             FastGameLoopTimer = new Timer();
             FastGameLoopTimer.Elapsed += new ElapsedEventHandler(FastGameLoop);
-            FastGameLoopTimer.Interval = 1;
+            FastGameLoopTimer.Interval = 30;
             FastGameLoopTimer.Enabled = true;
 
             Log.Logger.Information("Connected to Archipelago");
@@ -740,17 +715,10 @@ public partial class App : Application
             Dictionary<String, String> lastConnectionDetails = new();
             lastConnectionDetails["slot"] = Context.Slot;
             lastConnectionDetails["host"] = Context.Host;
-            lastConnectionDetails["overlayScope"] = ToOverlayScopeString(OverlayScope);
-            try
-            {
-                SaveLastConnectionDetails(lastConnectionDetails);
-            }
-            catch (Exception ex)
-            {
-                Log.Logger.Debug($"Failed to write connection details\r\n{ex.ToString()}");
-            }
-            // Repopulate hint list.  There is likely a better way to do this using the Get network protocol
-            // with keys=[$"hints_{team}_{slot}"].
+            lastConnectionDetails["overlayScope"] = OverlayScope.ToString().ToLower();
+            SaveLastConnectionDetails(lastConnectionDetails);
+
+            // Repopulate hint list. There is likely a better way to do this
             apClient.SendMessage("!hint");
             UpdateItemLog();
         }
@@ -762,7 +730,7 @@ public partial class App : Application
         Log.Logger.Information("Disconnected from Archipelago");
         StopAndDisposeTimers();
         TearDownCurrentConnection();
-        ResetGlobalRuntimeState();
+        ResetGlobalState();
         return;
     }
 
@@ -771,7 +739,7 @@ public partial class App : Application
         Log.Logger.Warning("Duckstation disconnected.");
         StopAndDisposeTimers();
         TearDownCurrentConnection();
-        ResetGlobalRuntimeState();
+        ResetGlobalState();
     }
 
     private static async void StartMMLGame(object? sender, ElapsedEventArgs e)
@@ -964,6 +932,7 @@ public partial class App : Application
                         // Fix cutscene
                         LoopHelpers.HandleRedRefractorInSupportCar();
                         //LoopHelpers.HandleCutsceneSkipItemObtains(); // Moving to slowgameloop
+                        //LoopHelpers.RandomizeStartingSpecialWeapon();
                     }
 
                     // Run these after loading
@@ -1029,7 +998,8 @@ public partial class App : Application
                 {
                     // Task 1: Read useful memory
                     CurrentProgressionCounter = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
-                    CheckGoalCondition();
+                    LoopHelpers.CheckGoalCondition();
+                    LoopHelpers.RandomizeStartingSpecialWeapon();
 
 
                     ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
@@ -1134,47 +1104,7 @@ public partial class App : Application
         return;
     }
 
-    private static void CheckGoalCondition()
-    {
-        ArchipelagoClient? apClient = APClient;
-        if (
-            HasSubmittedGoal ||
-            apClient?.Options == null ||
-            !LocationManager_EnableLocationsCondition() ||
-            !apClient.Options.TryGetValue("goal", out var goal)
-        )
-        {
-            return;
-        }
-
-        bool isGoalComplete = (CompletionGoal)int.Parse(goal.ToString()) switch
-        {
-            CompletionGoal.JUNO => MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
-            CompletionGoal.ALL_BOSSES =>
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFerdinand) &&
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBonBonne) &&
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedMarlwolf) &&
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat) &&
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedGarudoriten) &&
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedKarumunaBashTrio) &&
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFockeWulf) &&
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedTheodoreBruno) &&
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
-            _ => false
-        };
-
-        if (isGoalComplete)
-        {
-            if (System.Threading.Interlocked.CompareExchange(ref _hasSubmittedGoal, 1, 0) != 0)
-            {
-                return;
-            }
-            apClient.SendGoalCompletion();
-        }
-        return;
-    }
-
-    private static bool LocationManager_EnableLocationsCondition()
+    public static bool LocationManager_EnableLocationsCondition()
     {
         bool[] conditions = [
             MemoryHelpers.IsOutOfTitleScreen(),
@@ -1199,7 +1129,7 @@ public partial class App : Application
                 ScoutedLocationItemData.TryGetValue(e.CompletedLocation.Id, out ItemData? itemData) &&
                 DataDicts.LocationDataDict.TryGetValue(e.CompletedLocation.Id, out LocationData? locationData) &&
                 locationData.LevelData != null &&
-                Memory.ReadShort(Addresses.CurrentLevel.Address) == (locationData.LevelData.AreaCode << 8 | locationData.LevelData.RoomCode)
+                Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big) == ((ushort)(locationData.LevelData.AreaCode << 8 | locationData.LevelData.RoomCode))
             )
             {
                 TextData overwrittenText = TextHelpers.OverwriteText(locationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemData));
@@ -1307,12 +1237,8 @@ public partial class App : Application
         return;
     }
 
-    // Wraps an IOverlayService so the library's client.Dispose() cannot destroy
-    // the shared overlay window. The real overlay is owned and disposed by App.
-    // AttachToWindow is only forwarded on the first connect; on reconnects the
-    // overlay is already running so calling it again would reset its render state.
     // Solves the problem of multiple overlay services being created across reconnections.
-    private sealed class NonDisposingOverlayProxy : IOverlayService
+    private class NonDisposingOverlayProxy : IOverlayService
     {
         private readonly IOverlayService _inner;
         private readonly bool _shouldAttach;

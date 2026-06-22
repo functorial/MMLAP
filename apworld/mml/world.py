@@ -24,7 +24,12 @@ class GameWorld(World):
     # TODO: Remember to update this!
     ap_world_version = "0.3.0"
 
+    starting_special_weapon: int;
+
     origin_region_name = "Ocean Tower - Room 1"
+
+    def generate_early(self) -> None:
+        self.starting_special_weapon = 11 if not self.options.randomizeStartingSpecialWeapon.value else self.random.randint(0, 13)
 
     def create_regions(self) -> None:
         regions.create_and_connect_regions(self)
@@ -46,6 +51,14 @@ class GameWorld(World):
     def fill_slot_data(self) -> Mapping[str, Any]:
         # Archipelago.Core expects a different format than self.options.as_dict
         return {
-            "options": self.options.as_dict("goal"),
             "apworldVersion": self.ap_world_version,
+            "options": {
+                "goal": self.options.goal.value,
+                "randomizeStartingSpecialWeapon": self.options.randomizeStartingSpecialWeapon.value,
+            },
+            # Returns a bit offset to be added to 0xBE410
+            # 0 = Normal Arm, 2 = Machine Buster, 3 = Powered Buster, 4 = Drill Arm, 5 = Grenade Arm, 
+            # 6 = Spread Buster, 7 = Vacuum Arm, 8 = Active Buster, 9 = Blade Arm, 10 = Grand Grenade, 
+            # 11 = Splash Mine (default), 12 = Shield Arm, 13 = Shining Laser
+            "startingSpecialWeapon": self.starting_special_weapon,
         }

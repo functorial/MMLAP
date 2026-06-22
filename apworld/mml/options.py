@@ -7,10 +7,11 @@ from Options import Toggle, DefaultOnToggle, Option, Range, Choice, ItemDict, De
 # Range: options that have a mix/max value, like damage amplification, or a chance of something happening.
 # Choice: an option where you pick a discrete answer like in a dropdown menu.
 
+
 class Goal(Choice):
     """
     Juno: Defeat Juno.
-    All Bosses: Defeat all bosses with a healthbar.
+    All Bosses: Defeat all bosses with a health bar.
     """
 
     display_name = "Goal"
@@ -20,8 +21,18 @@ class Goal(Choice):
 
     default = option_juno
 
+class RandomizeStartingSpecialWeapon(Toggle):
+    """
+    Shuffles the Mine Parts Kit into the item pool and randomizes the first special weapon received.
+    """
+
+    display_name = "Randomize Starting Special Weapon"
+
+    default = False
+
 @dataclass
 class GameOptions(PerGameCommonOptions):
     goal: Goal
+    randomizeStartingSpecialWeapon: RandomizeStartingSpecialWeapon
 
 option_presets = {}

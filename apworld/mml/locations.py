@@ -180,9 +180,15 @@ def create_regular_locations(world: GameWorld) -> None:
         region_data = region_data_dict[region_name]
         region = world.get_region(region_name)
         location_names_with_ids = get_location_names_with_ids(region_data.locationNameList)
+
         # Don't create the location for defeating Juno if the goal is to defeat Juno, since it will be handled as an event
         if world.options.goal == world.options.goal.option_juno and region_name == "Main Gate - Juno Area (Boss)":
             location_names_with_ids.pop("Juno defeated", None)
+
+        # If this option is off then the player will get the Splash Arm special weapon as in vanilla game
+        if not world.options.randomizeStartingSpecialWeapon and region_name == "Apple Market - Junk Shop (Turn-in Rescue)":
+            location_names_with_ids.pop("Rescue the shop owner's husband", None)
+
         region.add_locations(location_names_with_ids, GameLocation)
     return None
 

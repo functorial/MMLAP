@@ -26,6 +26,12 @@ namespace MMLAP
         public static readonly AddressData CutsceneFlag                                   = new(0xC4C48, 0, null);
         public static readonly AddressData SavingFlag                                     = new(0x7568, 2, null);
         // Special Weapons
+        public static readonly AddressData SpecialWeaponInvStart                          = new(0xBE410, 7, null);
+        // 0 = Normal Arm, 2 = Machine Buster, 3 = Powered Buster, 4 = Drill Arm, 5 = Grenade Arm, 
+        // 6 = Spread Buster, 7 = Vacuum Arm, 8 = Active Buster, 9 = Blade Arm, 10 = Grand Grenade, 
+        // 11 = Splash Mine (default), 12 = Shield Arm, 13 = Shining Laser
+        public static readonly AddressData SpecialWeaponEquippedActual                    = new(0xB5320, null, 1);
+        public static readonly AddressData SpecialWeaponEquippedLoadout                   = new(0xB5322, null, 1);
         public static readonly AddressData HasNormalArm                                   = new(0xBE410, 7, null);
         public static readonly AddressData HasMachineBuster                               = new(0xBE410, 5, null);
         public static readonly AddressData HasPoweredBuster                               = new(0xBE410, 4, null);
@@ -47,6 +53,7 @@ namespace MMLAP
         // Main story flags
         public static readonly AddressData HasRescuedShopOwnersHusband                    = new(0xBE3D6, 4, null);
         public static readonly AddressData HasEarnedCitizenship                           = new(0xBE380, 1, null); //new(0xBE37C, 4, null);
+        public static readonly AddressData HasEarnedCitizenshipLate                       = new(0xBE37C, 4, null);
         public static readonly AddressData CanStartTronDogCutscene                        = new(0xBE440, 7, null);
         public static readonly AddressData HasStartedTronDogCutscene                      = new(0xBE378, 6, null);
         public static readonly AddressData HasWatchedServbotTakeoffCutscene               = new(0xBE37A, 0, null);

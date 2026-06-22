@@ -673,7 +673,13 @@ namespace MMLAP
             return code;
         }
 
-        private static OpCode LoadHalfImmediate(uint startAddress, MMLEnums.Register register, short shortVal)
+        public static OpCode[] AlterStartingSpecialWeapon(byte weaponCode)
+        {
+            OpCode[] code = [LoadHalfImmediate(0x001DBE20, MMLEnums.Register.v0, weaponCode)];
+            return code;
+        }
+
+        public static OpCode LoadHalfImmediate(uint startAddress, MMLEnums.Register register, short shortVal)
         {
             // addiu rt, zero, imm16
             uint instruction =

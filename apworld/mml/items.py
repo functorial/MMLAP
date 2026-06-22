@@ -175,6 +175,8 @@ def create_all_items(world: GameWorld) -> None:
                 add_count = 0 # 4
             case "Buster Max":
                 add_count = 0
+            case "Mine Parts Kit":
+                add_count = 1 if world.options.randomizeStartingSpecialWeapon else 0
             case _:
                 add_count = 1
 
