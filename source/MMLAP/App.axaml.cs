@@ -370,6 +370,7 @@ public partial class App : Application
 
     private static void LogDebugInfo()
     {
+        var apClient = APClient;
         try
         {
             // Clear and start collecting loop metrics
@@ -932,7 +933,7 @@ public partial class App : Application
                         // Fix cutscene
                         LoopHelpers.HandleRedRefractorInSupportCar();
                         //LoopHelpers.HandleCutsceneSkipItemObtains(); // Moving to slowgameloop
-                        //LoopHelpers.RandomizeStartingSpecialWeapon();
+                        //LoopHelpers.ShuffleStartingSpecialWeapon();
                     }
 
                     // Run these after loading
@@ -999,7 +1000,7 @@ public partial class App : Application
                     // Task 1: Read useful memory
                     CurrentProgressionCounter = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
                     LoopHelpers.CheckGoalCondition();
-                    LoopHelpers.RandomizeStartingSpecialWeapon();
+                    LoopHelpers.ShuffleStartingSpecialWeapon();
 
 
                     ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
@@ -1029,7 +1030,7 @@ public partial class App : Application
                             {
                                 // Do slow memory writes, typically ones that are low priority or cause problems in fast write
                                 LoopHelpers.HandleSlowCodeWrites(currentLevelData, CurrentProgressionCounter);
-                                LoopHelpers.HandleAreaExitLocks(currentLevelData);
+                                LoopHelpers.HandleAreaExitLocks(currentLevelData, apClient.Options);
                                 LoopHelpers.HandleFlutterFixedBrokenDistinction(currentLevelData);
                                 LoopHelpers.HandleOddPails(currentLevelData);
                                 IsManagingLevelChange = false;
@@ -1157,7 +1158,7 @@ public partial class App : Application
                 ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
                 if (DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData))
                 {
-                    LoopHelpers.HandleAreaExitUnlocks(currentLevelData, args.Item.Id);
+                    LoopHelpers.HandleAreaExitLocks(currentLevelData, apClient.Options);
                 }
             }
 

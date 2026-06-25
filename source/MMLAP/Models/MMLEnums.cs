@@ -7,10 +7,11 @@
             Nothing = 0,
             Zenny = 1,
             Buster = 2,
-            Special = 3,
+            SpecialItem = 3,
             Normal = 4,
             AP = 5,
             Cheat = 6,
+            SpecialWeapon = 7,
         }
 
         public enum LocationCategory
@@ -62,6 +63,19 @@
             sp   = 0x1D,
             fp   = 0x1E,
             ra   = 0x1F,
+        }
+
+        public enum RegionLockOption
+        {
+            Vanilla = 0,
+            Randomized = 1,
+            Open = 2,
+        }
+
+        public enum RegionLockActionType
+        {
+            Lock = 0,
+            Unlock = 1,
         }
     }
 }

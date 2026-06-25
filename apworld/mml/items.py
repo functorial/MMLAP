@@ -17,6 +17,7 @@ class ItemData(NamedTuple):
 ITEM_DATA_DICT = {
     "Unlock Main Gate"                  : ItemData(0x0001, ItemClassification.progression,                             None                        ),
     "Unlock Sub-Cities"                 : ItemData(0x0002, ItemClassification.progression,                             None                        ),
+    "Splash Mine"                       : ItemData(0x002B, ItemClassification.filler,                                  None                        ), # This replaces Mine Parts Kit
     "Nothing"                           : ItemData(0x00FF, ItemClassification.filler,                                  None                        ),
     "Power Raiser"                      : ItemData(0x020D, ItemClassification.filler,                                  None                        ),
     "Buster Max"                        : ItemData(0x0210, ItemClassification.useful,                                  None                        ), # strong buster part -> useful
@@ -63,7 +64,7 @@ ITEM_DATA_DICT = {
    #"Beetle"                            : ItemData(0x0254, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
    #"Comic Book"                        : ItemData(0x0255, ItemClassification.progression,                             None                        ), # LOCATION NOT IMPLEMENTED YET
     "Ring"                              : ItemData(0x0256, ItemClassification.progression,                             None                        ),
-    "Mine Parts Kit"                    : ItemData(0x0258, ItemClassification.filler,                                  None                        ),
+   #"Mine Parts Kit"                    : ItemData(0x0258, ItemClassification.filler,                                  None                        ), # Replacing with Splash Mine
     "Cannon Kit"                        : ItemData(0x0259, ItemClassification.progression,                             None                        ),
     "Grenade Kit"                       : ItemData(0x025A, ItemClassification.filler,                                  None                        ),
     "Blumebear Parts"                   : ItemData(0x025B, ItemClassification.useful,                                  None                        ), # strong special weapon -> useful
@@ -174,9 +175,20 @@ def create_all_items(world: GameWorld) -> None:
             case "Nothing":
                 add_count = 0 # 4
             case "Buster Max":
-                add_count = 0
-            case "Mine Parts Kit":
-                add_count = 1 if world.options.randomizeStartingSpecialWeapon else 0
+                add_count = 1 if world.options.shuffleBusterMax else 0
+           #case "Mine Parts Kit":
+            case "Splash Mine":
+                add_count = 1 if world.options.shuffleStartingSpecialWeapon else 0
+            case "Citizen's Card":
+                add_count = 1 if world.options.shuffleCitizensCard else 0
+            case "Class B License":
+                add_count = 1 if world.options.shuffleClassBLicense else 0
+            case "Class A License":
+                add_count = 1 if world.options.shuffleClassALicense else 0
+            case "Unlock Main Gate":
+                add_count = 1 if world.options.shuffleMainGateUnlock else 0
+            case "Unlock Sub-Cities":
+                add_count = 1 if world.options.shuffleSubCitiesUnlock else 0
             case _:
                 add_count = 1
 

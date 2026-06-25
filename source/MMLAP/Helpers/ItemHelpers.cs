@@ -62,11 +62,14 @@ namespace MMLAP.Helpers
                 case MMLEnums.ItemCategory.Buster:
                     ReceiveBusterPart(itemData);
                     break;
-                case MMLEnums.ItemCategory.Special:
+                case MMLEnums.ItemCategory.SpecialItem:
                     ReceiveSpecialItem(itemData);
                     break;
                 case MMLEnums.ItemCategory.Normal:
                     ReceiveNormalItem(itemData);
+                    break;
+                case MMLEnums.ItemCategory.SpecialWeapon:
+                    ReceiveSpecialWeapon(itemData);
                     break;
                 default:
                     return;
@@ -128,7 +131,7 @@ namespace MMLAP.Helpers
 
         public static void ReceiveSpecialItem(ItemData itemData)
         {
-            if (itemData.Category != ItemCategory.Special)
+            if (itemData.Category != ItemCategory.SpecialItem)
             {
                 return;
             }
@@ -139,6 +142,16 @@ namespace MMLAP.Helpers
         public static void ReceiveNormalItem(ItemData itemData)
         {
             if (itemData.Category != ItemCategory.Normal)
+            {
+                return;
+            }
+            _ = MemoryHelpers.WriteAddressDataBit(itemData.InventoryAddressData, true);
+            return;
+        }
+
+        public static void ReceiveSpecialWeapon(ItemData itemData)
+        {
+            if (itemData.Category != ItemCategory.SpecialWeapon)
             {
                 return;
             }

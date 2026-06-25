@@ -4,6 +4,7 @@ using Archipelago.MultiClient.Net.Models;
 using Avalonia.Rendering;
 using MMLAP.Models;
 using Serilog;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -248,6 +249,12 @@ namespace MMLAP.Helpers
 
         public static void HandleLoadingFastCodeWrites(LevelData currentLevelData, byte currentProgressionCounter)
         {
+            var apClient = App.APClient;
+            if (apClient == null)
+            {
+                return;
+            }
+
             switch (currentLevelData)
             {
                 case var data when data.AreaName == "Cardon Forest (Flutter Broken)":
@@ -328,7 +335,7 @@ namespace MMLAP.Helpers
                     bool hasUnlockedMainGate = ItemHelpers.HasReceivedItem(0x0001);
                     bool hasActivatedEmergencySystem = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
                     bool hasWatchedMainGateOpenCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedMainGateOpenCutscene);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardOutsideMainGate(currentProgressionCounter, hasUnlockedMainGate, hasActivatedEmergencySystem, hasWatchedMainGateOpenCutscene));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardOutsideMainGate(currentProgressionCounter, hasUnlockedMainGate, hasActivatedEmergencySystem, hasWatchedMainGateOpenCutscene, apClient.Options));
                     break;
 
                 case var data when data.AreaName == "Apple Market":
@@ -349,13 +356,15 @@ namespace MMLAP.Helpers
                     bool hasUnlockedSubCitiesDowntown = ItemHelpers.HasReceivedItem(0x0002);
                     bool hasDefeatedBalkonGeratDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
                     bool hasTakenRedRefractorDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(currentProgressionCounter, hasEarnedClassBLicenseDowntown, hasDefeatedBalkonGeratDowntown, hasTakenRedRefractorDowntown, hasUnlockedSubCitiesDowntown));
+                    bool hasActivatedUnlockSubCitiesDowntown = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedUnlockSubCities);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardDowntown(currentProgressionCounter, hasEarnedClassBLicenseDowntown, hasDefeatedBalkonGeratDowntown, hasTakenRedRefractorDowntown, hasUnlockedSubCitiesDowntown, hasActivatedUnlockSubCitiesDowntown, apClient.Options));
                     break;
 
                 case var data when data.AreaName == "Uptown":
                     bool hasUnlockedSubCitiesUptown = ItemHelpers.HasReceivedItem(0x0002);
                     bool hasShownRollRedRefractorUptown = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardUptown(currentProgressionCounter, hasUnlockedSubCitiesUptown, hasShownRollRedRefractorUptown));
+                    bool hasActivatedUnlockSubCitiesUptown = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedUnlockSubCities);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardUptown(currentProgressionCounter, hasUnlockedSubCitiesUptown, hasShownRollRedRefractorUptown, hasActivatedUnlockSubCitiesUptown, apClient.Options));
                     break;
 
                 case var data when data.AreaName == "Old City":
@@ -610,356 +619,199 @@ namespace MMLAP.Helpers
             }
         }
 
-        public static void HandleAreaExitLocks(LevelData currentLevelData)
-        {
-            HandleCitizensCardExitUnlocks(currentLevelData);
-            HandleClassBLicenseExitUnlocks(currentLevelData);
-            HandleClassALicenseExitUnlocks(currentLevelData);
-
-            HandleCitizensCardExitLocks(currentLevelData);
-            HandleClassBLicenseExitLocks(currentLevelData);
-            HandleClassALicenseExitLocks(currentLevelData);
-            HandleMainGateExitLocks(currentLevelData);
-            HandleSubCityUnlockExitLocks(currentLevelData);
-        }
-
-        public static void HandleAreaExitUnlocks(LevelData currentLevelData, long itemId)
-        {
-            switch (itemId)
-            {
-                case 0x022A:
-                    HandleCitizensCardExitUnlocks(currentLevelData);
-                    break;
-                case 0x022B:
-                    HandleClassALicenseExitUnlocks(currentLevelData);
-                    break;
-                case 0x022C:
-                    HandleClassBLicenseExitUnlocks(currentLevelData);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        private static void TryLockExitWithDebug(string exitName, ExitData exitData)
-        {
-            bool didLock = exitData.LockExit();
-            if (!didLock)
-            {
-                //Log.Logger.Information($"LockExit failed for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
-            }
-            else
-            {
-                //Log.Logger.Information($"LockExit succeeded for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
-            }
-
-        }
-
-        private static void TryLockExitByName(string exitName)
+        private static void TryLockExitByName(string exitName, MMLEnums.RegionLockActionType regionLockActionType)
         {
             if (!DataDicts.ExitDataDict.TryGetValue(exitName, out var exitData))
             {
                 //Log.Logger.Information($"LockExit skipped because exit '{exitName}' was not found in ExitDataDict.");
                 return;
             }
-
-            TryLockExitWithDebug(exitName, exitData);
-        }
-
-        private static void TryUnlockExitWithDebug(string exitName, ExitData exitData)
-        {
-            bool didUnlock = exitData.UnlockExit();
-            if (!didUnlock)
+            switch (regionLockActionType)
             {
-                //Log.Logger.Information($"UnlockExit failed for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
-            }
-            else
-            {
-                //Log.Logger.Information($"UnlockExit succeeded for '{exitName}'. Source='{exitData.SourceName}', Target='{exitData.TargetName}', IsDoor={exitData.IsDoor}.");
+                case MMLEnums.RegionLockActionType.Lock:
+                    exitData.LockExit();
+                    break;
+                case MMLEnums.RegionLockActionType.Unlock:
+                    exitData.UnlockExit();
+                    break;
+                default:
+                    break;
             }
         }
 
-        private static void TryUnlockExitByName(string exitName)
+        private static void HandleAreaExitLocksItem(LevelData currentLevelData, MMLEnums.RegionLockOption regionLockOption, MMLEnums.RegionLockActionType regionLockActionType, int itemId, Action<LevelData, MMLEnums.RegionLockActionType> regionLockAction)
         {
-            if (!DataDicts.ExitDataDict.TryGetValue(exitName, out var exitData))
+            switch (regionLockOption)
             {
-                Log.Logger.Information($"UnlockExit skipped because exit '{exitName}' was not found in ExitDataDict.");
-                return;
+                case MMLEnums.RegionLockOption.Vanilla:
+                    // Assuming the relevant cheats which open the exits are optionized
+                    break;
+                case MMLEnums.RegionLockOption.Randomized:
+                    bool hasReceiveditem = ItemHelpers.HasReceivedItem(itemId);
+                    if (
+                        (regionLockActionType == MMLEnums.RegionLockActionType.Lock && hasReceiveditem) ||
+                        (regionLockActionType == MMLEnums.RegionLockActionType.Unlock && !hasReceiveditem)
+                    )
+                    {
+                        return;
+                    }
+                    regionLockAction(currentLevelData, regionLockActionType);
+                    break;
+                case MMLEnums.RegionLockOption.Open:
+                    if (regionLockActionType == MMLEnums.RegionLockActionType.Lock)
+                    {
+                        return;
+                    }
+                    regionLockAction(currentLevelData, regionLockActionType);
+                    break;
+                default:
+                    break;
             }
 
-            TryUnlockExitWithDebug(exitName, exitData);
         }
 
-        public static void HandleCitizensCardExitUnlocks(LevelData currentLevelData)
+        private static Action<LevelData, MMLEnums.RegionLockActionType> regionLockActionCitizensCard = (currentLevelData, regionLockActionType) =>
         {
-            if (!ItemHelpers.HasReceivedItem(0x022A))
-            {
-                return;
-            }
-
             switch (currentLevelData.AreaName)
             {
                 case "Apple Market":
-                    TryUnlockExitByName("Apple Market -> Downtown");
+                    TryLockExitByName("Apple Market -> Downtown", regionLockActionType);
                     break;
-
                 case "Yass Plains":
-                    TryUnlockExitByName("Yass Plains -> City Hall");
+                    TryLockExitByName("Yass Plains -> City Hall", regionLockActionType);
                     break;
-
                 case "Outside Main Gate":
-                    TryUnlockExitByName("Outside Main Gate -> Old City");
+                    TryLockExitByName("Outside Main Gate -> Old City", regionLockActionType);
                     break;
-
                 case "Wily's Boat":
-                    TryUnlockExitByName("Wily's Boat, Outside (Walkway) -> Uptown");
+                    TryLockExitByName("Wily's Boat, Outside (Walkway) -> Uptown", regionLockActionType);
                     break;
-
                 case "Underground Ruins":
-                    TryUnlockExitByName("Underground Ruins, Room 3 (Sewer) -> Downtown");
-                    TryUnlockExitByName("Underground Ruins, Room 4 -> Old City");
+                    TryLockExitByName("Underground Ruins, Room 3 (Sewer) -> Downtown", regionLockActionType);
+                    TryLockExitByName("Underground Ruins, Room 4 -> Old City", regionLockActionType);
                     break;
-
                 default:
                     break;
             }
-        }
+        };
 
-        public static void HandleCitizensCardExitLocks(LevelData currentLevelData)
+        private static Action<LevelData, MMLEnums.RegionLockActionType> regionLockActionClassBLicense = (currentLevelData, regionLockActionType) =>
         {
-            if (ItemHelpers.HasReceivedItem(0x022A))
-            {
-                return;
-            }
-
-            switch (currentLevelData.AreaName)
-            {
-                case "Apple Market":
-                    TryLockExitByName("Apple Market -> Downtown");
-                    break;
-
-                case "Yass Plains":
-                    TryLockExitByName("Yass Plains -> City Hall");
-                    break;
-
-                case "Outside Main Gate":
-                    TryLockExitByName("Outside Main Gate -> Old City");
-                    break;
-
-                case "Wily's Boat":
-                    TryLockExitByName("Wily's Boat, Outside (Walkway) -> Uptown");
-                    break;
-
-                case "Underground Ruins":
-                    TryLockExitByName("Underground Ruins, Room 3 (Sewer) -> Downtown");
-                    TryLockExitByName("Underground Ruins, Room 4 -> Old City");
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        public static void HandleClassBLicenseExitUnlocks(LevelData currentLevelData)
-        {
-            if (!ItemHelpers.HasReceivedItem(0x022C))
-            {
-                return;
-            }
-
             switch (currentLevelData.AreaName)
             {
                 case "Clozer Woods With Bridge":
-                    TryUnlockExitByName("Clozer Woods With Bridge -> Underground Ruins");
+                    TryLockExitByName("Clozer Woods With Bridge -> Underground Ruins", regionLockActionType);
                     break;
-
                 case "Cardon Forest (Flutter Broken)":
-                    TryUnlockExitByName("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2");
+                    TryLockExitByName("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2", regionLockActionType);
                     break;
-
                 case "Cardon Forest (Flutter Fixed)":
-                    TryUnlockExitByName("Cardon Forest South (Flutter Fixed) -> Underground Ruins, Room 2");
+                    TryLockExitByName("Cardon Forest South (Flutter Fixed) -> Underground Ruins, Room 2", regionLockActionType);
                     break;
-
-                case "Cardon Forest Sub-Gate":
-                    TryUnlockExitByName("Cardon Forest Sub-Gate, Room 1 (N) -> Underground Ruins");
-                    break;
-
-                case "Lake Jyun Sub-Gate":
-                    TryUnlockExitByName("Lake Jyun Sub-Gate, Room 4 (W) -> Underground Ruins (NW)");
-                    TryUnlockExitByName("Lake Jyun Sub-Gate, Room 4 (E) -> Underground Ruins (NE)");
-                    break;
-
-                case "Clozer Woods Sub-Gate":
-                    TryUnlockExitByName("Clozer Woods Sub-Gate, Room 10 -> Underground Ruins");
-                    break;
-
-                case "Main Gate":
-                    TryUnlockExitByName("East Door Console Room -> Underground Ruins, NE Area 2");
-                    break;
-
-                case "Underground Ruins":
-                    TryUnlockExitByName("Underground Ruins, Room 1 (Junk Store Man Area) -> Room 2");
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        public static void HandleClassBLicenseExitLocks(LevelData currentLevelData)
-        {
-            if (ItemHelpers.HasReceivedItem(0x022C))
-            {
-                return;
-            }
-
-            switch (currentLevelData.AreaName)
-            {
-                case "Clozer Woods With Bridge":
-                    TryLockExitByName("Clozer Woods With Bridge -> Underground Ruins");
-                    break;
-
-                case "Cardon Forest (Flutter Broken)":
-                    TryLockExitByName("Cardon Forest South (Flutter Broken) -> Underground Ruins, Room 2");
-
-                    break;
-
-                case "Cardon Forest (Flutter Fixed)":
-                    TryLockExitByName("Cardon Forest South (Flutter Fixed) -> Underground Ruins, Room 2");
-                    break;
-
                 //case "Old City":
-                //    TryLockExitByName("Old City -> Underground Ruins");
-                //    TryLockExitByName("Old City (dogs, no weapons) -> Underground Ruins, to Main Gate");
+                //    TryLockExitByName("Old City -> Underground Ruins", regionLockActionType);
+                //    TryLockExitByName("Old City (dogs, no weapons) -> Underground Ruins, to Main Gate", regionLockActionType);
                 //    break;
-
                 case "Cardon Forest Sub-Gate":
-                    TryLockExitByName("Cardon Forest Sub-Gate, Room 1 (N) -> Underground Ruins");
+                    TryLockExitByName("Cardon Forest Sub-Gate, Room 1 (N) -> Underground Ruins", regionLockActionType);
                     break;
-
                 case "Lake Jyun Sub-Gate":
-                    TryLockExitByName("Lake Jyun Sub-Gate, Room 4 (W) -> Underground Ruins (NW)");
-                    TryLockExitByName("Lake Jyun Sub-Gate, Room 4 (E) -> Underground Ruins (NE)");
+                    TryLockExitByName("Lake Jyun Sub-Gate, Room 4 (W) -> Underground Ruins (NW)", regionLockActionType);
+                    TryLockExitByName("Lake Jyun Sub-Gate, Room 4 (E) -> Underground Ruins (NE)", regionLockActionType);
                     break;
-
                 case "Clozer Woods Sub-Gate":
-                    TryLockExitByName("Clozer Woods Sub-Gate, Room 10 -> Underground Ruins");
+                    TryLockExitByName("Clozer Woods Sub-Gate, Room 10 -> Underground Ruins", regionLockActionType);
                     break;
-
                 case "Main Gate":
-                    TryLockExitByName("East Door Console Room -> Underground Ruins, NE Area 2");
+                    TryLockExitByName("East Door Console Room -> Underground Ruins, NE Area 2", regionLockActionType);
                     break;
-
                 case "Underground Ruins":
-                    TryLockExitByName("Underground Ruins, Room 1 (Junk Store Man Area) -> Room 2");
+                    TryLockExitByName("Underground Ruins, Room 1 (Junk Store Man Area) -> Room 2", regionLockActionType);
                     break;
-
                 default:
                     break;
             }
-        }
+        };
 
-        public static void HandleClassALicenseExitUnlocks(LevelData currentLevelData)
+        private static Action<LevelData, MMLEnums.RegionLockActionType> regionLockActionClassALicense = (currentLevelData, regionLockActionType) =>
         {
-            if (!ItemHelpers.HasReceivedItem(0x022B))
-            {
-                return;
-            }
-
             switch (currentLevelData.AreaName)
             {
                 case "Outside Cardon Forest Sub-Gate":
-                    TryUnlockExitByName("Outside Cardon Forest Sub-Gate -> Cardon Forest Sub-Gate");
+                    TryLockExitByName("Outside Cardon Forest Sub-Gate -> Cardon Forest Sub-Gate", regionLockActionType);
                     break;
-
                 case "Lake Jyun":
-                    TryUnlockExitByName("On the Lake -> Lake Jyun Sub-Gate");
+                    TryLockExitByName("On the Lake -> Lake Jyun Sub-Gate", regionLockActionType);
                     break;
-
                 case "Clozer Woods Sub-Gate":
-                    TryUnlockExitByName("Flutter Lobby -> Clozer Woods Sub-Gate");
+                    TryLockExitByName("Flutter Lobby -> Clozer Woods Sub-Gate", regionLockActionType);
                     break;
-
                 case "Underground Ruins":
-                    TryUnlockExitByName("Underground Ruins, Room 2 -> Cardon Forest Sub-gate");
-                    TryUnlockExitByName("Underground Ruins, Room 7 -> Lake Jyun Sub-Gate (W)");
-                    TryUnlockExitByName("Underground Ruins, Room 7 -> Lake Jyun Sub-Gate (E)");
-                    TryUnlockExitByName("Underground Ruins, Room 9 -> Clozer Woods Sub-Gate");
+                    TryLockExitByName("Underground Ruins, Room 2 -> Cardon Forest Sub-gate", regionLockActionType);
+                    TryLockExitByName("Underground Ruins, Room 7 -> Lake Jyun Sub-Gate (W)", regionLockActionType);
+                    TryLockExitByName("Underground Ruins, Room 7 -> Lake Jyun Sub-Gate (E)", regionLockActionType);
+                    TryLockExitByName("Underground Ruins, Room 9 -> Clozer Woods Sub-Gate", regionLockActionType);
                     break;
-
                 default:
                     break;
             }
-        }
+        };
 
-        public static void HandleClassALicenseExitLocks(LevelData currentLevelData)
+        private static Action<LevelData, MMLEnums.RegionLockActionType> regionLockActionMainGateUnlock = (currentLevelData, regionLockActionType) =>
         {
-            if (ItemHelpers.HasReceivedItem(0x022B))
-            {
-                return;
-            }
-            switch (currentLevelData.AreaName)
-            {
-                case "Outside Cardon Forest Sub-Gate":
-                    TryLockExitByName("Outside Cardon Forest Sub-Gate -> Cardon Forest Sub-Gate");
-                    break;
-
-                case "Lake Jyun":
-                    TryLockExitByName("On the Lake -> Lake Jyun Sub-Gate");
-                    break;
-
-                case "Clozer Woods Sub-Gate":
-                    TryLockExitByName("Flutter Lobby -> Clozer Woods Sub-Gate");
-                    break;
-
-                case "Underground Ruins":
-                    TryLockExitByName("Underground Ruins, Room 2 -> Cardon Forest Sub-gate");
-                    TryLockExitByName("Underground Ruins, Room 7 -> Lake Jyun Sub-Gate (W)");
-                    TryLockExitByName("Underground Ruins, Room 7 -> Lake Jyun Sub-Gate (E)");
-                    TryLockExitByName("Underground Ruins, Room 9 -> Clozer Woods Sub-Gate");
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        // The outside main gate to main gate is handled in the fast foward cheat. Little room from Bruno is ignored as well.
-        public static void HandleMainGateExitLocks(LevelData currentLevelData)
-        {
-            if (ItemHelpers.HasReceivedItem(0x0001))
-            {
-                return;
-            }
             switch (currentLevelData.AreaName)
             {
                 case "Underground Ruins":
-                    TryLockExitByName("Underground Ruins, Room 2 -> Main Gate");
+                    TryLockExitByName("Underground Ruins, Room 2 -> Main Gate", regionLockActionType);
                     break;
+                //case "Outside Main Gate":
+                //    TryLockExitByName("Outside Main Gate -> Main Gate (Entrance)", regionLockActionType);
+                //    break;
                 default:
                     break;
             }
-        }
+        };
 
-        // The Downtown and Uptown sub-city locks are done in the fast forward cheats by just preventing the sub-city to raise up
-        public static void HandleSubCityUnlockExitLocks(LevelData currentLevelData)
+        private static Action<LevelData, MMLEnums.RegionLockActionType> regionLockActionSubCitiesUnlock = (currentLevelData, regionLockActionType) =>
         {
-            if (ItemHelpers.HasReceivedItem(0x0002))
-            {
-                return;
-            }
-
             switch (currentLevelData.AreaName)
             {
                 case "Old City":
                     // TODO: Actually delete sub city entrance model if not received unlock sub-cities
-                    TryLockExitByName("Old City (dogs, no weapons) -> Watcher Sub-City");
+                    TryLockExitByName("Old City (dogs, no weapons) -> Watcher Sub-City", regionLockActionType);
                     break;
-
+                //case "Downtown":
+                //    TryLockExitByName("Downtown -> Sleeper Sub-City", regionLockActionType);
+                //    break;
+                //case "Uptown":
+                //    TryLockExitByName("Uptown -> Dreamer Sub-City", regionLockActionType);
+                //    break;
                 default:
                     break;
             }
+        };
+
+        public static void HandleAreaExitLocks(LevelData currentLevelData, Dictionary<string, object> options)
+        {
+            MMLEnums.RegionLockOption shuffleCitizensCard = (MMLEnums.RegionLockOption)int.Parse(options["shuffleCitizensCard"].ToString());
+            HandleAreaExitLocksItem(currentLevelData, shuffleCitizensCard, MMLEnums.RegionLockActionType.Unlock, 0x022A, regionLockActionCitizensCard);
+            HandleAreaExitLocksItem(currentLevelData, shuffleCitizensCard, MMLEnums.RegionLockActionType.Lock, 0x022A, regionLockActionCitizensCard);
+
+            MMLEnums.RegionLockOption shuffleClassBLicense = (MMLEnums.RegionLockOption)int.Parse(options["shuffleClassBLicense"].ToString());
+            HandleAreaExitLocksItem(currentLevelData, shuffleClassBLicense, MMLEnums.RegionLockActionType.Unlock, 0x022C, regionLockActionClassBLicense);
+            HandleAreaExitLocksItem(currentLevelData, shuffleClassBLicense, MMLEnums.RegionLockActionType.Lock, 0x022C, regionLockActionClassBLicense);
+
+            MMLEnums.RegionLockOption shuffleClassALicense = (MMLEnums.RegionLockOption)int.Parse(options["shuffleClassALicense"].ToString());
+            HandleAreaExitLocksItem(currentLevelData, shuffleClassALicense, MMLEnums.RegionLockActionType.Unlock, 0x022B, regionLockActionClassALicense);
+            HandleAreaExitLocksItem(currentLevelData, shuffleClassALicense, MMLEnums.RegionLockActionType.Lock, 0x022B, regionLockActionClassALicense);
+
+            MMLEnums.RegionLockOption shuffleMainGateUnlock = (MMLEnums.RegionLockOption)int.Parse(options["shuffleMainGateUnlock"].ToString());
+            //HandleAreaExitLocksItem(currentLevelData, shuffleMainGateUnlock, MMLEnums.RegionLockActionType.Unlock, 0x0001, regionLockActionMainGateUnlock); // Handled in FastLoop with Cheats.FastForwardOutsideMainGate by just raising the main gate up
+            HandleAreaExitLocksItem(currentLevelData, shuffleMainGateUnlock, MMLEnums.RegionLockActionType.Lock, 0x0001, regionLockActionMainGateUnlock);
+
+            MMLEnums.RegionLockOption shuffleSubCitiesUnlock = (MMLEnums.RegionLockOption)int.Parse(options["shuffleSubCitiesUnlock"].ToString());
+            //HandleAreaExitLocksItem(currentLevelData, shuffleSubCitiesUnlock, MMLEnums.RegionLockActionType.Unlock); // Handled in FastLoop with Cheats.FastForwardDowntown, Cheats.FastForwardUptown, and Cheats.FastForwardOldCity by just raising the sub-cities up
+            HandleAreaExitLocksItem(currentLevelData, shuffleSubCitiesUnlock, MMLEnums.RegionLockActionType.Lock, 0x0002, regionLockActionSubCitiesUnlock);
         }
 
         // The "showing roll the red refractor" only works if you have the yellow refractor
@@ -1408,7 +1260,7 @@ namespace MMLAP.Helpers
             }
         }
 
-        public static void RandomizeStartingSpecialWeapon()
+        public static void ShuffleStartingSpecialWeapon()
         {
             var apClient = App.APClient;
             var slotData = App.SlotData;
@@ -1417,7 +1269,7 @@ namespace MMLAP.Helpers
                 App.SlotData == null ||
                 !MemoryHelpers.ReadAddressDataBit(Addresses.SupportCarRnDFlag) || 
                 MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenshipLate) ||
-                int.Parse(apClient?.Options?["randomizeStartingSpecialWeapon"].ToString()) != 1 ||
+                int.Parse(apClient?.Options?["shuffleStartingSpecialWeapon"].ToString()) != 1 ||
                 !slotData.TryGetValue("startingSpecialWeapon", out var startingSpecialWeapon)
             )
             {

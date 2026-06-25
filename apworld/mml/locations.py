@@ -150,7 +150,6 @@ LOCATION_DATA_DICT = {
     "Gift Music Box to Roll"                                        : LocationData(125, LocationCategory.QUEST,     False),
     "Gift Ring to Roll"                                             : LocationData(126, LocationCategory.QUEST,     False),
     "Turn in missing bag"                                           : LocationData(127, LocationCategory.QUEST,     False),
-
     "Take the yellow refractor"                                     : LocationData(128, LocationCategory.QUEST,     False),
     "Take the red refractor"                                        : LocationData(129, LocationCategory.QUEST,     False),
     "Earn citizenship in Kattelox City"                             : LocationData(130, LocationCategory.QUEST,     False),
@@ -159,7 +158,7 @@ LOCATION_DATA_DICT = {
     "Activate the emergency system"                                 : LocationData(133, LocationCategory.QUEST,     False),
     "Activate unlock sub-cities"                                    : LocationData(134, LocationCategory.QUEST,     False),
    #"Gai-nee Tooren defeated"                                       : LocationData(135, LocationCategory.COMBAT,    False),
-    "Juno defeated"                                                   : LocationData(136, LocationCategory.COMBAT,    False),
+    "Juno defeated"                                                 : LocationData(136, LocationCategory.COMBAT,    False),
 }
 
 LOCATION_NAME_TO_ID         = {locationName: LOCATION_DATA_DICT[locationName].id         for locationName in LOCATION_DATA_DICT.keys()}
@@ -186,8 +185,23 @@ def create_regular_locations(world: GameWorld) -> None:
             location_names_with_ids.pop("Juno defeated", None)
 
         # If this option is off then the player will get the Splash Arm special weapon as in vanilla game
-        if not world.options.randomizeStartingSpecialWeapon and region_name == "Apple Market - Junk Shop (Turn-in Rescue)":
+        if not world.options.shuffleStartingSpecialWeapon and region_name == "Apple Market - Junk Shop (Turn-in Rescue)":
             location_names_with_ids.pop("Rescue the shop owner's husband", None)
+
+        if not world.options.shuffleCitizensCard and region_name == "Cardon Forest (Get Citizen's Card)":
+            location_names_with_ids.pop("Earn citizenship in Kattelox City", None)
+        
+        if not world.options.shuffleClassBLicense and region_name == "City Hall - Amelia's Office (Get Class B License)":
+            location_names_with_ids.pop("Earn the Class B License", None)
+        
+        if not world.options.shuffleClassALicense and region_name == "City Hall - Amelia's Office (Get Class A License)":
+            location_names_with_ids.pop("Earn the Class A License", None)
+
+        if not world.options.shuffleMainGateUnlock and region_name == "Clozer Woods Sub-Gate - Control Room (Activate The Emergency System)":
+            location_names_with_ids.pop("Activate the emergency system", None)
+        
+        if not world.options.shuffleSubCitiesUnlock and region_name == "Main Gate - (Command Terminal)":
+            location_names_with_ids.pop("Activate unlock sub-cities", None)
 
         region.add_locations(location_names_with_ids, GameLocation)
     return None

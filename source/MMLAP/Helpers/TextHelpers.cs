@@ -207,7 +207,7 @@ namespace MMLAP.Helpers
             List<ItemCategory> displayedItemCategories =
             [
                 ItemCategory.Buster,
-                ItemCategory.Special,
+                ItemCategory.SpecialItem,
                 ItemCategory.Normal 
             ];
             byte[] itemByteArray = [];
