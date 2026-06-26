@@ -52,7 +52,7 @@ class GameWorld(World):
                 "Shield Arm": 12,
                 "Shining Laser": 13,
             }
-            weapon_pool = [weapon_map[key] for key, value in self.options.shuffleStartingSpecialWeaponOptions.value.items() if value]
+            weapon_pool = [weapon_map[key] for key in self.options.shuffleStartingSpecialWeaponOptions.value]
             self.starting_special_weapon = self.random.choice(weapon_pool) if weapon_pool else weapon_map["Splash Mine"]
 
     def create_regions(self) -> None:

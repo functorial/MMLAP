@@ -75,16 +75,16 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     def is_citizens_card_accessible() -> Callable[[CollectionState], bool]:
         return has_any([
             has_item("Citizen's Card"),
-            lambda _: world.options.randomizeCitizensCard == world.options.randomizeCitizensCard.option_open,
-            lambda _: world.options.randomizeCitizensCard == world.options.randomizeCitizensCard.option_vanilla,
+            lambda _: world.options.shuffleCitizensCard == world.options.shuffleCitizensCard.option_open,
+            lambda _: world.options.shuffleCitizensCard == world.options.shuffleCitizensCard.option_vanilla,
         ])
     
     def is_class_b_license_accessible() -> Callable[[CollectionState], bool]:
         return has_any([
             has_item("Class B License"),
-            lambda _: world.options.randomizeClassBLicense == world.options.randomizeClassBLicense.option_open,
+            lambda _: world.options.shuffleClassBLicense == world.options.shuffleClassBLicense.option_open,
             has_all([
-                lambda _: world.options.randomizeClassBLicense == world.options.randomizeClassBLicense.option_vanilla,
+                lambda _: world.options.shuffleClassBLicense == world.options.shuffleClassBLicense.option_vanilla,
                 is_citizens_card_accessible(),
             ]),
         ])
@@ -92,9 +92,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     def is_class_a_license_accessible() -> Callable[[CollectionState], bool]:
         return has_any([
             has_item("Class A License"),
-            lambda _: world.options.randomizeClassALicense == world.options.randomizeClassALicense.option_open,
+            lambda _: world.options.shuffleClassALicense == world.options.shuffleClassALicense.option_open,
             has_all([
-                lambda _: world.options.randomizeClassALicense == world.options.randomizeClassALicense.option_vanilla,
+                lambda _: world.options.shuffleClassALicense == world.options.shuffleClassALicense.option_vanilla,
                 is_citizens_card_accessible(),
             ]),
         ])
@@ -117,9 +117,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     def is_main_gate_accessible() -> Callable[[CollectionState], bool]:
         return has_any([
             has_item("Unlock Main Gate"),
-            lambda _: world.options.randomizeMainGateAccess == world.options.randomizeMainGateAccess.option_open,
+            lambda _: world.options.shuffleMainGateUnlock == world.options.shuffleMainGateUnlock.option_open,
             has_all([
-                lambda _: world.options.randomizeMainGateAccess == world.options.randomizeMainGateAccess.option_vanilla,
+                lambda _: world.options.shuffleMainGateUnlock == world.options.shuffleMainGateUnlock.option_vanilla,
                 can_activate_emergency_system(),
             ]),
         ])
@@ -129,9 +129,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             is_citizens_card_accessible(),
             has_any([
                 has_item("Unlock Sub-Cities"),
-                lambda _: world.options.randomizeSubCitiesAccess == world.options.randomizeSubCitiesAccess.option_open,
+                lambda _: world.options.shuffleSubCitiesUnlock == world.options.shuffleSubCitiesUnlock.option_open,
                 has_all([
-                    lambda _: world.options.randomizeSubCitiesAccess == world.options.randomizeSubCitiesAccess.option_vanilla,
+                    lambda _: world.options.shuffleSubCitiesUnlock == world.options.shuffleSubCitiesUnlock.option_vanilla,
                     is_main_gate_accessible(),
                 ]),
             ]),
@@ -143,9 +143,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             is_citizens_card_accessible(),
             has_any([
                 has_item("Unlock Sub-Cities"),
-                lambda _: world.options.randomizeSubCitiesAccess == world.options.randomizeSubCitiesAccess.option_open,
+                lambda _: world.options.shuffleSubCitiesUnlock == world.options.shuffleSubCitiesUnlock.option_open,
                 has_all([
-                    lambda _: world.options.randomizeSubCitiesAccess == world.options.randomizeSubCitiesAccess.option_vanilla,
+                    lambda _: world.options.shuffleSubCitiesUnlock == world.options.shuffleSubCitiesUnlock.option_vanilla,
                     is_main_gate_accessible(),
                 ]),
             ]),
@@ -158,9 +158,9 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             is_main_gate_accessible(),
             has_any([
                 has_item("Unlock Sub-Cities"),
-                lambda _: world.options.randomizeSubCitiesAccess == world.options.randomizeSubCitiesAccess.option_open,
+                lambda _: world.options.shuffleSubCitiesUnlock == world.options.shuffleSubCitiesUnlock.option_open,
                 has_all([
-                    lambda _: world.options.randomizeSubCitiesAccess == world.options.randomizeSubCitiesAccess.option_vanilla,
+                    lambda _: world.options.shuffleSubCitiesUnlock == world.options.shuffleSubCitiesUnlock.option_vanilla,
                     is_main_gate_accessible(),
                 ]),
             ]),
@@ -169,13 +169,13 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
     def has_drill_arm() -> Callable[[CollectionState], bool]:
         return has_any([
             has_all([can_fix_support_car(), has_item("Blunted Drill")]),
-            lambda _: world.options.randomizeStartingSpecialWeapon and world.starting_special_weapon == 4,
+            lambda _: world.options.shuffleStartingSpecialWeapon and world.starting_special_weapon == 4,
         ])
     
     def has_grand_grenade() -> Callable[[CollectionState], bool]:
         return has_any([
             has_all([can_fix_support_car(), has_item("Bomb Schematic")]),
-            lambda _: world.options.randomizeStartingSpecialWeapon and world.starting_special_weapon == 10,
+            lambda _: world.options.shuffleStartingSpecialWeapon and world.starting_special_weapon == 10,
         ])
     
     def can_destroy_cracked_walls() -> Callable[[CollectionState], bool]:
@@ -188,7 +188,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         has_spread_buster = has_all([can_fix_support_car(), has_all_items(["Ancient Book", "Old Launcher", "Arm Supporter"])])
         return has_any([
             has_powered_buster, has_grand_grenade, has_active_buster, has_spread_buster,
-            lambda _: world.options.randomizeStartingSpecialWeapon and world.starting_special_weapon in [3, 6, 8, 10],
+            lambda _: world.options.shuffleStartingSpecialWeapon and world.starting_special_weapon in [3, 6, 8, 10],
         ])
 
     def has_clubhouse_items() -> Callable[[CollectionState], bool]:

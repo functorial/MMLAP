@@ -1319,6 +1319,9 @@ namespace MMLAP.Helpers
                 !slotData.TryGetValue("startingSpecialWeapon", out var startingSpecialWeapon)
             )
             {
+                bool a = !apClient.Options.TryGetValue("shuffleStartingSpecialWeapon", out var shuffleStartingSpecialWeapona);
+                bool b = !slotData.TryGetValue("startingSpecialWeapon", out var startingSpecialWeaponb);
+                Log.Logger.Information($"{a}, {int.Parse(shuffleStartingSpecialWeapona.ToString())}, {b}, {startingSpecialWeaponb} ");
                 return;
             }
             MemoryHelpers.WriteAddressDataBit(Addresses.HasSplashMine, false);
