@@ -357,7 +357,16 @@ namespace MMLAP
             // 1. Tron and dog scene happens at 0, and can't skip this in vanilla for boss sequence
             // 2. Bomb quest requires class A license 
             // 3. Bank Robber requires sub-cities raised
-            MMLEnums.RegionLockOption regionLockOption = (MMLEnums.RegionLockOption)int.Parse(options["shuffleSubCitiesUnlock"].ToString());
+
+            MMLEnums.RegionLockOption regionLockOption;
+            if (options.TryGetValue("shuffleSubCitiesUnlock", out var shuffleSubCitiesUnlockOption))
+            {
+                regionLockOption = (MMLEnums.RegionLockOption)int.Parse(shuffleSubCitiesUnlockOption.ToString());
+            }
+            else
+            {
+                regionLockOption = MMLEnums.RegionLockOption.Vanilla;
+            }
             byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
                                     //hasActivatedUnlockSubCities ? (byte)0x09 :
                                     hasDefeatedBalkonGerat || hasTakenRedRefractor ? (byte)0x06 :
@@ -436,7 +445,16 @@ namespace MMLAP
         public static OpCode[] FastForwardUptown(byte currentProgressionCounter, bool hasUnlockedSubCities, bool hasShownRollRedRefractor, bool hasActivatedUnlockSubCities, Dictionary<string, object> options)
         {
             // Needs to be written fast during loading screen
-            MMLEnums.RegionLockOption regionLockOption = (MMLEnums.RegionLockOption)int.Parse(options["shuffleSubCitiesUnlock"].ToString());
+            MMLEnums.RegionLockOption regionLockOption;
+            if (options.TryGetValue("shuffleSubCitiesUnlock", out var shuffleSubCitiesUnlockOption))
+            {
+                regionLockOption = (MMLEnums.RegionLockOption)int.Parse(shuffleSubCitiesUnlockOption.ToString());
+            }
+            else
+            {
+                regionLockOption = MMLEnums.RegionLockOption.Vanilla;
+            }
+
             switch (regionLockOption)
             {
                 case MMLEnums.RegionLockOption.Vanilla:
@@ -729,7 +747,15 @@ namespace MMLAP
 
         public static OpCode[] FastForwardOutsideMainGate(byte currentProgressionCounter, bool hasUnlockedMainGate, bool hasActivatedEmergencySystem, bool hasWatchedMainGateOpenCutscene, Dictionary<string, object> options)
         {
-            MMLEnums.RegionLockOption regionLockOption = (MMLEnums.RegionLockOption)int.Parse(options["shuffleMainGateUnlock"].ToString());
+            MMLEnums.RegionLockOption regionLockOption;
+            if (options.TryGetValue("shuffleMainGateUnlock", out var shuffleMainGateUnlockOption))
+            {
+                regionLockOption = (MMLEnums.RegionLockOption)int.Parse(shuffleMainGateUnlockOption.ToString());
+            }
+            else
+            {
+                regionLockOption = MMLEnums.RegionLockOption.Vanilla;
+            }
             bool isInCutscene = hasActivatedEmergencySystem && !hasWatchedMainGateOpenCutscene;
             switch (regionLockOption)
             {

@@ -7,7 +7,6 @@ from Options import Toggle, DefaultOnToggle, Option, Range, Choice, OptionSet, I
 # Range: options that have a mix/max value, like damage amplification, or a chance of something happening.
 # Choice: an option where you pick a discrete answer like in a dropdown menu.
 
-
 class Goal(Choice):
     """
     Juno: Defeat Juno.
@@ -20,51 +19,6 @@ class Goal(Choice):
     option_all_bosses = 1
 
     default = option_juno
-
-class ShuffleStartingSpecialWeapon(Toggle):
-    """
-    Shuffles the Mine Parts Kit into the item pool and randomizes the first special weapon received.
-    """
-
-    display_name = "Shuffle Starting Special Weapon"
-
-    default = False
-
-class ShuffleStartingSpecialWeaponOptions(OptionSet):
-    """
-    If 'Shuffle Starting Special Weapon' is enabled, this option will determine the special weapon pool to shuffle from.
-    If none are selected, the logic will default to the Splash Arm.
-    """
-
-    display_name = "Starting Special Weapon Options"
-
-    valid_weapons = {
-        "Normal Arm",
-       #"Mega Buster Sidearm",
-        "Machine Buster",
-        "Powered Buster",
-        "Drill Arm",
-        "Grenade Arm",
-        "Spread Buster",
-        "Vacuum Arm",
-        "Active Buster",
-        "Blade Arm",
-        "Grand Grenade",
-        "Splash Mine",
-        "Shield Arm",
-        "Shining Laser",
-    }
-
-    default = valid_weapons
-
-class ShuffleBusterMax(Toggle):
-    """
-    Shuffles the Buster Max buster part into the item pool.
-    """
-    
-    display_name = "Shuffle Buster Max"
-
-    default = False
 
 class ShuffleCitizensCard(Choice):
     """
@@ -141,12 +95,63 @@ class ShuffleSubCitiesUnlock(Choice):
 
     default = option_vanilla
 
+class ShuffleStartingSpecialWeapon(Toggle):
+    """
+    Shuffles the Mine Parts Kit into the item pool and randomizes the first special weapon received.
+    """
+
+    display_name = "Shuffle Starting Special Weapon"
+
+    default = False
+
+class ShuffleStartingSpecialWeaponOptions(OptionSet):
+    """
+    If 'Shuffle Starting Special Weapon' is enabled, this option will determine the special weapon pool to shuffle from.
+    If none are selected, the logic will default to the Splash Arm.
+    """
+
+    display_name = "Shuffle Starting Special Weapon Options"
+
+    valid_weapons = {
+        "Normal Arm",
+       #"Mega Buster Sidearm",
+        "Machine Buster",
+        "Powered Buster",
+        "Drill Arm",
+        "Grenade Arm",
+        "Spread Buster",
+        "Vacuum Arm",
+        "Active Buster",
+        "Blade Arm",
+        "Grand Grenade",
+        "Splash Mine",
+        "Shield Arm",
+        "Shining Laser",
+    }
+
+    default = valid_weapons
+
+class ShuffleBusterMax(Toggle):
+    """
+    Shuffles the Buster Max buster part into the item pool.
+    """
+    
+    display_name = "Shuffle Buster Max"
+
+    default = False
 
 
 @dataclass
 class GameOptions(PerGameCommonOptions):
     goal: Goal
-    randomizeStartingSpecialWeapon: RandomizeStartingSpecialWeapon
+    shuffleCitizensCard: ShuffleCitizensCard
+    shuffleClassBLicense: ShuffleClassBLicense
+    shuffleClassALicense: ShuffleClassALicense
+    shuffleMainGateUnlock: ShuffleMainGateUnlock
+    shuffleSubCitiesUnlock: ShuffleSubCitiesUnlock
+    shuffleStartingSpecialWeapon: ShuffleStartingSpecialWeapon
+    shuffleStartingSpecialWeaponOptions: ShuffleStartingSpecialWeaponOptions
+    shuffleBusterMax: ShuffleBusterMax
 
 option_presets = {}
 
@@ -161,5 +166,14 @@ option_groups = [
             ShuffleSubCitiesUnlock,
         ],
         start_collapsed = False,
-    )
+    ),
+    OptionGroup(
+        name = "Weapon Options",
+        options = [
+            ShuffleStartingSpecialWeapon,
+            ShuffleStartingSpecialWeaponOptions,
+            ShuffleBusterMax,
+        ],
+        start_collapsed = False,
+    ),
 ]

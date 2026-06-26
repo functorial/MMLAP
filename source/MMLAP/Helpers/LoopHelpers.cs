@@ -793,23 +793,68 @@ namespace MMLAP.Helpers
 
         public static void HandleAreaExitLocks(LevelData currentLevelData, Dictionary<string, object> options)
         {
-            MMLEnums.RegionLockOption shuffleCitizensCard = (MMLEnums.RegionLockOption)int.Parse(options["shuffleCitizensCard"].ToString());
+            MMLEnums.RegionLockOption shuffleCitizensCard;
+            if (options.TryGetValue("shuffleCitizensCard", out var shuffleCitizensCardOption))
+            {
+                shuffleCitizensCard = (MMLEnums.RegionLockOption)int.Parse(shuffleCitizensCardOption.ToString());
+            }
+            else
+            {
+                shuffleCitizensCard = MMLEnums.RegionLockOption.Vanilla;
+                Log.Logger.Warning("shuffleCitizensCard option not found.");
+            }
             HandleAreaExitLocksItem(currentLevelData, shuffleCitizensCard, MMLEnums.RegionLockActionType.Unlock, 0x022A, regionLockActionCitizensCard);
             HandleAreaExitLocksItem(currentLevelData, shuffleCitizensCard, MMLEnums.RegionLockActionType.Lock, 0x022A, regionLockActionCitizensCard);
 
-            MMLEnums.RegionLockOption shuffleClassBLicense = (MMLEnums.RegionLockOption)int.Parse(options["shuffleClassBLicense"].ToString());
+            MMLEnums.RegionLockOption shuffleClassBLicense;
+            if (options.TryGetValue("shuffleClassBLicense", out var shuffleClassBLicenseOption))
+            {
+                shuffleClassBLicense = (MMLEnums.RegionLockOption)int.Parse(shuffleClassBLicenseOption.ToString());
+            }
+            else
+            {
+                shuffleClassBLicense = MMLEnums.RegionLockOption.Vanilla;
+                Log.Logger.Warning("shuffleClassBLicense option not found.");
+            }
             HandleAreaExitLocksItem(currentLevelData, shuffleClassBLicense, MMLEnums.RegionLockActionType.Unlock, 0x022C, regionLockActionClassBLicense);
             HandleAreaExitLocksItem(currentLevelData, shuffleClassBLicense, MMLEnums.RegionLockActionType.Lock, 0x022C, regionLockActionClassBLicense);
 
-            MMLEnums.RegionLockOption shuffleClassALicense = (MMLEnums.RegionLockOption)int.Parse(options["shuffleClassALicense"].ToString());
+            MMLEnums.RegionLockOption shuffleClassALicense;
+            if (options.TryGetValue("shuffleClassALicense", out var shuffleClassALicenseOption))
+            {
+                shuffleClassALicense = (MMLEnums.RegionLockOption)int.Parse(shuffleClassALicenseOption.ToString());
+            }
+            else
+            {
+                shuffleClassALicense = MMLEnums.RegionLockOption.Vanilla;
+                Log.Logger.Warning("shuffleClassALicense option not found.");
+            }
             HandleAreaExitLocksItem(currentLevelData, shuffleClassALicense, MMLEnums.RegionLockActionType.Unlock, 0x022B, regionLockActionClassALicense);
             HandleAreaExitLocksItem(currentLevelData, shuffleClassALicense, MMLEnums.RegionLockActionType.Lock, 0x022B, regionLockActionClassALicense);
 
-            MMLEnums.RegionLockOption shuffleMainGateUnlock = (MMLEnums.RegionLockOption)int.Parse(options["shuffleMainGateUnlock"].ToString());
+            MMLEnums.RegionLockOption shuffleMainGateUnlock;
+            if (options.TryGetValue("shuffleMainGateUnlock", out var shuffleMainGateUnlockOption))
+            {
+                shuffleMainGateUnlock = (MMLEnums.RegionLockOption)int.Parse(shuffleMainGateUnlockOption.ToString());
+            }
+            else
+            {
+                shuffleMainGateUnlock = MMLEnums.RegionLockOption.Vanilla;
+                Log.Logger.Warning("shuffleMainGateUnlock option not found.");
+            }
             //HandleAreaExitLocksItem(currentLevelData, shuffleMainGateUnlock, MMLEnums.RegionLockActionType.Unlock, 0x0001, regionLockActionMainGateUnlock); // Handled in FastLoop with Cheats.FastForwardOutsideMainGate by just raising the main gate up
             HandleAreaExitLocksItem(currentLevelData, shuffleMainGateUnlock, MMLEnums.RegionLockActionType.Lock, 0x0001, regionLockActionMainGateUnlock);
 
-            MMLEnums.RegionLockOption shuffleSubCitiesUnlock = (MMLEnums.RegionLockOption)int.Parse(options["shuffleSubCitiesUnlock"].ToString());
+            MMLEnums.RegionLockOption shuffleSubCitiesUnlock;
+            if (options.TryGetValue("shuffleSubCitiesUnlock", out var shuffleSubCitiesUnlockOption))
+            {
+                shuffleSubCitiesUnlock = (MMLEnums.RegionLockOption)int.Parse(shuffleSubCitiesUnlockOption.ToString());
+            }
+            else
+            {
+                shuffleSubCitiesUnlock = MMLEnums.RegionLockOption.Vanilla;
+                Log.Logger.Warning("shuffleSubCitiesUnlock option not found.");
+            }
             //HandleAreaExitLocksItem(currentLevelData, shuffleSubCitiesUnlock, MMLEnums.RegionLockActionType.Unlock); // Handled in FastLoop with Cheats.FastForwardDowntown, Cheats.FastForwardUptown, and Cheats.FastForwardOldCity by just raising the sub-cities up
             HandleAreaExitLocksItem(currentLevelData, shuffleSubCitiesUnlock, MMLEnums.RegionLockActionType.Lock, 0x0002, regionLockActionSubCitiesUnlock);
         }
@@ -1269,7 +1314,8 @@ namespace MMLAP.Helpers
                 App.SlotData == null ||
                 !MemoryHelpers.ReadAddressDataBit(Addresses.SupportCarRnDFlag) || 
                 MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenshipLate) ||
-                int.Parse(apClient?.Options?["shuffleStartingSpecialWeapon"].ToString()) != 1 ||
+                !apClient.Options.TryGetValue("shuffleStartingSpecialWeapon", out var shuffleStartingSpecialWeapon) ||
+                int.Parse(shuffleStartingSpecialWeapon.ToString()) != 1 ||
                 !slotData.TryGetValue("startingSpecialWeapon", out var startingSpecialWeapon)
             )
             {
