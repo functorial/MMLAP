@@ -343,7 +343,7 @@ namespace MMLAP.Helpers
                     bool hasEarnedClassBLicenseApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasEarnedClassALicenseApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
                     bool hasShownRollRedRefractorApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusbandApple, hasEarnedClassBLicenseApple, hasEarnedClassALicenseApple, hasShownRollRedRefractorApple));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusbandApple, hasEarnedClassBLicenseApple, hasEarnedClassALicenseApple, hasShownRollRedRefractorApple, apClient.Options));
                     break;
 
                 case var data when data.AreaName == "Underground Ruins":
@@ -1319,9 +1319,6 @@ namespace MMLAP.Helpers
                 !slotData.TryGetValue("startingSpecialWeapon", out var startingSpecialWeapon)
             )
             {
-                bool a = !apClient.Options.TryGetValue("shuffleStartingSpecialWeapon", out var shuffleStartingSpecialWeapona);
-                bool b = !slotData.TryGetValue("startingSpecialWeapon", out var startingSpecialWeaponb);
-                Log.Logger.Information($"{a}, {int.Parse(shuffleStartingSpecialWeapona.ToString())}, {b}, {startingSpecialWeaponb} ");
                 return;
             }
             MemoryHelpers.WriteAddressDataBit(Addresses.HasSplashMine, false);

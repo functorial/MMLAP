@@ -245,6 +245,7 @@ public partial class App : Application
                 Log.Logger.Information("!reload - Force reload all items.  Use this if you think you may have missed received items.  Please reconnect to the server while in game to refresh received items.");
                 Log.Logger.Information("!goal - Check your current goal.");
                 Log.Logger.Information("!debug - Print debugging information about current game and client state.");
+                Log.Logger.Information("!options - Print your loaded AP options.");
                 Log.Logger.Information("!overlay <off|local|global|status> - Set overlay logging scope.");
                 break;
             case "!reload":
@@ -632,7 +633,14 @@ public partial class App : Application
             return;
         }
 
-        APZennyCommittedToSave = (uint?)APClient.CurrentSession.DataStorage[Scope.Slot, "mml_ap_zenny_committed"];
+        try
+        {
+            APZennyCommittedToSave = (uint?)APClient.CurrentSession.DataStorage[Scope.Slot, "mml_ap_zenny_committed"];
+        }
+        catch
+        {
+
+        }
 
         // Subscribe to item and location events
         APClient.ItemManager.ItemReceived += ItemManager_ItemReceived;

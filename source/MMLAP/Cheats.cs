@@ -320,35 +320,76 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardAppleMarket(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasShownRollRedRefractor)
+        public static OpCode[] FastForwardAppleMarket(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasShownRollRedRefractor, Dictionary<string, object> options)
         {
             // TODO: Figure out shop item progression and how that logic should work
-            //byte fastForwardShopOwner = hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01;
-            byte fastForwardState = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 :
-                                    hasShownRollRedRefractor ? Math.Max((byte)0x08, currentProgressionCounter) : // Moving this state early to red refractor
-                                    //!hasEarnedClassALicense ? (byte)0x01 :
-                                    (byte)0x02; 
-            return [
-                // 
-                LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, fastForwardState),
-                // Open door to downtown
-                LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardState)),
-                // Check if less than 7
-                LoadHalfImmediate(0x00100384, MMLEnums.Register.v0, fastForwardState),
-                // lb a1 0x0(s0), check if equal 0
-                LoadHalfImmediate(0x0010048C, MMLEnums.Register.v0, fastForwardState),
-                // ?
-                LoadHalfImmediate(0x0010054C, MMLEnums.Register.v1, fastForwardState),
-                //// 0xBE378 bit checks, main area
-                //LoadHalfImmediate(0x000198C8, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
-                //LoadHalfImmediate(0x0001F910, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
-                //LoadHalfImmediate(0x00100348, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
-                //LoadHalfImmediate(0x00100678, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
-                //LoadHalfImmediate(0x0010049C, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), //
-                //LoadHalfImmediate(0x00100688, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
-                // 0xBE378 bit checks, shop
-                LoadHalfImmediate(0x001008B0, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
-            ];
+
+            MMLEnums.RegionLockOption regionLockOption;
+            if (options.TryGetValue("shuffleCitizensCard", out var shuffleCitizensCard))
+            {
+                regionLockOption = (MMLEnums.RegionLockOption)int.Parse(shuffleCitizensCard.ToString());
+            }
+            else
+            {
+                regionLockOption = MMLEnums.RegionLockOption.Vanilla;
+            }
+
+            switch (regionLockOption)
+            {
+                case MMLEnums.RegionLockOption.Vanilla:
+                    byte fastForwardStateVanilla = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 :
+                                            hasShownRollRedRefractor ? Math.Max((byte)0x08, currentProgressionCounter) : // Moving this state early to red refractor
+                                            //!hasEarnedClassALicense ? (byte)0x01 :
+                                            (byte)0x02;
+                    return [
+                        // 
+                        LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, fastForwardStateVanilla),
+                        // Open door to downtown
+                        //LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardStateOpen)),
+                        // Check if less than 7
+                        LoadHalfImmediate(0x00100384, MMLEnums.Register.v0, fastForwardStateVanilla),
+                        // lb a1 0x0(s0), check if equal 0
+                        LoadHalfImmediate(0x0010048C, MMLEnums.Register.v0, fastForwardStateVanilla),
+                        // ?
+                        LoadHalfImmediate(0x0010054C, MMLEnums.Register.v1, fastForwardStateVanilla),
+                        //// 0xBE378 bit checks, main area
+                        //LoadHalfImmediate(0x000198C8, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                        //LoadHalfImmediate(0x0001F910, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                        //LoadHalfImmediate(0x00100348, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                        //LoadHalfImmediate(0x00100678, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                        //LoadHalfImmediate(0x0010049C, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), //
+                        //LoadHalfImmediate(0x00100688, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                        // 0xBE378 bit checks, shop
+                        LoadHalfImmediate(0x001008B0, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                    ];
+                case var option when option == MMLEnums.RegionLockOption.Randomized || option == MMLEnums.RegionLockOption.Open:
+                    byte fastForwardStateOpen = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 :
+                                            hasShownRollRedRefractor ? Math.Max((byte)0x08, currentProgressionCounter) : // Moving this state early to red refractor
+                                            (byte)0x02;
+                    return [
+                        // 
+                        LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, fastForwardStateOpen),
+                        // Open door to downtown
+                        LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardStateOpen)),
+                        // Check if less than 7
+                        LoadHalfImmediate(0x00100384, MMLEnums.Register.v0, fastForwardStateOpen),
+                        // lb a1 0x0(s0), check if equal 0
+                        LoadHalfImmediate(0x0010048C, MMLEnums.Register.v0, fastForwardStateOpen),
+                        // ?
+                        LoadHalfImmediate(0x0010054C, MMLEnums.Register.v1, fastForwardStateOpen),
+                        //// 0xBE378 bit checks, main area
+                        //LoadHalfImmediate(0x000198C8, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                        //LoadHalfImmediate(0x0001F910, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                        //LoadHalfImmediate(0x00100348, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                        //LoadHalfImmediate(0x00100678, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                        //LoadHalfImmediate(0x0010049C, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), //
+                        //LoadHalfImmediate(0x00100688, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                        // 0xBE378 bit checks, shop
+                        LoadHalfImmediate(0x001008B0, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01),
+                    ]; 
+                default:
+                    return [];
+            }
         }
 
         public static OpCode[] FastForwardDowntown(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasDefeatedBalkonGerat, bool hasTakenRedRefractor, bool hasUnlockedSubCities, bool hasActivatedUnlockSubCities, Dictionary<string, object> options)
@@ -397,7 +438,7 @@ namespace MMLAP
                     return [
                         // Multiple tiers here for checking 0xC1B62: 0 (also checks 0xBE378[5, 6]), 1-5, 6-7, 8-10, 11
                         // Writes to global value 0x800981E2, copied into 0xC1B7A
-                        LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState),
+                        //LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState),
                         // ?
                         LoadHalfImmediate(0x00106C24, MMLEnums.Register.v1, fastForwardState),
                         // In internal game loop
