@@ -419,7 +419,7 @@ namespace MMLAP
                     return [
                         // Multiple tiers here for checking 0xC1B62: 0 (also checks 0xBE378[5, 6]), 1-5, 6-7, 8-10, 11
                         // Writes to global value 0x800981E2, copied into 0xC1B7A
-                        LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState),
+                        //LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState),
                         // ?
                         LoadHalfImmediate(0x00106C24, MMLEnums.Register.v1, fastForwardState),
                         // In internal game loop
@@ -456,7 +456,7 @@ namespace MMLAP
                     return [
                         // Multiple tiers here for checking 0xC1B62: 0 (also checks 0xBE378[5, 6]), 1-5, 6-7, 8-10, 11
                         // Writes to global value 0x800981E2, copied into 0xC1B7A
-                        LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState),
+                        //LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState),
                         // ?
                         LoadHalfImmediate(0x00106C24, MMLEnums.Register.v1, fastForwardState),
                         // In internal game loop
