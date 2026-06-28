@@ -763,12 +763,14 @@ namespace MMLAP
         {
             byte fastForwardState = (byte)(hasActivatedEmergencySystem ? 0x07 : 0x07);
             byte disableFockeWulf = (byte)(hasDefeatedFockeWulf ? 0x01 : 0x00);
+            byte disableFockeWulfN = (byte)(hasDefeatedFockeWulf ? 0x00 : 0x01);
             return [
                 // Fixes cardon -> clozer cutscene and vice versa
                 LoadHalfImmediate(0x00100284, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x00100B48, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x00101A40, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x00101A50, MMLEnums.Register.v0, disableFockeWulf),
+                LoadHalfImmediate(0x00100E54, MMLEnums.Register.v0, disableFockeWulf),
                 LoadHalfImmediate(0x0001FDE8, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x00100E44, MMLEnums.Register.v1, fastForwardState),
                 //LoadHalfImmediate(0x001008DC, MMLEnums.Register.v1, fastForwardState),
