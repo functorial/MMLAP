@@ -15,12 +15,12 @@ namespace MMLAP.Helpers
 {
     public class LoopHelpers
     {
-        public static void CheckGoalCondition()
+        public static void CheckGoalCondition(bool hasSubmittedGoal, ArchipelagoClient? apClient)
         {
-            ArchipelagoClient? apClient = App.APClient;
             if (
-                App.HasSubmittedGoal ||
-                apClient?.Options == null ||
+                hasSubmittedGoal  ||
+                apClient == null ||
+                apClient.Options == null ||
                 !App.LocationManager_EnableLocationsCondition() ||
                 !apClient.Options.TryGetValue("goal", out var goal)
             )
@@ -193,12 +193,10 @@ namespace MMLAP.Helpers
             return processedLocationIds;
         }
 
-        public static List<int> UpdateTextBoxesForCompletedLocationsNonOdd(LevelData currentLevelData, ushort currentLevelID, ConcurrentStack<TextData> textDataToWriteStack, List<int> ignoreIds)
+        public static List<int> UpdateTextBoxesForCompletedLocationsNonOdd(ArchipelagoClient? apClient, LevelData currentLevelData, ushort currentLevelID, ConcurrentStack<TextData> textDataToWriteStack, List<int> ignoreIds)
         {
             // This function proactively overwrites text boxes for already-completed locations with Nothing item
             List<int> processedCompletedLocationIds = [];
-
-            ArchipelagoClient? apClient = App.APClient;
             if (
                 apClient?.CurrentSession == null ||
                 currentLevelData == null
@@ -247,9 +245,8 @@ namespace MMLAP.Helpers
             return processedCompletedLocationIds;
         }
 
-        public static void HandleLoadingFastCodeWrites(LevelData currentLevelData, byte currentProgressionCounter)
+        public static void HandleLoadingFastCodeWrites(ArchipelagoClient apClient, bool hasSubmittedGoal, LevelData currentLevelData, byte currentProgressionCounter)
         {
-            var apClient = App.APClient;
             if (apClient == null)
             {
                 return;
@@ -267,8 +264,7 @@ namespace MMLAP.Helpers
                 case var data when data.AreaName == "Cardon Forest (Flutter Fixed)":
                     bool hasDefeatedJunoFlutterFixed = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno);
                     bool hasWatchedFlutterFixFromJunoCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedFlutterFixFromJunoCutscene);
-                    bool hasCompletedGoal = App.HasSubmittedGoal;
-                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(currentProgressionCounter, hasDefeatedJunoFlutterFixed, hasWatchedFlutterFixFromJunoCutscene, hasCompletedGoal));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCardonForestFlutterFixed(currentProgressionCounter, hasDefeatedJunoFlutterFixed, hasWatchedFlutterFixFromJunoCutscene, hasSubmittedGoal));
                     if (
                         MemoryHelpers.ReadAddressDataBit(Addresses.HasFinishedWatchingJunoDefeatCutscene) &&
                         !MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedFlutterFixFromJunoCutscene)
@@ -948,9 +944,13 @@ namespace MMLAP.Helpers
         //    Memory.WriteByte(0xC4C4C, 0x02);
         //}
 
-        public static void SyncSyntheticLocations()
+        public static void SyncSyntheticLocations(ArchipelagoClient? apClient)
         {
-            IReadOnlyCollection<long>? allLocationsChecked = App.APClient?.CurrentSession?.Locations?.AllLocationsChecked;
+            if (apClient == null)
+            {
+                return;
+            }
+            IReadOnlyCollection<long>? allLocationsChecked = apClient.CurrentSession?.Locations?.AllLocationsChecked;
             if (allLocationsChecked == null)
             {
                 return;
@@ -1007,9 +1007,8 @@ namespace MMLAP.Helpers
             return total;
         }
 
-        public static void ReceivePreviouslyReceivedItems(IReadOnlyCollection<ItemInfo> allItemsReceived)
+        public static void ReceivePreviouslyReceivedItems(IReadOnlyCollection<ItemInfo> allItemsReceived, uint? apZennyCommittedToSave)
         {
-            uint? apZennyCommittedToSave = App.APZennyCommittedToSave;
             if (allItemsReceived.Count == 0)
             {
                 return;
@@ -1305,25 +1304,24 @@ namespace MMLAP.Helpers
             }
         }
 
-        public static void ShuffleStartingSpecialWeapon()
+        public static void ShuffleStartingSpecialWeapon(ArchipelagoClient? apClient, Dictionary<string, object>? slotData)
         {
-            var apClient = App.APClient;
-            var slotData = App.SlotData;
             if (
                 apClient == null ||
-                App.SlotData == null ||
-                !MemoryHelpers.ReadAddressDataBit(Addresses.SupportCarRnDFlag) || 
-                MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenshipLate) ||
+                slotData == null ||
                 !apClient.Options.TryGetValue("shuffleStartingSpecialWeapon", out var shuffleStartingSpecialWeapon) ||
                 int.Parse(shuffleStartingSpecialWeapon.ToString()) != 1 ||
-                !slotData.TryGetValue("startingSpecialWeapon", out var startingSpecialWeapon)
+                !slotData.TryGetValue("startingSpecialWeapon", out var startingSpecialWeapon) ||
+                !MemoryHelpers.ReadAddressDataBit(Addresses.SupportCarRnDFlag) || 
+                MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedCitizenshipLate)
             )
             {
                 return;
             }
             MemoryHelpers.WriteAddressDataBit(Addresses.HasSplashMine, false);
             byte offset = byte.Parse(startingSpecialWeapon.ToString());
-            Memory.WriteByte((ulong)(0xBE410 + (offset >> 3)), (byte)(7 - (offset % 8)));
+            Memory.WriteBit((ulong)(0xBE410 + (offset >> 3)), 7 - (offset % 8), true);
+            Log.Logger.Information($"Wrote weapon {startingSpecialWeapon}:  {(uint)(0xBE410 + (offset >> 3)):X04}[{(byte)(7 - (offset % 8))}]");
             //Memory.WriteByte(Addresses.SpecialWeaponEquippedActual.Address, offset);
             //Memory.WriteByte(Addresses.SpecialWeaponEquippedLoadout.Address, offset);
             MemoryHelpers.WriteCode(Cheats.AlterStartingSpecialWeapon(offset));

@@ -64,7 +64,7 @@ public partial class App : Application
     private static ConcurrentStack<TextData> TextDataToWriteStack { get; set; } = new();
     private static ushort? PreviousLevelID_Slow { get; set; }
     private static ushort? PreviousLevelID_Fast { get; set; }
-    private static byte CurrentProgressionCounter { get; set; } = 0x0;
+    private static byte CurrentProgressionCounter_Slow { get; set; } = 0x0;
     private static ConcurrentDictionary<string, byte> VisitedAreaNames { get; set; } = new();
     private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;
@@ -89,7 +89,7 @@ public partial class App : Application
         PlayerName = null;
         PreviousLevelID_Slow = null;
         PreviousLevelID_Fast = null;
-        CurrentProgressionCounter = 0x0;
+        CurrentProgressionCounter_Slow = 0x0;
         IsManagingLevelChange = false;
         IsPreviouslyInTitleScreen = false;
         IsLoadingIntoGame = false;
@@ -444,7 +444,7 @@ public partial class App : Application
 
             Log.Logger.Information("===== DEBUG INFO =====");
             Log.Logger.Information($"Loop Performance: SlowGameLoop={slowLoopStats}, FastGameLoop={fastLoopStats}");
-            Log.Logger.Information($"Progression: tracked=0x{CurrentProgressionCounter:X2}, memory=0x{memoryProgressionCounter:X2}");
+            Log.Logger.Information($"Progression: tracked=0x{CurrentProgressionCounter_Slow:X2}, memory=0x{memoryProgressionCounter:X2}");
             Log.Logger.Information($"Level: 0x{currentLevelID:X4} ({currentLevelName})");
             Log.Logger.Information($"Connection: connected={APClient?.IsConnected ?? false}, loggedIn={APClient?.IsLoggedIn ?? false}, inGameSyncInitialized={IsInGameSyncInitialized}");
             Log.Logger.Information($"Loop state: isManagingLevelChange={IsManagingLevelChange}, isLoadingIntoGame={IsLoadingIntoGame}, previousLevelIDSlow={(PreviousLevelID_Slow != null ? $"0x{PreviousLevelID_Slow.Value:X4}" : "null")}, previousLevelIDFast={(PreviousLevelID_Fast != null ? $"0x{PreviousLevelID_Fast.Value:X4}" : "null")}");
@@ -904,6 +904,7 @@ public partial class App : Application
         try
         {
             ArchipelagoClient? apClient = APClient;
+            bool hasSubmittedGoal = HasSubmittedGoal;
             if (
                 apClient?.ItemManager != null &&
                 apClient?.CurrentSession != null
@@ -917,7 +918,7 @@ public partial class App : Application
                 }
                 if (WasSaving && !isSaving)
                 {
-                    App.APZennyCommittedToSave = LoopHelpers.GetReceivedAPZennyTotal(apClient.CurrentSession.Items.AllItemsReceived);
+                    APZennyCommittedToSave = LoopHelpers.GetReceivedAPZennyTotal(apClient.CurrentSession.Items.AllItemsReceived);
                     APClient?.CurrentSession.DataStorage[Scope.Slot, "mml_ap_zenny_committed"] = APZennyCommittedToSave;
                 }
                 WasSaving = isSaving;
@@ -935,7 +936,7 @@ public partial class App : Application
                     )
                     {
                         // Write fast forward area cheats which do things like unlock doors and prevent black screens
-                        LoopHelpers.HandleLoadingFastCodeWrites(currentLevelData, CurrentProgressionCounter);
+                        LoopHelpers.HandleLoadingFastCodeWrites(apClient, hasSubmittedGoal, currentLevelData, CurrentProgressionCounter_Slow);
                         // Handle text and possible overflows from locations that give items during text windows Mine Parts Kit from the rescue shop owner's husband location
                         //LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack); // Moving to slowgameloop
                         // Fix cutscene
@@ -994,6 +995,7 @@ public partial class App : Application
         try
         {
             ArchipelagoClient? apClient = APClient;
+            bool hasSubmittedGoal = HasSubmittedGoal;
             if (
                 apClient?.ItemManager != null &&
                 apClient?.CurrentSession != null
@@ -1006,10 +1008,11 @@ public partial class App : Application
                 )
                 {
                     // Task 1: Read useful memory
-                    CurrentProgressionCounter = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
-                    LoopHelpers.CheckGoalCondition();
-                    LoopHelpers.ShuffleStartingSpecialWeapon();
+                    CurrentProgressionCounter_Slow = Memory.ReadByte(Addresses.CurrentProgressionCounter.Address);
+                    LoopHelpers.CheckGoalCondition(hasSubmittedGoal, apClient);
 
+                    var slotData = SlotData;
+                    LoopHelpers.ShuffleStartingSpecialWeapon(apClient, SlotData);
 
                     ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
                     if (currentLevelID != PreviousLevelID_Slow)
@@ -1039,7 +1042,7 @@ public partial class App : Application
                             if (IsManagingLevelChange)
                             {
                                 // Do slow memory writes, typically ones that are low priority or cause problems in fast write
-                                LoopHelpers.HandleSlowCodeWrites(currentLevelData, CurrentProgressionCounter);
+                                LoopHelpers.HandleSlowCodeWrites(currentLevelData, CurrentProgressionCounter_Slow);
                                 LoopHelpers.HandleAreaExitLocks(currentLevelData, apClient.Options);
                                 LoopHelpers.HandleFlutterFixedBrokenDistinction(currentLevelData);
                                 LoopHelpers.HandleOddPails(currentLevelData);
@@ -1057,7 +1060,7 @@ public partial class App : Application
                             {
                                 List<long>? completedLocationIds = apClient?.CurrentSession?.Locations?.AllLocationsChecked?.ToList();
                                 List<int> processedOddLocationIds = LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack, completedLocationIds);
-                                List<int> processedCompletedLocationIds = LoopHelpers.UpdateTextBoxesForCompletedLocationsNonOdd(currentLevelData, currentLevelID, TextDataToWriteStack, processedOddLocationIds);
+                                List<int> processedCompletedLocationIds = LoopHelpers.UpdateTextBoxesForCompletedLocationsNonOdd(apClient, currentLevelData, currentLevelID, TextDataToWriteStack, processedOddLocationIds);
                                 while (TextDataToWriteStack.TryPop(out var overwrittenTextData))
                                 {
                                     if (overwrittenTextData.SourceLevelId == null || overwrittenTextData.SourceLevelId == currentLevelID)
@@ -1091,13 +1094,14 @@ public partial class App : Application
                     LocationManager_EnableLocationsCondition()
                 )
                 {
-                    LoopHelpers.SyncSyntheticLocations();
+                    LoopHelpers.SyncSyntheticLocations(apClient);
 
                     IReadOnlyCollection<long> allLocationsChecked = apClient.CurrentSession.Locations.AllLocationsChecked;
                     LoopHelpers.RecheckPreviouslyCheckedContainerLocations(allLocationsChecked);
 
                     IReadOnlyCollection<ItemInfo> allItemsReceived = apClient.CurrentSession.Items.AllItemsReceived;
-                    LoopHelpers.ReceivePreviouslyReceivedItems(allItemsReceived);
+                    var apZennyCommittedToSave = APZennyCommittedToSave;
+                    LoopHelpers.ReceivePreviouslyReceivedItems(allItemsReceived, apZennyCommittedToSave);
 
                     IsLoadingIntoGame = false;
                 }

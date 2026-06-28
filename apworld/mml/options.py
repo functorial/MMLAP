@@ -22,6 +22,7 @@ class Goal(Choice):
 
 class ShuffleCitizensCard(Choice):
     """
+    The Citizen's Card controls access to Kattelox city.
     Vanilla: The Citizen's Card is obtained normally.
     Randomized: Shuffles the Citizen's Card and location into the pool. Not recommended for large multiworlds.
     Open: The Citizen's Card does nothing and the doors to the city are always open.
@@ -37,6 +38,7 @@ class ShuffleCitizensCard(Choice):
 
 class ShuffleClassBLicense(Choice):
     """
+    The Class B License controls access to the Underground Ruins.
     Vanilla: The Class B License is obtained normally.
     Randomized: Shuffles the Class B License and location into the pool.
     Open: The Class B License does nothing and the doors to the Underground Ruins are always open.
@@ -52,6 +54,7 @@ class ShuffleClassBLicense(Choice):
 
 class ShuffleClassALicense(Choice):
     """
+    The Class A License controls access to the three Sub-Gates.
     Vanilla: The Class A License is obtained normally.
     Randomized: Shuffles the Class A License and location into the pool.
     Open: The Class A License does nothing and the doors to the Sub-Gates are always open.
