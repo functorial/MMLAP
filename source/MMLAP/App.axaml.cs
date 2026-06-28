@@ -1022,12 +1022,14 @@ public partial class App : Application
                     {
                         VisitedAreaNames.TryAdd(currentLevelData.AreaName, 0);
 
-                        bool isSafeToManageAndRestoreMemory =
-                            !MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag) &&
-                            !MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag) &&
-                            !MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag);
+                        //bool isSafeToManageAndRestoreMemory =
+                        //    !MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag) &&
+                        //    !MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag) &&
+                        //    !MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag);
 
-                        if (isSafeToManageAndRestoreMemory)
+                        //if (isSafeToManageAndRestoreMemory)
+                        // Gonna try this instead since i think we do want to write when camera is altered in some cases.
+                        if (!MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag))
                         {
                             // Remove items that may be given from skipping cutscenes
                             LoopHelpers.HandleCutsceneSkipItemObtains(currentLevelData);
