@@ -59,7 +59,7 @@ public partial class App : Application
     private static Timer? FastGameLoopTimer { get; set; }
     private static int IsFastLoopRunning = 0;
     private static OverlayLoggingScope OverlayScope { get; set; } = OverlayLoggingScope.Local;
-    private static IOverlayService? SharedOverlayService { get; set; } = null;
+    //private static IOverlayService? SharedOverlayService { get; set; } = null;
     private static Timer? StartMMLTimer { get; set; }
     private static ConcurrentStack<TextData> TextDataToWriteStack { get; set; } = new();
     private static ushort? PreviousLevelID_Slow { get; set; }
@@ -246,7 +246,7 @@ public partial class App : Application
                 Log.Logger.Information("!goal - Check your current goal.");
                 Log.Logger.Information("!debug - Print debugging information about current game and client state.");
                 Log.Logger.Information("!options - Print your loaded AP options.");
-                Log.Logger.Information("!overlay <off|local|global|status> - Set overlay logging scope.");
+                //Log.Logger.Information("!overlay <off|local|global|status> - Set overlay logging scope.");
                 break;
             case "!reload":
                 Log.Logger.Information($"> {a.Command}");
@@ -591,16 +591,17 @@ public partial class App : Application
         APClient.GameDisconnected += Client_GameDisconnected;
         APClient.MessageReceived += Client_MessageReceived;
 
-        bool isFirstOverlayAttach = SharedOverlayService == null;
-        SharedOverlayService ??= new WindowsOverlayService(new OverlayOptions
-        {
-            XOffset = 30,
-            YOffset = 100,
-            FontSize = 24,
-            DefaultTextColor = Archipelago.Core.Util.Overlay.Color.Yellow,
-            FadeDuration = 10.0f
-        });
-        APClient.IntializeOverlayService(new NonDisposingOverlayProxy(SharedOverlayService, isFirstOverlayAttach));
+        // Initialize overlay service
+        //bool isFirstOverlayAttach = SharedOverlayService == null;
+        //SharedOverlayService ??= new WindowsOverlayService(new OverlayOptions
+        //{
+        //    XOffset = 30,
+        //    YOffset = 100,
+        //    FontSize = 24,
+        //    DefaultTextColor = Archipelago.Core.Util.Overlay.Color.Yellow,
+        //    FadeDuration = 10.0f
+        //});
+        //APClient.IntializeOverlayService(new NonDisposingOverlayProxy(SharedOverlayService, isFirstOverlayAttach));
 
         // Connect to host and log in to slot => init Options, ItemManager, LocationManager
         string host = (e.Host ?? "localhost:38281").Trim();
@@ -1230,7 +1231,7 @@ public partial class App : Application
             LogHint(e.Message);
         }
         // Try to send to overlay if it's an ItemSend message matching the current scope
-        TryOverlayMessage(e.Message);
+        //TryOverlayMessage(e.Message);
         Log.Logger.Information(JsonConvert.SerializeObject(e.Message));
         return;
     }
