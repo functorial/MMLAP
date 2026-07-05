@@ -339,7 +339,8 @@ namespace MMLAP.Helpers
                     bool hasEarnedClassBLicenseApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
                     bool hasEarnedClassALicenseApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
                     bool hasShownRollRedRefractorApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusbandApple, hasEarnedClassBLicenseApple, hasEarnedClassALicenseApple, hasShownRollRedRefractorApple, apClient.Options));
+                    bool hasStartedTronDogCutsceneApple = MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedTronDogCutscene);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardAppleMarket(currentProgressionCounter, hasRescuedShopOwnersHusbandApple, hasEarnedClassBLicenseApple, hasEarnedClassALicenseApple, hasShownRollRedRefractorApple, hasStartedTronDogCutsceneApple, apClient.Options));
                     break;
 
                 case var data when data.AreaName == "Underground Ruins":
@@ -1321,9 +1322,6 @@ namespace MMLAP.Helpers
             MemoryHelpers.WriteAddressDataBit(Addresses.HasSplashMine, false);
             byte offset = byte.Parse(startingSpecialWeapon.ToString());
             Memory.WriteBit((ulong)(0xBE410 + (offset >> 3)), 7 - (offset % 8), true);
-            Log.Logger.Information($"Wrote weapon {startingSpecialWeapon}:  {(uint)(0xBE410 + (offset >> 3)):X04}[{(byte)(7 - (offset % 8))}]");
-            //Memory.WriteByte(Addresses.SpecialWeaponEquippedActual.Address, offset);
-            //Memory.WriteByte(Addresses.SpecialWeaponEquippedLoadout.Address, offset);
             MemoryHelpers.WriteCode(Cheats.AlterStartingSpecialWeapon(offset));
         }
     }

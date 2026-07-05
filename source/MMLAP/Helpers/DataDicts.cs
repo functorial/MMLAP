@@ -276,6 +276,7 @@ namespace MMLAP.Helpers
             { 0x0602, new("City Hall",                      "Outdoors (no music, combat)",      0x06, 0x02) },
             { 0x0603, new("City Hall",                      "Teisel's Room",                    0x06, 0x03) },
             { 0x0604, new("City Hall",                      "Amelia's Office (wrecked)",        0x06, 0x04) },
+            { 0x0605, new("City Hall",                      "Gesellschaft view",                0x06, 0x05) },
             { 0x0700, new("Gesellschaft Interior",          "Empty?",                           0x07, 0x00) },
             { 0x0701, new("Gesellschaft Interior",          "Engine Room",                      0x07, 0x01) },
             { 0x0702, new("Gesellschaft Interior",          "Hallway",                          0x07, 0x02) },

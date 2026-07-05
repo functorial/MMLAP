@@ -64,7 +64,7 @@ public partial class App : Application
     private static ConcurrentStack<TextData> TextDataToWriteStack { get; set; } = new();
     private static ushort? PreviousLevelID_Slow { get; set; }
     private static ushort? PreviousLevelID_Fast { get; set; }
-    private static byte CurrentProgressionCounter_Slow { get; set; } = 0x0;
+    public static byte CurrentProgressionCounter_Slow { get; set; } = 0x0;
     private static ConcurrentDictionary<string, byte> VisitedAreaNames { get; set; } = new();
     private static bool IsManagingLevelChange { get; set; } = false;
     private static bool IsPreviouslyInTitleScreen { get; set; } = false;

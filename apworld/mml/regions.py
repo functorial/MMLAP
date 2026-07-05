@@ -293,21 +293,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
             can_fix_support_car(),
         ])
 
-    # Current Assumptions:
-    # - Yellow Refractor = No requirement b/c cardon keys aren't randomized
-    # - Balkon Gerat defeated = No req b/c +2 range upgrade in shop isn't randomized
-    # - Red Refractor = Lake Jyun Requirements = Jump springs & Lake Jyun keys
-    # - Sub City = Lake Jyun and Clozer Requirements = Jump springs & Lake Jyun keys & Clozer keys (& Explosive ?? Not sure)
-    # - Clozer sub-gate is not accessible from ruins besides (Gorubesshu Corridor), the other doors dont work
-    # - You can always get to Roll to create stuff from where you obtain stuff
-    # - You can always farm up as much zenny as you need
-    # - You can always buy shop items
-    # - You can always repair the damaged buildings
-    # - You can always "complete a quest" to progress things like hideout, repairing buildings, etc.
-    # - A bunch of logic not included because it is not randomized in (e.g. items not randomized like Citizen Card, door unlocks, etc.)
-    #
-    # Known soft-locks:
-    # - Can get stuck in Old City warehouse before the Bruno fight is enabled.
+    # The current full logic model
+    # Options may pop locations from model, see locations.create_regular_locations
     regionDataDict = {
         "Ocean Tower - Room 1": 
             GameRegionData(
