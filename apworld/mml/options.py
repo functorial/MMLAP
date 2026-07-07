@@ -24,7 +24,7 @@ class ShuffleCitizensCard(Choice):
     """
     The Citizen's Card controls access to Kattelox city.
     Vanilla: The Citizen's Card is obtained normally.
-    Randomized: Shuffles the Citizen's Card and location into the pool. Not recommended for large multiworlds.
+    Randomized: Shuffles the Citizen's Card and location into the pool.
     Open: The Citizen's Card does nothing and the doors to the city are always open.
     """
 

@@ -181,26 +181,26 @@ def create_regular_locations(world: GameWorld) -> None:
         location_names_with_ids = get_location_names_with_ids(region_data.locationNameList)
 
         # Don't create the location for defeating Juno if the goal is to defeat Juno, since it will be handled as an event
-        if world.options.goal == world.options.goal.option_juno and region_name == "Main Gate - Juno Area (Boss)":
+        if world.options.goal.value == world.options.goal.option_juno and region_name == "Main Gate - Juno Area (Boss)":
             location_names_with_ids.pop("Juno defeated", None)
 
         # If this option is off then the player will get the Splash Arm special weapon as in vanilla game
-        if not world.options.shuffleStartingSpecialWeapon and region_name == "Apple Market - Junk Shop (Turn-in Rescue)":
+        if not world.options.shuffleStartingSpecialWeapon.value and region_name == "Apple Market - Junk Shop (Turn-in Rescue)":
             location_names_with_ids.pop("Rescue the shop owner's husband", None)
 
-        if not world.options.shuffleCitizensCard and region_name == "Cardon Forest (Get Citizen's Card)":
+        if world.options.shuffleCitizensCard.value in [world.options.shuffleCitizensCard.option_vanilla, world.options.shuffleCitizensCard.option_open] and region_name == "Cardon Forest (Get Citizen's Card)":
             location_names_with_ids.pop("Earn citizenship in Kattelox City", None)
         
-        if not world.options.shuffleClassBLicense and region_name == "City Hall - Amelia's Office (Get Class B License)":
+        if world.options.shuffleClassBLicense.value in [world.options.shuffleClassBLicense.option_vanilla, world.options.shuffleClassBLicense.option_open] and region_name == "City Hall - Amelia's Office (Get Class B License)":
             location_names_with_ids.pop("Earn the Class B License", None)
         
-        if not world.options.shuffleClassALicense and region_name == "City Hall - Amelia's Office (Get Class A License)":
+        if world.options.shuffleClassALicense.value in [world.options.shuffleClassALicense.option_vanilla, world.options.shuffleClassALicense.option_open] and region_name == "City Hall - Amelia's Office (Get Class A License)":
             location_names_with_ids.pop("Earn the Class A License", None)
 
-        if not world.options.shuffleMainGateUnlock and region_name == "Clozer Woods Sub-Gate - Control Room (Activate The Emergency System)":
+        if world.options.shuffleMainGateUnlock.value in [world.options.shuffleMainGateUnlock.option_vanilla, world.options.shuffleMainGateUnlock.option_open] and region_name == "Clozer Woods Sub-Gate - Control Room (Activate The Emergency System)":
             location_names_with_ids.pop("Activate the emergency system", None)
         
-        if not world.options.shuffleSubCitiesUnlock and region_name == "Main Gate - (Command Terminal)":
+        if world.options.shuffleSubCitiesUnlock.value in [world.options.shuffleSubCitiesUnlock.option_vanilla, world.options.shuffleSubCitiesUnlock.option_open] and region_name == "Main Gate - (Command Terminal)":
             location_names_with_ids.pop("Activate unlock sub-cities", None)
 
         region.add_locations(location_names_with_ids, GameLocation)

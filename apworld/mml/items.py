@@ -175,20 +175,20 @@ def create_all_items(world: GameWorld) -> None:
             case "Nothing":
                 add_count = 0 # 4
             case "Buster Max":
-                add_count = 1 if world.options.shuffleBusterMax else 0
+                add_count = 1 if world.options.shuffleBusterMax.value else 0
            #case "Mine Parts Kit":
             case "Splash Mine":
-                add_count = 1 if world.options.shuffleStartingSpecialWeapon else 0
+                add_count = 1 if world.options.shuffleStartingSpecialWeapon.value else 0
             case "Citizen's Card":
-                add_count = 1 if world.options.shuffleCitizensCard else 0
+                add_count = 1 if world.options.shuffleCitizensCard.value == world.options.shuffleCitizensCard.option_randomized else 0
             case "Class B License":
-                add_count = 1 if world.options.shuffleClassBLicense else 0
+                add_count = 1 if world.options.shuffleClassBLicense.value == world.options.shuffleClassBLicense.option_randomized else 0
             case "Class A License":
-                add_count = 1 if world.options.shuffleClassALicense else 0
+                add_count = 1 if world.options.shuffleClassALicense.value == world.options.shuffleClassALicense.option_randomized else 0
             case "Unlock Main Gate":
-                add_count = 1 if world.options.shuffleMainGateUnlock else 0
+                add_count = 1 if world.options.shuffleMainGateUnlock.value == world.options.shuffleMainGateUnlock.option_randomized else 0
             case "Unlock Sub-Cities":
-                add_count = 1 if world.options.shuffleSubCitiesUnlock else 0
+                add_count = 1 if world.options.shuffleSubCitiesUnlock.value == world.options.shuffleSubCitiesUnlock.option_randomized else 0
             case _:
                 add_count = 1
 
