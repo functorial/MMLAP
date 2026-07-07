@@ -188,7 +188,19 @@ namespace MMLAP.Helpers
                     Memory.WriteByteArray(0x00154737, rollInitiateEndingCutsceneText);
                     break;
 
-                default:
+                case var data when data.AreaName == "City Hall (Indoors)" && data.RoomName == "Inspector's Office":
+                    // Provide in game signal to player that the jump springs are required in logic to do the bomb quest
+                    List<byte[]> inspectorNeedsJumpSpringsTextArrs = [
+                        TextHelpers.EncodeSimpleString("Excuse me, MegaMan!\nWe need the help of someone\nwho can "),
+                        TextHelpers.AddTextColor(TextHelpers.EncodeSimpleString("Jump To High Places"), TextHelpers.textColorCool2),
+                        TextHelpers.EncodeSimpleString("."),
+                        TextHelpers.endWindow,
+                    ];
+                    byte[] inspectorNeedsJumpSpringsText = TextHelpers.ConcatArrayList(inspectorNeedsJumpSpringsTextArrs);
+                    Memory.WriteByteArray(0x154509, inspectorNeedsJumpSpringsText);
+                    break;
+
+				default:
                     break;
             }
             return processedLocationIds;

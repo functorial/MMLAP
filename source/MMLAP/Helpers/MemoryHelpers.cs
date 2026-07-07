@@ -66,14 +66,14 @@ namespace MMLAP.Helpers
             return Memory.WriteBit(addressData.Address, addressData.BitNumber.Value, value);
         }
 
-        // Used for [jal 0x0001da58 || addiv a0, zero, BitsFromBE378(addressData)] bit checks
-        public static short? BitsFromBE378(AddressData? addressData)
+        // Used for [jal 0x0001da58 || addiv a0, zero, BitOffsetFromBE378(addressData)] bit checks
+        public static short? BitOffsetFromBE378(AddressData? addressData)
         {
-            if(addressData == null || addressData.BitNumber == null)
+            if(addressData == null)
             {
                 return null;
             }
-            return (short)((addressData.Address - 0xBE378) * 8 + (7 - addressData.BitNumber));
+            return (short)((addressData.Address - 0xBE378) * 8 + (7 - (addressData.BitNumber??0)));
         }
     }
 }

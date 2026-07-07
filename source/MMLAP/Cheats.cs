@@ -633,7 +633,7 @@ namespace MMLAP
         {
             byte fastForwardState = HasStartedMainGateOpenCutscene ? Math.Max((byte)0x08, currentProgressionCounter) :
                                     Math.Max((byte)0x02, currentProgressionCounter);
-            short jumpSpringsBit = MemoryHelpers.BitsFromBE378(DataDicts.ItemDataDict[0x026C].InventoryAddressData) ?? 0x00;
+            short jumpSpringsBit = MemoryHelpers.BitOffsetFromBE378(DataDicts.ItemDataDict[0x0221].InventoryAddressData) ?? 0x00;
             return [
                 // Checks < 8
                 LoadHalfImmediate(0x0001FCE8, MMLEnums.Register.v1, fastForwardState),
@@ -643,7 +643,7 @@ namespace MMLAP
                 LoadHalfImmediate(0x001002B4, MMLEnums.Register.v1, fastForwardState),
                 // Check HasTakenYellowRefractor @ talking to inspector
                 //LoadHalfImmediate(0x001047A0, MMLEnums.Register.v0, 0x01), // Remove check entirely
-                LoadHalfImmediate(0x001047A0, MMLEnums.Register.a0, jumpSpringsBit), // Replace with jump springs check
+                LoadHalfImmediate(0x001047A4, MMLEnums.Register.a0, jumpSpringsBit), // Replace with jump springs check
             ];
         }
 
