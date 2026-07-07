@@ -1923,7 +1923,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
         "Uptown Sub-City - City": 
             GameRegionData(
                 [
-
+                    "Gai-nee Tooren defeated",
                 ],
                 [
                     ExitData("Uptown"),

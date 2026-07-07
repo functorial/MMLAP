@@ -157,7 +157,7 @@ LOCATION_DATA_DICT = {
     "Earn the Class A License"                                      : LocationData(132, LocationCategory.QUEST,     False),
     "Activate the emergency system"                                 : LocationData(133, LocationCategory.QUEST,     False),
     "Activate unlock sub-cities"                                    : LocationData(134, LocationCategory.QUEST,     False),
-   #"Gai-nee Tooren defeated"                                       : LocationData(135, LocationCategory.COMBAT,    False),
+    "Gai-nee Tooren defeated"                                       : LocationData(135, LocationCategory.COMBAT,    False),
     "Juno defeated"                                                 : LocationData(136, LocationCategory.COMBAT,    False),
 }
 
@@ -227,6 +227,7 @@ def create_events(world: GameWorld) -> None:
                     and state.can_reach_location("Garudoriten defeated", world.player)
                     and state.can_reach_location("Karumuna Bash Trio defeated", world.player)
                     and state.can_reach_location("Focke-Wulf defeated", world.player)
+                    and state.can_reach_location("Gai-nee Tooren defeated", world.player)
                     and state.can_reach_location("Theodore Bruno defeated", world.player)
                     and state.can_reach_location("Juno defeated", world.player)
                 )

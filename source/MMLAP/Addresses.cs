@@ -84,6 +84,7 @@ namespace MMLAP
         public static readonly AddressData HasWatchedMainGateOpenCutscene                 = new(0xBE3EE, 4, null);
         public static readonly AddressData HasDefeatedFockeWulf                           = new(0xBE37D, 5, null);
         public static readonly AddressData HasActivatedUnlockSubCities                    = new(0xBE382, 1, null);
+        public static readonly AddressData HasDefeatedGaiNeeTooren                        = new(0xBE386, 6, null);
         public static readonly AddressData HasDefeatedTheodoreBruno                       = new(0xBE382, 5, null);
         public static readonly AddressData HasDefeatedJuno                                = new(0xBE385, 3, null);
         public static readonly AddressData HasFinishedWatchingJunoDefeatCutscene          = new(0xBE3B7, 0, null);

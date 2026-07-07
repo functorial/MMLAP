@@ -723,7 +723,7 @@ namespace MMLAP.Helpers
             { 132, new(132, "Earn the Class A License",                                      LocationCategory.Quest,     LevelDataDict[0x0601], ItemDataDict[0x022B], Addresses.HasEarnedClassALicense,  null, false, null,    0x154E1D) },
             { 133, new(133, "Activate the emergency system",                                 LocationCategory.Quest,     LevelDataDict[0x1302], ItemDataDict[0x0001], Addresses.HasStartedMainGateOpenCutscene,  null, false, null, null) },
             { 134, new(134, "Activate unlock sub-cities",                                    LocationCategory.Quest,     LevelDataDict[0x1A00], ItemDataDict[0x0002], Addresses.HasActivatedUnlockSubCities,  null, false, null,    null)     },
-          //{ 135, new(135, "Gai-nee Tooren defeated",                                       LocationCategory.Combat,    LevelDataDict[0x1D02], ItemDataDict[0x00FF], new AddressData(0xBE386, 6, null), null, false, null,    null)     },
+            { 135, new(135, "Gai-nee Tooren defeated",                                       LocationCategory.Combat,    LevelDataDict[0x1D02], ItemDataDict[0x00FF], Addresses.HasDefeatedGaiNeeTooren, null, false, null,    null)     },
             { 136, new(136, "Juno defeated",                                                 LocationCategory.Combat,    LevelDataDict[0x1A0F], ItemDataDict[0x00FF], Addresses.HasDefeatedJuno,         null, false, null,    null)     },
         };
         

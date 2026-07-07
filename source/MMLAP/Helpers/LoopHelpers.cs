@@ -39,7 +39,8 @@ namespace MMLAP.Helpers
                     MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedGarudoriten) &&
                     MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedKarumunaBashTrio) &&
                     MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedFockeWulf) &&
-                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedTheodoreBruno) &&
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedGaiNeeTooren) &&
+					MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedTheodoreBruno) &&
                     MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno),
                 _ => false
             };
