@@ -329,9 +329,9 @@ namespace MMLAP.Helpers
 
                 case var data when data.AreaName == "Outside Main Gate":
                     bool hasUnlockedMainGate = ItemHelpers.HasReceivedItem(0x0001);
-                    bool hasActivatedEmergencySystem = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
+                    bool HasStartedMainGateOpenCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedMainGateOpenCutscene);
                     bool hasWatchedMainGateOpenCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasWatchedMainGateOpenCutscene);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardOutsideMainGate(currentProgressionCounter, hasUnlockedMainGate, hasActivatedEmergencySystem, hasWatchedMainGateOpenCutscene, apClient.Options));
+                    MemoryHelpers.WriteCode(Cheats.FastForwardOutsideMainGate(currentProgressionCounter, hasUnlockedMainGate, HasStartedMainGateOpenCutscene, hasWatchedMainGateOpenCutscene, apClient.Options));
                     break;
 
                 case var data when data.AreaName == "Apple Market":
@@ -383,8 +383,8 @@ namespace MMLAP.Helpers
                 //    break;
 
                 case var data when data.AreaName == "City Hall (Indoors)":
-                    bool hasActivatedEmergencySystemCityHallIndoors = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
-                    MemoryHelpers.WriteCode(Cheats.FastForwardCityHallIndoors(currentProgressionCounter, hasActivatedEmergencySystemCityHallIndoors));
+                    bool HasStartedMainGateOpenCutsceneCityHallIndoors = MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedMainGateOpenCutscene);
+                    MemoryHelpers.WriteCode(Cheats.FastForwardCityHallIndoors(currentProgressionCounter, HasStartedMainGateOpenCutsceneCityHallIndoors));
                     break;
 
                 case var data when data.AreaName == "Yass Plains":

@@ -79,7 +79,8 @@ namespace MMLAP
         public static readonly AddressData HasShownRollRedRefractor                       = new(0xBE3B2, 6, null);
         public static readonly AddressData HasRedRefractor                                = new(0xBE41D, 6, null);
         public static readonly AddressData HasDefeatedKarumunaBashTrio                    = new(0xBE382, 4, null);
-        public static readonly AddressData HasActivatedEmergencySystem                    = new(0xBE380, 3, null);
+        public static readonly AddressData HasActivatedEmergencySystem                    = new(0xBE380, 3, null); // This bit is checked for starting Gesellschaft fight
+        public static readonly AddressData HasStartedMainGateOpenCutscene                 = new(0xBE380, 3, null);
         public static readonly AddressData HasWatchedMainGateOpenCutscene                 = new(0xBE3EE, 4, null);
         public static readonly AddressData HasDefeatedFockeWulf                           = new(0xBE37D, 5, null);
         public static readonly AddressData HasActivatedUnlockSubCities                    = new(0xBE382, 1, null);

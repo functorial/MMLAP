@@ -423,7 +423,7 @@ public partial class App : Application
             bool hasDefeatedBalkonGerat = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
             bool hasTakenRedRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
             bool hasShownRollRedRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
-            bool hasActivatedEmergencySystem = MemoryHelpers.ReadAddressDataBit(Addresses.HasActivatedEmergencySystem);
+            bool HasStartedMainGateOpenCutscene = MemoryHelpers.ReadAddressDataBit(Addresses.HasStartedMainGateOpenCutscene);
             bool hasDefeatedJuno = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedJuno);
             bool hasUnlockedMainGate = ItemHelpers.HasReceivedItem(0x0001);
             bool hasUnlockedSubCities = ItemHelpers.HasReceivedItem(0x0002);
@@ -459,7 +459,7 @@ public partial class App : Application
             Log.Logger.Information($"- hasDefeatedBonBonne={hasDefeatedBonBonne}, hasCompletedCardonTankEvent={hasCompletedCardonTankEvent}");
             Log.Logger.Information($"- hasTakenYellowRefractor={hasTakenYellowRefractor}, hasCalledRollToFixBoat={hasCalledRollToFixBoat}");
             Log.Logger.Information($"- hasDefeatedBalkonGerat={hasDefeatedBalkonGerat}, hasTakenRedRefractor={hasTakenRedRefractor}, hasShownRollRedRefractor={hasShownRollRedRefractor}");
-            Log.Logger.Information($"- hasActivatedEmergencySystem={hasActivatedEmergencySystem}, hasDefeatedJuno={hasDefeatedJuno}");
+            Log.Logger.Information($"- HasStartedMainGateOpenCutscene={HasStartedMainGateOpenCutscene}, hasDefeatedJuno={hasDefeatedJuno}");
             Log.Logger.Information($"- hasUnlockedMainGate={hasUnlockedMainGate}, hasUnlockedSubCities={hasUnlockedSubCities}");
 
             Log.Logger.Information($"Visited areas this session ({visitedAreas.Count}):\n{(visitedAreas.Count > 0 ? string.Join("\n- ", visitedAreas) : "None")}");

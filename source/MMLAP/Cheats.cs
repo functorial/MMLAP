@@ -629,9 +629,9 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardCityHallIndoors(byte currentProgressionCounter, bool hasActivatedEmergencySystem)
+        public static OpCode[] FastForwardCityHallIndoors(byte currentProgressionCounter, bool HasStartedMainGateOpenCutscene)
         {
-            byte fastForwardState = hasActivatedEmergencySystem ? Math.Max((byte)0x08, currentProgressionCounter) :
+            byte fastForwardState = HasStartedMainGateOpenCutscene ? Math.Max((byte)0x08, currentProgressionCounter) :
                                     Math.Max((byte)0x02, currentProgressionCounter);
             short jumpSpringsBit = MemoryHelpers.BitsFromBE378(DataDicts.ItemDataDict[0x026C].InventoryAddressData) ?? 0x00;
             return [
@@ -771,19 +771,22 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardFlutterToSubGateCutscene(bool hasActivatedEmergencySystem, bool hasDefeatedFockeWulf)
+        public static OpCode[] FastForwardFlutterToSubGateCutscene(bool HasActivatedEmergencySystem, bool hasDefeatedFockeWulf)
         {
-            byte fastForwardState = (byte)(hasActivatedEmergencySystem ? 0x07 : 0x07);
-            byte disableFockeWulf = (byte)(hasDefeatedFockeWulf ? 0x01 : 0x00);
+            byte fastForwardState = !hasDefeatedFockeWulf ? (byte)0x07 : (byte)0x08;
+            //byte disableFockeWulf = !HasStartedMainGateOpenCutscene ? (byte)0x01 : (byte)0x00;
             return [
                 // Fixes cardon -> clozer cutscene and vice versa
+                LoadHalfImmediate(0x0001FDE8, MMLEnums.Register.v1, fastForwardState),
+
                 LoadHalfImmediate(0x00100284, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x00100B48, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x00101A40, MMLEnums.Register.v1, fastForwardState),
-                LoadHalfImmediate(0x00101A50, MMLEnums.Register.v0, disableFockeWulf),
-                LoadHalfImmediate(0x00100E54, MMLEnums.Register.v0, disableFockeWulf),
-                LoadHalfImmediate(0x0001FDE8, MMLEnums.Register.v1, fastForwardState),
                 LoadHalfImmediate(0x00100E44, MMLEnums.Register.v1, fastForwardState),
+                
+                //LoadHalfImmediate(0x00101A50, MMLEnums.Register.v0, disableFockeWulf),
+                //LoadHalfImmediate(0x00100E54, MMLEnums.Register.v0, disableFockeWulf),
+
                 //LoadHalfImmediate(0x001008DC, MMLEnums.Register.v1, fastForwardState),
                 //LoadHalfImmediate(0x00100A3C, MMLEnums.Register.a1, fastForwardState),
                 //LoadHalfImmediate(0x00100A88, MMLEnums.Register.v1, fastForwardState),
@@ -799,7 +802,7 @@ namespace MMLAP
             ];
         }
 
-        public static OpCode[] FastForwardOutsideMainGate(byte currentProgressionCounter, bool hasUnlockedMainGate, bool hasActivatedEmergencySystem, bool hasWatchedMainGateOpenCutscene, Dictionary<string, object> options)
+        public static OpCode[] FastForwardOutsideMainGate(byte currentProgressionCounter, bool hasUnlockedMainGate, bool HasStartedMainGateOpenCutscene, bool hasWatchedMainGateOpenCutscene, Dictionary<string, object> options)
         {
             MMLEnums.RegionLockOption regionLockOption;
             if (options.TryGetValue("shuffleMainGateUnlock", out var shuffleMainGateUnlockOption))
@@ -810,12 +813,12 @@ namespace MMLAP
             {
                 regionLockOption = MMLEnums.RegionLockOption.Vanilla;
             }
-            bool isInCutscene = hasActivatedEmergencySystem && !hasWatchedMainGateOpenCutscene;
+            bool isInCutscene = HasStartedMainGateOpenCutscene && !hasWatchedMainGateOpenCutscene;
             switch (regionLockOption)
             {
                 case MMLEnums.RegionLockOption.Vanilla:
                     byte fastForwardStateVanilla = isInCutscene ? (byte)0x07 :
-                                            hasActivatedEmergencySystem ? Math.Min((byte)0x0A, Math.Max((byte)0x08, currentProgressionCounter)) :
+                                            HasStartedMainGateOpenCutscene ? Math.Min((byte)0x0A, Math.Max((byte)0x08, currentProgressionCounter)) :
                                             Math.Min((byte)0x07, currentProgressionCounter);
                     return [
                         // Prevents unlocking main gate cutscene black screen
