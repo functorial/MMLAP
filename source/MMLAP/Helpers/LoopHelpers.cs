@@ -103,10 +103,9 @@ namespace MMLAP.Helpers
                         !MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense)
                     )
                     {
-                        ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(131) ? DataDicts.ItemDataDict[0x00FF] : classBScoutedItemData;
                         uint textStartAddress = 0x154500;
                         uint textEndAddress = 0x154521;
-                        byte[] hasEarnedClassBLicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(itemDataToWrite, prefix: TextHelpers.newPage, guaranteedLength: textEndAddress - textStartAddress);
+                        byte[] hasEarnedClassBLicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(classBScoutedItemData, prefix: TextHelpers.newPage, guaranteedLength: textEndAddress - textStartAddress);
                         Memory.WriteByteArray(textStartAddress, hasEarnedClassBLicenseTextOverwrite);
                         processedLocationIds.Add(131);
                     }
@@ -117,9 +116,8 @@ namespace MMLAP.Helpers
                         !MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense)
                     )
                     {
-                        ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(132) ? DataDicts.ItemDataDict[0x00FF] : classAScoutedItemData;
                         uint textStartAddress = 0x154E1D;
-                        byte[] hasEarnedClassALicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(itemDataToWrite);
+                        byte[] hasEarnedClassALicenseTextOverwrite = TextHelpers.EncodeYouGotItemWindow(classAScoutedItemData);
                         Memory.WriteByteArray(textStartAddress, hasEarnedClassALicenseTextOverwrite);
                         processedLocationIds.Add(132);
                     }
@@ -151,13 +149,9 @@ namespace MMLAP.Helpers
                         //iraLocationData.TextBoxStartAddress != null
                     )
                     {
-                        byte[] writeTextArrSuffix = TextHelpers.ConcatArrayList([TextHelpers.breakCutscene, TextHelpers.endWindow]); 
+                        byte[] writeTextArrSuffix = TextHelpers.ConcatArrayList([TextHelpers.breakCutscene, TextHelpers.endWindow]); // Cutting the cutscene short to avoid overflow issues
                         byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData, suffix: writeTextArrSuffix);
                         Memory.WriteByteArray(iraLocationData.TextBoxStartAddress ?? 0, writeTextArr);
-
-						//ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(111) ? DataDicts.ItemDataDict[0x00FF] : iraScoutedItemData;
-						//textDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemDataToWrite)));
-						//processedLocationIds.Add(111);
 					}
                     break;
 
@@ -171,10 +165,9 @@ namespace MMLAP.Helpers
                         citizensCardLocationData.TextBoxStartAddress != null
                     )
                     {
-                        ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(130) ? DataDicts.ItemDataDict[0x00FF] : citizensCardScoutedItemData;
                         // Being careful about text box overflow. Replacing new text window from man -> "You got" with a newpage, which saves a bunch of bytes.
                         // Not bothering to restore this text
-                        byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(itemDataToWrite, prefix: TextHelpers.newPage, suffix: TextHelpers.endWindow); // suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x89, 0x00]);
+                        byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(citizensCardScoutedItemData, prefix: TextHelpers.newPage, suffix: TextHelpers.endWindow); // suffix: [0x9F, 0x99, 0x00, 0xBD, 0xA9, 0x89, 0x00]);
                         Memory.WriteByteArray(citizensCardLocationData.TextBoxStartAddress ?? 0, writeTextArr);
                         processedLocationIds.Add(130);
                     }
@@ -194,14 +187,17 @@ namespace MMLAP.Helpers
 
                 case var data when data.AreaName == "City Hall (Indoors)" && data.RoomName == "Inspector's Office":
                     // Provide in game signal to player that the jump springs are required in logic to do the bomb quest
-                    List<byte[]> inspectorNeedsJumpSpringsTextArrs = [
-                        TextHelpers.EncodeSimpleString("Excuse me, MegaMan!\nWe need the help of someone\nwho can "),
-                        TextHelpers.AddTextColor(TextHelpers.EncodeSimpleString("Jump To High Places"), TextHelpers.textColorCool2),
-                        TextHelpers.EncodeSimpleString("."),
-                        TextHelpers.endWindow,
-                    ];
-                    byte[] inspectorNeedsJumpSpringsText = TextHelpers.ConcatArrayList(inspectorNeedsJumpSpringsTextArrs);
-                    Memory.WriteByteArray(0x154509, inspectorNeedsJumpSpringsText);
+                    if (!MemoryHelpers.ReadAddressDataBit(Addresses.StartBombQuest))
+                    {
+					    List<byte[]> inspectorNeedsJumpSpringsTextArrs = [
+                            TextHelpers.EncodeSimpleString("Excuse me, MegaMan!\nWe need the help of someone\nwho can "),
+                            TextHelpers.AddTextColor(TextHelpers.EncodeSimpleString("Jump To High Places"), TextHelpers.textColorCool2),
+                            TextHelpers.EncodeSimpleString("."),
+                            TextHelpers.endWindow,
+                        ];
+                        byte[] inspectorNeedsJumpSpringsText = TextHelpers.ConcatArrayList(inspectorNeedsJumpSpringsTextArrs);
+                        Memory.WriteByteArray(0x154509, inspectorNeedsJumpSpringsText);
+                    }
                     break;
 
 				default:
@@ -644,10 +640,12 @@ namespace MMLAP.Helpers
             {
                 case MMLEnums.RegionLockActionType.Lock:
                     exitData.LockExit();
+                    //Log.Logger.Information($"Locking {exitName}");
                     break;
                 case MMLEnums.RegionLockActionType.Unlock:
                     exitData.UnlockExit();
-                    break;
+					//Log.Logger.Information($"Unlocking {exitName}");
+					break;
                 default:
                     break;
             }
@@ -667,9 +665,9 @@ namespace MMLAP.Helpers
                         (regionLockActionType == MMLEnums.RegionLockActionType.Unlock && !hasReceiveditem)
                     )
                     {
-                        return;
+						return;
                     }
-                    regionLockAction(currentLevelData, regionLockActionType);
+					regionLockAction(currentLevelData, regionLockActionType);
                     break;
                 case MMLEnums.RegionLockOption.Open:
                     if (regionLockActionType == MMLEnums.RegionLockActionType.Lock)
@@ -811,7 +809,7 @@ namespace MMLAP.Helpers
             if (options.TryGetValue("shuffleCitizensCard", out var shuffleCitizensCardOption))
             {
                 shuffleCitizensCard = (MMLEnums.RegionLockOption)int.Parse(shuffleCitizensCardOption.ToString());
-            }
+			}
             else
             {
                 shuffleCitizensCard = MMLEnums.RegionLockOption.Vanilla;

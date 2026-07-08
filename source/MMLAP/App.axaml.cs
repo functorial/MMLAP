@@ -1026,25 +1026,23 @@ public partial class App : Application
                     {
                         VisitedAreaNames.TryAdd(currentLevelData.AreaName, 0);
 
-                        //bool isSafeToManageAndRestoreMemory =
-                        //    !MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag) &&
-                        //    !MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag) &&
-                        //    !MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag);
-
-                        //if (isSafeToManageAndRestoreMemory)
-                        // Gonna try this instead since i think we do want to write when camera is altered in some cases.
-                        if (!MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag))
+                        bool isSafeToManageAndRestoreMemory =
+                            !MemoryHelpers.ReadAddressDataBit(Addresses.LoadingFlag) &&
+                            !MemoryHelpers.ReadAddressDataBit(Addresses.ScreenWipeFlag);// && // Screen wipe check is important for locking mechanism in some cases. Looks like door data is loaded slowly, after loading flag.
+                            //!MemoryHelpers.ReadAddressDataBit(Addresses.CameraAlteredFlag); // Gonna try this instead since i think we do want to write when camera is altered in some cases.
+                        if (isSafeToManageAndRestoreMemory)
                         {
                             // Remove items that may be given from skipping cutscenes
                             LoopHelpers.HandleCutsceneSkipItemObtains(currentLevelData);
+                            LoopHelpers.HandleAreaExitLocks(currentLevelData, apClient.Options); // Moving this up here since it seems to get missed for some doors when in IsManagingLevelChange. Consider moving other helpers
 
                             //Log.Logger.Information($"IsManagingLevelChange: {IsManagingLevelChange}");
-                            // Task 2.b: Do things when changing level like overwrite text, write code that isnt needed during loading, and locking doors
+                            // Task 2.b: Do things when changing level like overwrite text write code that isnt needed during loading
                             if (IsManagingLevelChange)
                             {
+                                
                                 // Do slow memory writes, typically ones that are low priority or cause problems in fast write
                                 LoopHelpers.HandleSlowCodeWrites(currentLevelData, CurrentProgressionCounter_Slow);
-                                LoopHelpers.HandleAreaExitLocks(currentLevelData, apClient.Options);
                                 LoopHelpers.HandleFlutterFixedBrokenDistinction(currentLevelData);
                                 LoopHelpers.HandleOddPails(currentLevelData);
                                 IsManagingLevelChange = false;
@@ -1056,11 +1054,11 @@ public partial class App : Application
                             // Part of this prevents vanilla items from being given when replaying old saves
                             // Task 3.b: Restore overwritten memory
                             // If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text (may not be used)
+                            List<long>? completedLocationIds = apClient?.CurrentSession?.Locations?.AllLocationsChecked?.ToList();
+                            List<int> processedOddLocationIds = LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack, completedLocationIds);
                             bool textBoxOpen = MemoryHelpers.ReadAddressDataBit(Addresses.TextBoxOpenFlag);
-                            if (true)//!textBoxOpen)
+                            if (!textBoxOpen)
                             {
-                                List<long>? completedLocationIds = apClient?.CurrentSession?.Locations?.AllLocationsChecked?.ToList();
-                                List<int> processedOddLocationIds = LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack, completedLocationIds);
                                 List<int> processedCompletedLocationIds = LoopHelpers.UpdateTextBoxesForCompletedLocationsNonOdd(apClient, currentLevelData, currentLevelID, TextDataToWriteStack, processedOddLocationIds);
                                 while (TextDataToWriteStack.TryPop(out var overwrittenTextData))
                                 {

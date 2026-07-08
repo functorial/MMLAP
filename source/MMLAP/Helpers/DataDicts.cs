@@ -422,7 +422,7 @@ namespace MMLAP.Helpers
             { 0x0000, new(ItemCategory.AP,            "AP Item",                          1, null, null                             , null        ) },
             { 0x0001, new(ItemCategory.Cheat,         "Unlock Main Gate",                 1, null, null                             , "Main Gate" ) },
             { 0x0002, new(ItemCategory.Cheat,         "Unlock Sub-Cities",                1, null, null                             , "Sub-Cities") },
-            { 0x002B, new(ItemCategory.SpecialWeapon, "Splash Mine",                      1, null, new AddressData(0xBE411, 4, null), null        ) },
+            { 0x002B, new(ItemCategory.SpecialWeapon, "Splash Mine",                      1, null, new AddressData(0xBE411, 4, null), "Splash Mine") },
             { 0x00FF, new(ItemCategory.Nothing,       "Nothing",                          1, 0xFF, null                             , null        ) },
             { 0x0200, new(ItemCategory.Buster,        "Blaster Unit Omega",               1, 0x00, null                             , null        ) },
             { 0x0201, new(ItemCategory.Buster,        "Sniper Unit Omega",                1, 0x01, null                             , null        ) },
