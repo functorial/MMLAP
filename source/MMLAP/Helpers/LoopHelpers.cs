@@ -143,18 +143,22 @@ namespace MMLAP.Helpers
 
                 case var data when data.AreaName == "Uptown" && data.RoomName == "Ira's Room":
                     // "Cure Ira's illness" location text handling
-                    if (
+					if (
                         scoutedLocationItemData != null &&
                         scoutedLocationItemData.TryGetValue(111, out var iraScoutedItemData) &&
-                        DataDicts.LocationDataDict.TryGetValue(111, out var iraLocationData) &&
-                        iraLocationData.Name == "Cure Ira's illness" &&
-                        iraLocationData.TextBoxStartAddress != null
+                        DataDicts.LocationDataDict.TryGetValue(111, out var iraLocationData) //&&
+                        //iraLocationData.Name == "Cure Ira's illness" &&
+                        //iraLocationData.TextBoxStartAddress != null
                     )
                     {
-                        ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(111) ? DataDicts.ItemDataDict[0x00FF] : iraScoutedItemData;
-                        textDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemDataToWrite)));
-                        processedLocationIds.Add(111);
-                    }
+                        byte[] writeTextArrSuffix = TextHelpers.ConcatArrayList([TextHelpers.breakCutscene, TextHelpers.endWindow]); 
+                        byte[] writeTextArr = TextHelpers.EncodeYouGotItemWindow(iraScoutedItemData, suffix: writeTextArrSuffix);
+                        Memory.WriteByteArray(iraLocationData.TextBoxStartAddress ?? 0, writeTextArr);
+
+						//ItemData itemDataToWrite = completedLocationIds != null && completedLocationIds.Contains(111) ? DataDicts.ItemDataDict[0x00FF] : iraScoutedItemData;
+						//textDataToWriteStack.Push(TextHelpers.OverwriteText(iraLocationData.TextBoxStartAddress ?? 0, TextHelpers.EncodeYouGotItemWindow(itemDataToWrite)));
+						//processedLocationIds.Add(111);
+					}
                     break;
 
                 case var data when data.AreaName == "Cardon Forest (Flutter Broken)" && data.RoomName == "City Entrance":

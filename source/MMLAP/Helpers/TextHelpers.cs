@@ -38,6 +38,7 @@ namespace MMLAP.Helpers
         public static readonly byte[] nothing = [0x22, 0x3F, 0x44, 0x37, 0x38, 0x3D, 0x36];
         public static readonly byte[] newPage = [0x9F, 0x87, 0x04, 0x00];
         public static readonly byte[] endWindow = [0x9F, 0xA9, 0x84, 0x04, 0x00];
+        public static readonly byte[] breakCutscene = [0x87, 0x1E, 0x00]; // Must go before endWindow
 
         public static readonly Dictionary<char, byte> charDict = new()
         {
@@ -185,9 +186,11 @@ namespace MMLAP.Helpers
             coloredEncoding[^1] = 0x00; // reset to default color 
             return coloredEncoding;
         }
-
+        
         public static byte[] PlaySound(byte soundCode)
         {
+            // NOTE: It also looks like 0x8F prefix can play sounds too
+
             // 0X81 to 0x84 = menu
             // 0x85 and 0x86 = "you got" sounds
             // 0x8A = stop all music

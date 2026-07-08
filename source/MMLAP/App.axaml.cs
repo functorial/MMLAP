@@ -1052,12 +1052,12 @@ public partial class App : Application
 
                             // Task 3: Do memory things regardless of level change
 
-                            // Task 3.a: Proactively overwrite text boxes for already-completed locations
-                            // This prevents vanilla items from being given when replaying old saves
+                            // Task 3.a: Proactively overwrite text boxes
+                            // Part of this prevents vanilla items from being given when replaying old saves
                             // Task 3.b: Restore overwritten memory
-                            // If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text
+                            // If we have overwritten text for a scouted location, check if the textbox is closed, and if so, restore the original text (may not be used)
                             bool textBoxOpen = MemoryHelpers.ReadAddressDataBit(Addresses.TextBoxOpenFlag);
-                            if (!textBoxOpen)
+                            if (true)//!textBoxOpen)
                             {
                                 List<long>? completedLocationIds = apClient?.CurrentSession?.Locations?.AllLocationsChecked?.ToList();
                                 List<int> processedOddLocationIds = LoopHelpers.HandleOddLocationText(currentLevelData, ScoutedLocationItemData, TextDataToWriteStack, completedLocationIds);
