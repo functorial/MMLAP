@@ -1,0 +1,907 @@
+﻿using Archipelago.Core.Util;
+using MMLAP.Helpers;
+using MMLAP.Models;
+using ReactiveUI;
+using System;
+using System.Collections.Generic;
+using static MMLAP.Models.MMLEnums;
+
+namespace MMLAP
+{
+    public class Cheats
+    {
+        // NOTE: Any address of the form 0x0001FXXX which is overwritten should be restored after leaving the area where an overwrite is needed.
+        public static readonly OpCode Restore1F830 = new(0x0001F830, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1F8E0 = new(0x0001F8E0, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FA08 = new(0x0001FA08, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FA9C = new(0x0001FA9C, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FB28 = new(0x0001FB28, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FB58 = new(0x0001FB58, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FB90 = new(0x0001FB90, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FBCC = new(0x0001FBCC, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FC54 = new(0x0001FC54, 0x80421B62); // lb v0, 0x1B62(v0) ?
+        public static readonly OpCode Restore1FCE8 = new(0x0001FCE8, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FCA8 = new(0x0001FCA8, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FD40 = new(0x0001FD40, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FD5C = new(0x0001FD5C, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FD94 = new(0x0001FD94, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FDB0 = new(0x0001FDB0, 0x80631B62); // lb v1, 0x1B62(v1)
+        public static readonly OpCode Restore1FDE8 = new(0x0001FDE8, 0x80631B62); // lb v1, 0x1B62(v1)
+
+        public static readonly OpCode RestoreFixBoatCallRoll = new(Addresses.FixBoatCallRollUtil.Address, 0x10400006); // beq v0, zero, 0x80055478
+
+        public static (string Name, OpCode Code)[] GetAllRestoreOpCodes()
+        {
+            return
+            [
+                (nameof(Restore1F830), Restore1F830),
+                (nameof(Restore1F8E0), Restore1F8E0),
+                (nameof(Restore1FA08), Restore1FA08),
+                (nameof(Restore1FA9C), Restore1FA9C),
+                (nameof(Restore1FB28), Restore1FB28),
+                (nameof(Restore1FB58), Restore1FB58),
+                (nameof(Restore1FB90), Restore1FB90),
+                (nameof(Restore1FBCC), Restore1FBCC),
+                (nameof(Restore1FC54), Restore1FC54),
+                (nameof(Restore1FCE8), Restore1FCE8),
+                (nameof(Restore1FCA8), Restore1FCA8),
+                (nameof(Restore1FD40), Restore1FD40),
+                (nameof(Restore1FD5C), Restore1FD5C),
+                (nameof(Restore1FD94), Restore1FD94),
+                (nameof(Restore1FDB0), Restore1FDB0),
+                (nameof(Restore1FDE8), Restore1FDE8),
+                (nameof(RestoreFixBoatCallRoll), RestoreFixBoatCallRoll),
+            ];
+        }
+
+        public static void Restore1FXXXWrites(LevelData currentLevelData)
+        {
+            string levelName = currentLevelData.AreaName + ": " + currentLevelData.RoomName;
+
+            // Restore branch statement noped in EnableFixBoatCallRoll code which is used elsewhere
+            if (
+                levelName != "Wily's Boat: Outside Boat Shop" &&
+                Memory.ReadUInt(Addresses.FixBoatCallRollUtil.Address) == 0x00000000 &&
+                (
+                    MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat) ||
+                    currentLevelData.AreaName != "Wily's Boat"
+                )
+            )
+            {
+                MemoryHelpers.WriteCode(RestoreFixBoatCallRoll);
+            }
+
+            if (
+                currentLevelData.AreaName != "Lake Jyun"
+            )
+            {
+                //Memory.Write(0x0001FBC8, 0x3C03800C);
+                MemoryHelpers.WriteCode(Restore1FBCC);
+            }
+
+            if (currentLevelData.AreaName != "Gesellschaft Interior")
+            {
+                MemoryHelpers.WriteCode(Restore1FB28);
+            }
+
+            if (currentLevelData.AreaName != "Uptown")
+            {
+                MemoryHelpers.WriteCode(Restore1FB58);
+            }
+
+            if (currentLevelData.AreaName != "Clozer Woods")
+            {
+                MemoryHelpers.WriteCode(Restore1FB90);
+            }
+
+            if (currentLevelData.AreaName != "Wily's Boat")
+            {
+                MemoryHelpers.WriteCode(Restore1FCA8);
+            }
+
+            if (currentLevelData.AreaName != "Yass Plains")
+            {
+                MemoryHelpers.WriteCode(Restore1FD40);
+                MemoryHelpers.WriteCode(Restore1FD5C);
+            }
+
+            if (currentLevelData.AreaName != "Clozer Woods With Bridge")
+            {
+                MemoryHelpers.WriteCode(Restore1FD94);
+                MemoryHelpers.WriteCode(Restore1FDB0);
+            }
+
+            if (currentLevelData.AreaName != "Cardon Forest (Flutter Fixed)" && currentLevelData.AreaName != "Flutter To Sub-Gate Cutscene")
+            {
+                MemoryHelpers.WriteCode(Restore1FDE8);
+            }
+
+            if (currentLevelData.AreaName != "Cardon Forest (Flutter Broken)")
+            {
+                MemoryHelpers.WriteCode(Restore1F830);
+            }
+
+            if (currentLevelData.AreaName != "Apple Market")
+            {
+                MemoryHelpers.WriteCode(Restore1F8E0);
+            }
+
+            if (currentLevelData.AreaName != "City Hall")
+            {
+                MemoryHelpers.WriteCode(Restore1FA9C);
+            }
+
+            if (currentLevelData.AreaName != "City Hall (Indoors)")
+            {
+                MemoryHelpers.WriteCode(Restore1FCE8);
+            }
+
+            if (currentLevelData.AreaName != "Downtown")
+            {
+                // Commenting this out to hopefully avoid some crashes entering downtown
+                //MemoryHelpers.WriteCode(Restore1FA08);
+                bool hasEarnedClassBLicense = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassBLicense);
+                bool hasDefeatedBalkonGerat = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
+                bool hasTakenRedRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
+                byte currentProgressionCounter = App.CurrentProgressionCounter_Slow;
+
+                byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    hasDefeatedBalkonGerat || hasTakenRedRefractor ? (byte)0x06 :
+                                    currentProgressionCounter;
+                OpCode code = LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState);
+                MemoryHelpers.WriteCode(code);
+            }
+
+            if (currentLevelData.AreaName != "Outside Cardon Forest Sub-Gate")
+            {
+                //MemoryHelpers.WriteCode(Restore1FC54); // Actually don't want to restore this one...
+                // The game seems to crash if your progression counter is too high and trying to load into the tank with our fast forwarding
+                // So actually want to pre-load this before loading
+                bool hasDefeatedBonBonne = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBonBonne);
+                bool hasCompletedCardonTankEvent = MemoryHelpers.ReadAddressDataBit(Addresses.HasCompletedCardonTankEvent);
+                byte fastForwardState = !hasDefeatedBonBonne ? (byte)0x00 :
+                                        !hasCompletedCardonTankEvent ? (byte)0x03 :
+                                        (byte)0x04;
+                OpCode code = LoadHalfImmediate(0x0001FC54, MMLEnums.Register.v0, fastForwardState);
+                MemoryHelpers.WriteCode(code);
+            }
+        }
+
+        public static OpCode[] FastForwardOutsideCardonSubgate(byte currentProgressionCounter, bool hasDefeatedBonBonne, bool hasCompletedCardonTankEvent)
+        {
+            // Needs to be written fast during loading screen
+            byte fastForwardState = !hasDefeatedBonBonne ? (byte)0x00 :
+                                    !hasCompletedCardonTankEvent ? (byte)0x03 :
+                                    (byte)0x04;
+            return [
+                // Load assets
+                LoadHalfImmediate(0x0001FC54, MMLEnums.Register.v0, fastForwardState), // Also see special case in restore1fxxxwrites
+                // Unlock Door if >= 2
+                LoadHalfImmediate(0x00100E04, MMLEnums.Register.a1, Math.Max((byte)0x02, fastForwardState)),
+                //
+                LoadHalfImmediate(0x00100CE0, MMLEnums.Register.v0, fastForwardState),
+                LoadHalfImmediate(0x00100E8C, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardCardonForestSubgate(bool hasTakenYellowRefractor)
+        {
+            // May be written slowly as it is checked during in-game loop
+            byte fastForwardState = !hasTakenYellowRefractor ? (byte)0x03 : (byte)0x04;
+            return [
+                LoadHalfImmediate(0x00100320, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x0010E7FC, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x0010E8B8, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] DecoupleCardonForestSubGateKeys()
+        {
+            // See related code in 
+            AddressData jakkoKeyAddressData = Addresses.CardonForestSubGateJakkoStarterKeyPickup;
+            AddressData conveyorKeyAddressData = Addresses.CardonForestSubGateConveyorStarterKeyPickup;
+            AddressData switchesKeyAddressData = Addresses.CardonForestSubGateThreeSwitchStarterKeyPickup;
+            short jakkoKeyBitNumberOffset = (short)((jakkoKeyAddressData.Address - 0xBE378) * 8 + 7 - (jakkoKeyAddressData.BitNumber ?? 0));
+            short conveyorKeyBitNumberOffset = (short)((conveyorKeyAddressData.Address - 0xBE378) * 8 + 7 - (conveyorKeyAddressData.BitNumber ?? 1));
+            short switchesKeyBitNumberOffset = (short)((switchesKeyAddressData.Address - 0xBE378) * 8 + 7 - (switchesKeyAddressData.BitNumber ?? 2));
+            short jakkoRefractorTerminalVirtualOffset = (short)((Addresses.YellowRefractorTerminalVirtual.Address - 0xBE378) * 8 + 1);
+            short conveyorRefractorTerminalVirtualOffset = (short)((Addresses.YellowRefractorTerminalVirtual.Address - 0xBE378) * 8);
+            short switchesRefractorTerminalVirtualOffset = (short)((Addresses.YellowRefractorTerminalVirtual.Address - 0xBE378) * 8);
+            return [
+                // These will make the key pickups write to addresses, set to be distinct from "has key" addresses
+                LoadHalfImmediate(0x00108F5C, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // replace write 0xBE41D with 0xBE2E7 (jakko key)
+                LoadHalfImmediate(0x00108F64, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // replace write 0xBE41D with 0xBE2E7 (conveyor key)
+                LoadHalfImmediate(0x00108F4C, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // replace write 0xBE41E with 0xBE2E7 (switches key)
+
+                // These execute on loading into a room, determining if the key is there, so we change to the same values above
+                LoadHalfImmediate(0x0010CA24, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // load keys, switch read 0xBE41D with 0xBE2E7 (jakko key)
+                LoadHalfImmediate(0x0010C9B0, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // load keys, switch read 0xBE41D with 0xBE2E7 (conveyor key)
+                LoadHalfImmediate(0x0010CA44, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // load keys, switch read 0xBE41E with 0xBE2E7 (switches key)
+
+                // TODO: Figure out what these do. There is still an issue where Roll says the wrong line after picking up the third key
+                //LoadHalfImmediate(0x0010C784, MMLEnums.Register.a0, jakkoKeyBitNumberOffset), // replace read 0xBE41D with 0xBE2E7
+                //LoadHalfImmediate(0x0010C79C, MMLEnums.Register.a0, conveyorKeyBitNumberOffset), // replace read 0xBE41D with 0xBE2E7
+                //LoadHalfImmediate(0x0010C7B4, MMLEnums.Register.a0, switchesKeyBitNumberOffset), // replace read 0xBE41E with 0xBE2E7
+
+                // ?? These should make the sprite go away when picked up and control Roll's voice line
+                //LoadHalfImmediate(0x00108F94, MMLEnums.Register.a0, yellowRefractorTerminalVirtualOffset), // key pickup, switch read 0xBE41D with 0xBE2E6
+
+                // These should prevent the game writing to the terminal address based on your current key count when changing levels. Handled elsewhere
+                Nop(0x0010C7DC),
+                Nop(0x0010C850),
+                Nop(0x0010C868),
+                Nop(0x0010C870),
+                Nop(0x0010C87C),
+
+                // The refractor terminal reads whether you picked up the keys. These change the address the terminal is manipulated to another.
+                // We need to populate the other address with emulated behavior of the original based on keys in inventory. 
+                // This should probably be done in code injection, but I will put that part in the slow game loop because lazy
+                //LoadHalfImmediate(0x00051228, MMLEnums.Register.a0, -16), // 
+                //LoadHalfImmediate(0x0010BC0C, MMLEnums.Register.a0, -16),
+                //LoadHalfImmediate(0x0010BA84, MMLEnums.Register.a0, -16), // This one is in the internal game loop... 
+                // Jk, too hard. Key pickups also read/write here, so move those instead
+                //LoadHalfImmediate(0x00108F94, MMLEnums.Register.a0, jakkoRefractorTerminalVirtualOffset),
+
+                // If the yellow refractor has been picked up, then the game decides not to load a bunch of assets
+                // such as the keys and the yellow refractor itself. 
+                // Nop out this check so that it loads the assets regardless
+                // We can conditionally remove the yellow refractor assets in the fast game loop
+                Nop(0x0010C77C),
+            ];
+        }
+
+        public static OpCode[] FastForwardLakeJyunSubgate()
+        {
+            // May be written slowly as it is checked during in-game loop
+            byte fastForwardState = (byte)0x06;
+            return [
+                LoadHalfImmediate(0x001003F8, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardClozerWoodsSubgate()
+        {
+            byte fastForwardState = (byte)0x07;
+            return [
+                // Enables doors, spawns Flutter NPCs
+                LoadHalfImmediate(0x00100574, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardCardonForestFlutterBroken(byte currentProgressionCounter, bool hasStartedTronDogCutscene, bool hasEarnedClassBLicense, bool hasEarnedCitizenship)
+        {
+            byte fastForwardState = hasEarnedClassBLicense && hasEarnedCitizenship ? Math.Max((byte)0x01, currentProgressionCounter) : (byte)0x00;
+            byte startServbotCutscene = hasStartedTronDogCutscene && hasEarnedCitizenship ? (byte)0x01 : (byte)0x00;
+            return [
+                // Unlocks doors if >0
+                LoadHalfImmediate(0x001007E0, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardState)),
+                Nop(0x00100848), // Locks doors after taking to inspector even if 0x001007E0 is altered
+                Nop(0x0010084C), // Locks doors after taking to inspector even if 0x001007E0 is altered
+                // ? Checks =0
+                LoadHalfImmediate(0x001005EC, MMLEnums.Register.v0, fastForwardState),
+                // ? Checks =0
+                LoadHalfImmediate(0x001007F8, MMLEnums.Register.v0, fastForwardState),
+                // In internal game loop. Loads car if =0 (also need 1F830=0)
+                LoadHalfImmediate(0x001008F4, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x0001F830, MMLEnums.Register.v1, fastForwardState),
+                // 0xBE37C bit checks (junk shop rescue)
+                //LoadHalfImmediate(0x00100D10, MMLEnums.Register.v0, )
+                // 0xBE378 bit checks
+                //LoadHalfImmediate(0x00100808, MMLEnums.Register.v0, fastForwardState),
+                //LoadHalfImmediate(0x00100838, MMLEnums.Register.v0, fastForwardState),
+                //LoadHalfImmediate(0x00100C58, MMLEnums.Register.v0, fastForwardState),
+                LoadHalfImmediate(0x00100C98, MMLEnums.Register.v0, !hasEarnedCitizenship ? (byte)0x00 : (byte)0x01),
+                // For starting servbot cutscene if skipped some stuff
+                hasStartedTronDogCutscene && hasEarnedCitizenship ? Nop(0x00100CA0) : new OpCode(0x00100CA0, 0x1040000D),
+                // Delete code that gives Citizen's Card at cutscene start/skip
+                Nop(0x00105120),
+
+            ];
+        }
+
+        public static OpCode[] FastForwardCardonForestFlutterFixed(byte currentProgressionCounter, bool hasDefeatedJuno, bool hasWatchedFlutterFixFromJunoCutscene, bool hasCompletedGoal)
+        {
+            bool isWatchingFromJunoCutscene = hasDefeatedJuno && !hasWatchedFlutterFixFromJunoCutscene;
+            byte fastForwardState = hasCompletedGoal ? (byte)0x0B :
+                                  //isWatchingFromJunoCutscene ? (byte)0x0B :
+                                    Math.Min((byte)0x0A, Math.Max((byte)0x07, currentProgressionCounter));
+            return [
+                // Can re-enter flutter
+                LoadHalfImmediate(0x00100A3C, MMLEnums.Register.a1, fastForwardState),
+                // Flutter is there
+                LoadHalfImmediate(0x00100AE8, MMLEnums.Register.v1, fastForwardState),
+                // Remove roll scene
+                LoadHalfImmediate(0x00100E84, MMLEnums.Register.v0, 0x01),
+                // Ending Cutscene
+                LoadHalfImmediate(0x001008D8, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x00100A88, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x0001FDE8, MMLEnums.Register.v1, fastForwardState),
+                //Nop(0x0002FBCC),
+                //Nop(0x000322DC),
+                // Stops from juno cutscene
+                //LoadHalfImmediate(0x00100BB4, MMLEnums.Register.v0, 1),
+            ];
+        }
+
+        public static OpCode[] FastForwardUndergroundRuins(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband)
+        {
+            byte fastForwardState = !hasRescuedShopOwnersHusband ? (byte)0x00 : currentProgressionCounter;
+            return [
+                //LoadHalfImmediate(0x00100484, MMLEnums.Register.v0, fastForwardState),
+                LoadHalfImmediate(0x00100620, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardAppleMarket(byte currentProgressionCounter, bool hasRescuedShopOwnersHusband, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasShownRollRedRefractor, bool hasStartedTronDogCutscene, Dictionary<string, object> options)
+        {
+            // TODO: Figure out shop item progression and how that logic should work
+            // TODO: Some crashes possible when entering downtown related to the 0x1FXXX write. Gonna not restore this one until it's understood
+
+            MMLEnums.RegionLockOption regionLockOption;
+            if (options.TryGetValue("shuffleCitizensCard", out var shuffleCitizensCard))
+            {
+                regionLockOption = (MMLEnums.RegionLockOption)int.Parse(shuffleCitizensCard.ToString());
+            }
+            else
+            {
+                regionLockOption = MMLEnums.RegionLockOption.Vanilla;
+            }
+
+            switch (regionLockOption)
+            {
+                case MMLEnums.RegionLockOption.Vanilla:
+                    byte fastForwardStateVanilla = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 :
+                                            hasShownRollRedRefractor ? Math.Max((byte)0x08, currentProgressionCounter) : // Moving this state early to red refractor
+                                            //!hasEarnedClassALicense ? (byte)0x01 :
+                                            (byte)0x02;
+                    return [
+                        // 
+                        LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, fastForwardStateVanilla),
+                        // Open door to downtown
+                        //LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardStateOpen)),
+                        // Check if less than 7
+                        LoadHalfImmediate(0x00100384, MMLEnums.Register.v0, fastForwardStateVanilla),
+                        // lb a1 0x0(s0), check if equal 0
+                        LoadHalfImmediate(0x0010048C, MMLEnums.Register.v0, fastForwardStateVanilla),
+                        // ?
+                        LoadHalfImmediate(0x0010054C, MMLEnums.Register.v1, fastForwardStateVanilla),
+                        //// 0xBE378 bit checks, main area
+                        //LoadHalfImmediate(0x000198C8, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 = 6
+                        //LoadHalfImmediate(0x0001F910, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 = 6
+                        //LoadHalfImmediate(0x00100348, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 = 6
+                        //LoadHalfImmediate(0x00100678, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 = 6
+                        //LoadHalfImmediate(0x0010049C, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 - 2
+                        LoadHalfImmediate(0x00100688, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband || !hasStartedTronDogCutscene ? (byte)0x00 : (byte)0x01), // a0 = 1
+                        // 0xBE378 bit checks, shop
+                        LoadHalfImmediate(0x001008B0, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 = 1
+                    ];
+                case var option when option == MMLEnums.RegionLockOption.Randomized || option == MMLEnums.RegionLockOption.Open:
+                    byte fastForwardStateOpen = !hasRescuedShopOwnersHusband || !hasEarnedClassBLicense ? (byte)0x00 :
+                                            hasShownRollRedRefractor ? Math.Max((byte)0x08, currentProgressionCounter) : // Moving this state early to red refractor
+                                            (byte)0x02;
+                    return [
+                        // 
+                        LoadHalfImmediate(0x0001F8E0, MMLEnums.Register.v1, fastForwardStateOpen),
+                        // Open door to downtown
+                        LoadHalfImmediate(0x00100474, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardStateOpen)),
+                        // Check if less than 7
+                        LoadHalfImmediate(0x00100384, MMLEnums.Register.v0, fastForwardStateOpen),
+                        // lb a1 0x0(s0), check if equal 0
+                        LoadHalfImmediate(0x0010048C, MMLEnums.Register.v0, fastForwardStateOpen),
+                        // ?
+                        LoadHalfImmediate(0x0010054C, MMLEnums.Register.v1, fastForwardStateOpen),
+                        //// 0xBE378 bit checks, main area
+                        //LoadHalfImmediate(0x000198C8, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 = 6
+                        //LoadHalfImmediate(0x0001F910, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 = 6
+                        //LoadHalfImmediate(0x00100348, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 = 6
+                        //LoadHalfImmediate(0x00100678, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 = 6
+                        //LoadHalfImmediate(0x0010049C, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 - 2
+                        LoadHalfImmediate(0x00100688, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband || !hasStartedTronDogCutscene ? (byte)0x00 : (byte)0x01), // a0 = 1
+                        // 0xBE378 bit checks, shop
+                        LoadHalfImmediate(0x001008B0, MMLEnums.Register.v0, !hasRescuedShopOwnersHusband ? (byte)0x00 : (byte)0x01), // a0 = 1
+                    ]; 
+                default:
+                    return [];
+            }
+        }
+
+        public static OpCode[] FastForwardDowntown(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasDefeatedBalkonGerat, bool hasTakenRedRefractor, bool hasUnlockedSubCities, bool hasActivatedUnlockSubCities, Dictionary<string, object> options)
+        {
+            // Complex area, but important things here are:
+            // 1. Tron and dog scene happens at 0, and can't skip this in vanilla for boss sequence
+            // 2. Bomb quest requires class A license 
+            // 3. Bank Robber requires sub-cities raised
+
+            MMLEnums.RegionLockOption regionLockOption;
+            if (options.TryGetValue("shuffleSubCitiesUnlock", out var shuffleSubCitiesUnlockOption))
+            {
+                regionLockOption = (MMLEnums.RegionLockOption)int.Parse(shuffleSubCitiesUnlockOption.ToString());
+            }
+            else
+            {
+                regionLockOption = MMLEnums.RegionLockOption.Vanilla;
+            }
+            byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    hasDefeatedBalkonGerat || hasTakenRedRefractor ? (byte)0x06 :
+                                    currentProgressionCounter;
+            switch (regionLockOption)
+            {
+                case MMLEnums.RegionLockOption.Vanilla:
+                    byte fastForwardStateSubCityVanilla = hasActivatedUnlockSubCities ? (byte)0x09 : (byte)0x00;
+                    return [
+                        // Multiple tiers here for checking 0xC1B62: 0 (also checks 0xBE378[5, 6]), 1-5, 6-7, 8-10, 11
+                        // Writes to global value 0x800981E2, copied into 0xC1B7A
+                        LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState),
+                        // ?
+                        LoadHalfImmediate(0x00106C24, MMLEnums.Register.v1, fastForwardState),
+                        // In internal game loop
+                        LoadHalfImmediate(0x00106C84, MMLEnums.Register.v1, fastForwardState),
+                        // Enable Sub-City
+                        LoadHalfImmediate(0x00106BB0, MMLEnums.Register.v0, fastForwardStateSubCityVanilla),
+                        // Open doors
+                        LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, 0x02),
+                        // Opens doors during Tron / dog scene
+                        LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, 0x02),
+                        // Don't check whether talked to Tron before talking to dog
+                        LoadHalfImmediate(0x00117C98, MMLEnums.Register.v0, 0x01),
+                    ];
+                case MMLEnums.RegionLockOption.Randomized:
+                    byte fastForwardStateSubCityRandomized = hasUnlockedSubCities ? (byte)0x09 : (byte)0x00;
+                    return [
+                        // Multiple tiers here for checking 0xC1B62: 0 (also checks 0xBE378[5, 6]), 1-5, 6-7, 8-10, 11
+                        // Writes to global value 0x800981E2, copied into 0xC1B7A
+                        LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState),
+                        // ?
+                        LoadHalfImmediate(0x00106C24, MMLEnums.Register.v1, fastForwardState),
+                        // In internal game loop
+                        LoadHalfImmediate(0x00106C84, MMLEnums.Register.v1, fastForwardState),
+                        // Enable Sub-City
+                        LoadHalfImmediate(0x00106BB0, MMLEnums.Register.v0, fastForwardStateSubCityRandomized),
+                        // Open doors
+                        LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, 0x02),
+                        // Opens doors during Tron / dog scene
+                        LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, 0x02),
+                        // Don't check whether talked to Tron before talking to dog
+                        LoadHalfImmediate(0x00117C98, MMLEnums.Register.v0, 0x01),
+                    ];
+                case MMLEnums.RegionLockOption.Open:
+                    return [
+                        // Multiple tiers here for checking 0xC1B62: 0 (also checks 0xBE378[5, 6]), 1-5, 6-7, 8-10, 11
+                        // Writes to global value 0x800981E2, copied into 0xC1B7A
+                        LoadHalfImmediate(0x0001FA08, MMLEnums.Register.v1, fastForwardState),
+                        // ?
+                        LoadHalfImmediate(0x00106C24, MMLEnums.Register.v1, fastForwardState),
+                        // In internal game loop
+                        LoadHalfImmediate(0x00106C84, MMLEnums.Register.v1, fastForwardState),
+                        // Enable Sub-City
+                        LoadHalfImmediate(0x00106BB0, MMLEnums.Register.v0, (byte)0x09),
+                        // Open doors
+                        LoadHalfImmediate(0x00106B50, MMLEnums.Register.a1, 0x02),
+                        // Opens doors during Tron / dog scene
+                        LoadHalfImmediate(0x00106B68, MMLEnums.Register.v0, 0x02),
+                        // Don't check whether talked to Tron before talking to dog
+                        LoadHalfImmediate(0x00117C98, MMLEnums.Register.v0, 0x01),
+                    ];
+                default:
+                    return [];
+            }
+
+        }
+
+        public static OpCode[] FastForwardOldCity(byte currentProgressionCounter)
+        {
+            return [
+                LoadHalfImmediate(0x001007D0, MMLEnums.Register.v1, Math.Max((byte)0x09, currentProgressionCounter)),
+            ];
+        }
+
+        public static OpCode[] FastForwardUptown(byte currentProgressionCounter, bool hasUnlockedSubCities, bool hasShownRollRedRefractor, bool hasActivatedUnlockSubCities, Dictionary<string, object> options)
+        {
+            // Needs to be written fast during loading screen
+            MMLEnums.RegionLockOption regionLockOption;
+            if (options.TryGetValue("shuffleSubCitiesUnlock", out var shuffleSubCitiesUnlockOption))
+            {
+                regionLockOption = (MMLEnums.RegionLockOption)int.Parse(shuffleSubCitiesUnlockOption.ToString());
+            }
+            else
+            {
+                regionLockOption = MMLEnums.RegionLockOption.Vanilla;
+            }
+
+            switch (regionLockOption)
+            {
+                case MMLEnums.RegionLockOption.Vanilla:
+                    byte fastForwardStateVanilla = hasActivatedUnlockSubCities ? (byte)0x09 :
+                                            hasShownRollRedRefractor ? (byte)0x08 : // Moving this state early to red refractor
+                                            (byte)0x05;
+                    return [
+                        // Check slt 6, else check slt 8
+                        LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, fastForwardStateVanilla),
+                        // Sub city
+                        LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardStateVanilla),
+                        // check slt 5
+                        LoadHalfImmediate(0x0010047C, MMLEnums.Register.v0, fastForwardStateVanilla),
+                        // ? close to bit check @ bit 55
+                        LoadHalfImmediate(0x001005A4, MMLEnums.Register.a1, fastForwardStateVanilla),
+                        // In game loop
+                        LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardStateVanilla),
+                        // Check if fixed flutter when loading in hospital (for side quests).
+                        // Open it up, allowing Ira quest.
+                        //LoadHalfImmediate(0x00101310, MMLEnums.Register.v0, (byte)0x01),
+                        Nop(0x00101318),
+                        // other bit check @ bit 563
+                        //LoadHalfImmediate(0x00101320, MMLEnums.Register.v0, (byte)0x01),
+                        //Nop(0x00101328),
+                        // Missing woman quest check
+                        LoadHalfImmediate(0x0010129C, MMLEnums.Register.v0, fastForwardStateVanilla),
+                        // 
+                    ];
+                case MMLEnums.RegionLockOption.Randomized:
+                    byte fastForwardStateRandomized = hasUnlockedSubCities ? (byte)0x09 :
+                                            hasShownRollRedRefractor ? (byte)0x08 : // Moving this state early to red refractor
+                                            (byte)0x05;
+                    return [
+                        // Check slt 6, else check slt 8
+                        LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, fastForwardStateRandomized),
+                        // Sub city
+                        LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardStateRandomized),
+                        // check slt 5
+                        LoadHalfImmediate(0x0010047C, MMLEnums.Register.v0, fastForwardStateRandomized),
+                        // ? close to bit check @ bit 55
+                        LoadHalfImmediate(0x001005A4, MMLEnums.Register.a1, fastForwardStateRandomized),
+                        // In game loop
+                        LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardStateRandomized),
+                        // Check if fixed flutter when loading in hospital (for side quests).
+                        // Open it up, allowing Ira quest.
+                        //LoadHalfImmediate(0x00101310, MMLEnums.Register.v0, (byte)0x01),
+                        Nop(0x00101318),
+                        // other bit check @ bit 563
+                        //LoadHalfImmediate(0x00101320, MMLEnums.Register.v0, (byte)0x01),
+                        //Nop(0x00101328),
+                        // Missing woman quest check
+                        LoadHalfImmediate(0x0010129C, MMLEnums.Register.v0, fastForwardStateRandomized),
+                        // 
+                    ];
+                case MMLEnums.RegionLockOption.Open:
+                    byte fastForwardStateOpen = (byte)0x09;
+                    return [
+                        // Check slt 6, else check slt 8
+                        LoadHalfImmediate(0x0001FB58, MMLEnums.Register.v1, fastForwardStateOpen),
+                        // Sub city
+                        LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardStateOpen),
+                        // check slt 5
+                        LoadHalfImmediate(0x0010047C, MMLEnums.Register.v0, fastForwardStateOpen),
+                        // ? close to bit check @ bit 55
+                        LoadHalfImmediate(0x001005A4, MMLEnums.Register.a1, fastForwardStateOpen),
+                        // In game loop
+                        LoadHalfImmediate(0x00100648, MMLEnums.Register.v1, fastForwardStateOpen),
+                        // Check if fixed flutter when loading in hospital (for side quests).
+                        // Open it up, allowing Ira quest.
+                        //LoadHalfImmediate(0x00101310, MMLEnums.Register.v0, (byte)0x01),
+                        Nop(0x00101318),
+                        // other bit check @ bit 563
+                        //LoadHalfImmediate(0x00101320, MMLEnums.Register.v0, (byte)0x01),
+                        //Nop(0x00101328),
+                        // Missing woman quest check
+                        LoadHalfImmediate(0x0010129C, MMLEnums.Register.v0, fastForwardStateOpen),
+                        // 
+                    ];
+                default:
+                    return [];
+            }
+        }
+
+        public static OpCode[] FastForwardCityHall(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat, bool hasTakenRedRefractor)
+        {
+            // Note: Important here is:
+            // 1. Need 0x00 to talk to officer before pirates & to do Bon Bonne
+            // 2. Amelia's Office counts as City Hall (werid things can happen there with cutscenes)
+            // Going to try separating Amelia's Office from here to make things easier
+            byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    !hasEarnedClassALicense ? (byte)0x01 :
+                                    !hasDefeatedBalkonGerat || !hasTakenRedRefractor ? (byte)0x02 :
+                                    Math.Max((byte)0x06, currentProgressionCounter);
+            return [
+                // Four tiers: checks if = 1. else checks = 0 (and 0xBE43E?), else checks 2 <= .. <= 5, else checks >= 6
+                // Each tier writes a different value to $gp + 0x98A = 0x800981EE which is written to 0xC1B7A
+                LoadHalfImmediate(0x0001FA9C, MMLEnums.Register.v1, fastForwardState),
+                // lb a1 0x0(s0), unlocks doors if >0
+                LoadHalfImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, fastForwardState)),
+                // lb v0 0x0(s0), check if = 0, unlock door to yass during pirate event
+                LoadHalfImmediate(0x001006FC, MMLEnums.Register.v0, Math.Max((byte)0x01, fastForwardState)),
+                // Check if = 0
+                LoadHalfImmediate(0x001005D8, MMLEnums.Register.v1, fastForwardState),
+                // check if = 0, In a complex branch structure
+                LoadHalfImmediate(0x00119FA4, MMLEnums.Register.v1, fastForwardState),
+                // check if = 0, In a complex branch structure
+                LoadHalfImmediate(0x00119FDC, MMLEnums.Register.v1, fastForwardState),
+                // In internal game loop, checks if = 0, spawns NPCs if >0
+                LoadHalfImmediate(0x00100778, MMLEnums.Register.v1, fastForwardState),
+                //
+                LoadHalfImmediate(0x001007BC, MMLEnums.Register.v1, fastForwardState),
+                // Loading in from Marlwolf cutscene
+                LoadHalfImmediate(0x00101088, MMLEnums.Register.v0, fastForwardState),
+                // Delete code that gives Class B License at cutscene start/skip
+                //Nop(0x00105CC4),
+                //Nop(0x000553C4), // This is used for writing all kinds of bits so really dont want to nop this
+                // Delete code that gives Class A License at cutscene start/skip
+                //Nop(0x001069D4),
+            ];
+        }
+
+        public static OpCode[] FastForwardCityHallIndoors(byte currentProgressionCounter, bool HasStartedMainGateOpenCutscene)
+        {
+            byte fastForwardState = HasStartedMainGateOpenCutscene ? Math.Max((byte)0x08, currentProgressionCounter) :
+                                    Math.Max((byte)0x02, currentProgressionCounter);
+            short jumpSpringsBit = MemoryHelpers.BitOffsetFromBE378(DataDicts.ItemDataDict[0x0221].InventoryAddressData) ?? 0x00;
+            return [
+                // Checks < 8
+                LoadHalfImmediate(0x0001FCE8, MMLEnums.Register.v1, fastForwardState),
+                // Changes something at >1
+                LoadHalfImmediate(0x0010022C, MMLEnums.Register.a1, fastForwardState),
+                // In game loop, will move police officer if >1
+                LoadHalfImmediate(0x001002B4, MMLEnums.Register.v1, fastForwardState),
+                // Check HasTakenYellowRefractor @ talking to inspector
+                //LoadHalfImmediate(0x001047A0, MMLEnums.Register.v0, 0x01), // Remove check entirely
+                LoadHalfImmediate(0x001047A4, MMLEnums.Register.a0, jumpSpringsBit), // Replace with jump springs check
+            ];
+        }
+
+        //public static OpCode[] FastForwardCityHallAmelia(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense)
+        //{
+        //    // Note: Important here is (1) need 0x00 to talk to officer before pirates (2) Amelia's Office counts as City Hall
+        //    byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 : 
+        //                            !hasEarnedClassALicense ? (byte)0x01 :
+        //                            currentProgressionCounter;
+        //    return [
+        //        // Four tiers: checks if = 1. else checks = 0 (and 0xBE43E?), else checks 2 <= .. <= 5, else checks >= 6
+        //        // Each tier writes a different value to $gp + 0x98A = 0x800981EE which is written to 0xC1B7A
+        //        LoadHalfImmediate(0x0001FA9C, MMLEnums.Register.v1, fastForwardState),
+        //        // Check if = 0
+        //        LoadHalfImmediate(0x001005D8, MMLEnums.Register.v1, fastForwardState),
+        //        // lb a1 0x0(s0), unlocks doors if >0
+        //        LoadHalfImmediate(0x001006E4, MMLEnums.Register.a1, Math.Max((byte)0x01, currentProgressionCounter)),
+        //        // check if = 0, In a complex branch structure
+        //        LoadHalfImmediate(0x00119FA4, MMLEnums.Register.v1, fastForwardState),
+        //        // check if = 0, In a complex branch structure
+        //        LoadHalfImmediate(0x00119FDC, MMLEnums.Register.v1, fastForwardState),
+        //        // In internal game loop, checks if = 0, spawns NPCs if >0
+        //        LoadHalfImmediate(0x00100778, MMLEnums.Register.v1, fastForwardState),
+        //        // lb v0 0x0(s0), check if = 0
+        //        LoadHalfImmediate(0x001006FC, MMLEnums.Register.v0, fastForwardState),
+        //        LoadHalfImmediate(0x001007BC, MMLEnums.Register.v1, fastForwardState),
+
+        //    ];
+        //}
+
+        public static OpCode[] FastForwardWilysBoat(byte currentProgressionCounter, bool HasFixedBoat, bool hasDefeatedBalkonGerat)
+        {
+            // This could go in slow loop, but put in fast loop since NPCs spawn on progression check
+            byte fastForwardState = (byte)(hasDefeatedBalkonGerat ? Math.Max((byte)0x06, currentProgressionCounter) : (HasFixedBoat ? 0x05 : 0x04));
+            return [
+                // 
+                LoadHalfImmediate(0x0001FCA8, MMLEnums.Register.v1, fastForwardState),
+                // Loads people into the zone (they were evacuated)
+                LoadHalfImmediate(0x001003A8, MMLEnums.Register.v1, fastForwardState),
+                // 
+                LoadHalfImmediate(0x00100374, MMLEnums.Register.a1, fastForwardState),
+                // ?? 
+                //LoadHalfImmediate(0x0001FCA8, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+        public static OpCode[] EnableFixBoatCallRoll()
+        {
+            // Enable "Call Roll" option when talking to worker which usually checks 0xBE37B[1]
+            // delete branching that checks 0xBE37B[1] (the "has started taking yellow refractor cutscene" flag)
+            // This is used by other stuff and can cause soft locks if not rewritten
+            // An execution breakpoint here only hits once in this area, so it should be safe as long as it's restored later
+            return [
+                Nop(Addresses.FixBoatCallRollUtil.Address),
+            ];
+        }
+
+        public static OpCode[] EnableRedRefractorCutscene()
+        {
+            return [
+                LoadHalfImmediate(0x001001EC, MMLEnums.Register.v1, 0x06),
+            ];
+        }
+
+
+        public static OpCode[] FastForwardYassPlains(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat, bool hasTakenRedRefractor)
+        {
+            byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    !hasEarnedClassALicense ? (byte)0x01 :
+                                    !hasDefeatedBalkonGerat && !hasTakenRedRefractor ? (byte)0x02 :
+                                    Math.Max((byte)0x06, currentProgressionCounter);
+            return [
+                // Original tests v1 = 1
+                LoadHalfImmediate(0x0001FD40, MMLEnums.Register.v1, fastForwardState),
+                // ?
+                LoadHalfImmediate(0x0001FD5C, MMLEnums.Register.v1, fastForwardState),
+                // ?
+                LoadHalfImmediate(0x001006D4, MMLEnums.Register.a1, fastForwardState),
+                // In internal game loop, loads tanks?
+                LoadHalfImmediate(0x00100754, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardClozerWoodsWithBridge(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense, bool hasDefeatedBalkonGerat, bool hasTakenRedRefractor)
+        {
+            byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    !hasEarnedClassALicense ? (byte)0x01 :
+                                    !hasDefeatedBalkonGerat || !hasTakenRedRefractor ? (byte)0x02 :
+                                    Math.Max((byte)0x06, currentProgressionCounter);
+            return [
+                // ?
+                LoadHalfImmediate(0x0001FD94, MMLEnums.Register.v1, fastForwardState),
+                // ?
+                LoadHalfImmediate(0x0001FDB0, MMLEnums.Register.v1, fastForwardState),
+                // ?
+                LoadHalfImmediate(0x001002A0, MMLEnums.Register.a1, fastForwardState),
+                // In internal game loop
+                LoadHalfImmediate(0x00100328, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardClozerWoods(byte currentProgressionCounter, bool hasEarnedClassBLicense, bool hasEarnedClassALicense)
+        {
+            byte fastForwardState = !hasEarnedClassBLicense ? (byte)0x00 :
+                                    !hasEarnedClassALicense ? (byte)0x01 :
+                                    Math.Max((byte)0x02, currentProgressionCounter);
+            return [
+                // ?
+                LoadHalfImmediate(0x0001FB90, MMLEnums.Register.v1, fastForwardState),
+                // In internal game loop
+                LoadHalfImmediate(0x00100534, MMLEnums.Register.v1, fastForwardState),
+                // Enable sub-gate entrance door
+                LoadHalfImmediate(0x00100500, MMLEnums.Register.a1, Math.Max((byte)0x08, currentProgressionCounter)),
+            ];
+        }
+
+        public static OpCode[] FastForwardGesellschaft(byte currentProgressionCounter, bool hasTakenRedRefractor)
+        {
+            byte fastForwardState = !hasTakenRedRefractor ? (byte)0x01 : (byte)0x06;
+            return [
+                LoadHalfImmediate(0x0001FB28, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x00103F20, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x001002F0, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x001034A4, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x00100220, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardFlutterToSubGateCutscene(bool HasActivatedEmergencySystem, bool hasDefeatedFockeWulf)
+        {
+            byte fastForwardState = !hasDefeatedFockeWulf ? (byte)0x07 : (byte)0x08;
+            //byte disableFockeWulf = !HasStartedMainGateOpenCutscene ? (byte)0x01 : (byte)0x00;
+            return [
+                // Fixes cardon -> clozer cutscene and vice versa
+                LoadHalfImmediate(0x0001FDE8, MMLEnums.Register.v1, fastForwardState),
+
+                LoadHalfImmediate(0x00100284, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x00100B48, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x00101A40, MMLEnums.Register.v1, fastForwardState),
+                LoadHalfImmediate(0x00100E44, MMLEnums.Register.v1, fastForwardState),
+                
+                //LoadHalfImmediate(0x00101A50, MMLEnums.Register.v0, disableFockeWulf),
+                //LoadHalfImmediate(0x00100E54, MMLEnums.Register.v0, disableFockeWulf),
+
+                //LoadHalfImmediate(0x001008DC, MMLEnums.Register.v1, fastForwardState),
+                //LoadHalfImmediate(0x00100A3C, MMLEnums.Register.a1, fastForwardState),
+                //LoadHalfImmediate(0x00100A88, MMLEnums.Register.v1, fastForwardState),
+                //LoadHalfImmediate(0x00100AE8, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardGesellschaftBattle()
+        {
+            byte fastForwardState = (byte)0x07;
+            return [
+                LoadHalfImmediate(0x00100710, MMLEnums.Register.v1, fastForwardState),
+            ];
+        }
+
+        public static OpCode[] FastForwardOutsideMainGate(byte currentProgressionCounter, bool hasUnlockedMainGate, bool HasStartedMainGateOpenCutscene, bool hasWatchedMainGateOpenCutscene, Dictionary<string, object> options)
+        {
+            MMLEnums.RegionLockOption regionLockOption;
+            if (options.TryGetValue("shuffleMainGateUnlock", out var shuffleMainGateUnlockOption))
+            {
+                regionLockOption = (MMLEnums.RegionLockOption)int.Parse(shuffleMainGateUnlockOption.ToString());
+            }
+            else
+            {
+                regionLockOption = MMLEnums.RegionLockOption.Vanilla;
+            }
+            bool isInCutscene = HasStartedMainGateOpenCutscene && !hasWatchedMainGateOpenCutscene;
+            switch (regionLockOption)
+            {
+                case MMLEnums.RegionLockOption.Vanilla:
+                    byte fastForwardStateVanilla = isInCutscene ? (byte)0x07 :
+                                            HasStartedMainGateOpenCutscene ? Math.Min((byte)0x0A, Math.Max((byte)0x08, currentProgressionCounter)) :
+                                            Math.Min((byte)0x07, currentProgressionCounter);
+                    return [
+                        // Prevents unlocking main gate cutscene black screen
+                        LoadHalfImmediate(0x00100420, MMLEnums.Register.v1, fastForwardStateVanilla),
+                        // ?
+                        LoadHalfImmediate(0x001007E0, MMLEnums.Register.v1, fastForwardStateVanilla),
+                    ];
+                case MMLEnums.RegionLockOption.Randomized:
+                    byte fastForwardStateRandomized = isInCutscene ? (byte)0x07 : 
+                                            hasUnlockedMainGate ? Math.Min((byte)0x0A, Math.Max((byte)0x08, currentProgressionCounter)) : 
+                                            Math.Min((byte)0x07, currentProgressionCounter);
+                    return [
+                        // Prevents unlocking main gate cutscene black screen
+                        LoadHalfImmediate(0x00100420, MMLEnums.Register.v1, fastForwardStateRandomized),
+                        // ?
+                        LoadHalfImmediate(0x001007E0, MMLEnums.Register.v1, fastForwardStateRandomized),
+                    ];
+                case MMLEnums.RegionLockOption.Open:
+                    byte fastForwardStateOpen = isInCutscene ? (byte)0x07 : Math.Min((byte)0x0A, Math.Max((byte)0x08, currentProgressionCounter));
+                    return [
+                        LoadHalfImmediate(0x00100420, MMLEnums.Register.v1, fastForwardStateOpen),
+                        LoadHalfImmediate(0x001007E0, MMLEnums.Register.v1, fastForwardStateOpen),
+                    ];
+                default:
+                    return [];
+            }
+
+        }
+
+        public static OpCode[] FastForwardMainGate(byte currentProgressionCounter, bool hasShownRollRedRefractor)
+        {
+            byte fastForwardState = Math.Max(currentProgressionCounter, (byte)0x08);
+            byte cardonForestState = hasShownRollRedRefractor ? (byte)0x1B : (byte)0x03;
+            return [
+                // Unlock standard doors
+                LoadHalfImmediate(0x00100990, MMLEnums.Register.v1, fastForwardState),
+                // Disables control panel
+                //LoadHalfImmediate(0x0012B9B8, MMLEnums.Register.v0, 0x01),
+                // Opens door in control panel room
+                LoadHalfImmediate(0x00126798, MMLEnums.Register.v0, 0x01),
+                // Pick which cardon forest flutter state to go to after Juno
+                LoadHalfImmediate(0x00105660, MMLEnums.Register.v0, cardonForestState),
+            ];
+        }
+
+        public static OpCode[] FastForwardLakeJyun(bool HasFixedBoat, bool hasWatchedBalkonGeratDefeatCutscene)
+        {
+            byte fastForwardState = !HasFixedBoat ? (byte)0x04 :
+                                    !hasWatchedBalkonGeratDefeatCutscene ? (byte)0x05 :
+                                    (byte)0x06;
+            OpCode[] code = [
+                // 0x05 Prevents black screen after phase 1. 0x06 has the boat there after boss
+                LoadHalfImmediate(0x0010059C, MMLEnums.Register.v1, fastForwardState),
+                // Prevents crash after starting phase 1
+                LoadHalfImmediate(0x0001FBCC, MMLEnums.Register.v1, fastForwardState),
+                // Lets phase 1 load
+                LoadHalfImmediate(0x0011674C, MMLEnums.Register.v1, fastForwardState),
+                // Lets after phase 2 load
+                LoadHalfImmediate(0x00101A68, MMLEnums.Register.v0, (HasFixedBoat && hasWatchedBalkonGeratDefeatCutscene) ? (byte)0x01 : (byte)0x00),
+            ];
+            return code;
+        }
+
+        public static OpCode[] AlterStartingSpecialWeapon(byte weaponCode)
+        {
+            OpCode[] code = [LoadHalfImmediate(0x001DBE20, MMLEnums.Register.v0, weaponCode)];
+            return code;
+        }
+
+        public static OpCode LoadHalfImmediate(uint startAddress, MMLEnums.Register register, short shortVal)
+        {
+            // addiu rt, zero, imm16
+            uint instruction =
+                0x24000000u |
+                ((uint)register << 16) |
+                (uint)(ushort)shortVal;   // keep only low 16 bits (two's complement)
+
+            return new OpCode(startAddress, instruction);
+        }
+
+        private static OpCode Nop(uint startAddress)
+        {
+            return new OpCode(startAddress, 0x00000000); // nop
+        }
+    }
+}

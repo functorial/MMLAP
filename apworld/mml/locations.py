@@ -82,9 +82,9 @@ LOCATION_DATA_DICT = {
     "Cardon Forest Sub-Gate, Bottom conveyor hole"                  : LocationData(57,  LocationCategory.CONTAINER, False),
     "Cardon Forest Sub-Gate, Middle conveyor hole"                  : LocationData(58,  LocationCategory.CONTAINER, False),
     "Cardon Forest Sub-Gate, Middle switch chest"                   : LocationData(59,  LocationCategory.CONTAINER, False),
-    "Cardon Forest Sub-Gate, Jakko nest starter key get"            : LocationData(60,  LocationCategory.PICKUP,    False),
-    "Cardon Forest Sub-Gate, Conveyor chest starter key get"        : LocationData(61,  LocationCategory.PICKUP,    False),
-    "Cardon Forest Sub-Gate, Three switch starter key get"          : LocationData(62,  LocationCategory.PICKUP,    False),
+    "Cardon Forest Sub-Gate, Jakko nest starter key pickup"         : LocationData(60,  LocationCategory.PICKUP,    False),
+    "Cardon Forest Sub-Gate, Conveyor chest starter key pickup"     : LocationData(61,  LocationCategory.PICKUP,    False),
+    "Cardon Forest Sub-Gate, Three switch starter key pickup"       : LocationData(62,  LocationCategory.PICKUP,    False),
     "Lake Jyun Sub-Gate, Entrance right hole"                       : LocationData(63,  LocationCategory.CONTAINER, False),
     "Lake Jyun Sub-Gate, Entrance left hole"                        : LocationData(64,  LocationCategory.CONTAINER, False),
     "Lake Jyun Sub-Gate, Entrance chest"                            : LocationData(65,  LocationCategory.CONTAINER, False),
@@ -132,7 +132,7 @@ LOCATION_DATA_DICT = {
     "Race Straight Course Rank A"                                   : LocationData(107, LocationCategory.QUEST,     False),
     "Race Left Curve Course Rank A"                                 : LocationData(108, LocationCategory.QUEST,     False),
     "Race Technical Course Rank A"                                  : LocationData(109, LocationCategory.QUEST,     False),
-    "Save the missing woman"                                        : LocationData(110, LocationCategory.QUEST,     False),
+    "Take Anna to the hospital"                                     : LocationData(110, LocationCategory.QUEST,     False),
     "Cure Ira's illness"                                            : LocationData(111, LocationCategory.QUEST,     False),
    #"Tell painter she needs red"                                    : LocationData(112, LocationCategory.QUEST,     False),
    #"Get lipstick"                                                  : LocationData(113, LocationCategory.QUEST,     False),
@@ -144,13 +144,21 @@ LOCATION_DATA_DICT = {
     "Museum donation, Shiny Object"                                 : LocationData(119, LocationCategory.QUEST,     False),
     "Museum donation, Old Shield"                                   : LocationData(120, LocationCategory.QUEST,     False),
     "Museum donation, Shiny Red Stone"                              : LocationData(121, LocationCategory.QUEST,     False),
-    "Complete the Museum exhibit"                                   : LocationData(122, LocationCategory.QUEST,     False),
+   #"Complete the Museum exhibit"                                   : LocationData(122, LocationCategory.QUEST,     False),
     "Take dangerous object from museum visitor"                     : LocationData(123, LocationCategory.QUEST,     False),
     "Gift Flower to Roll"                                           : LocationData(124, LocationCategory.QUEST,     False),
     "Gift Music Box to Roll"                                        : LocationData(125, LocationCategory.QUEST,     False),
     "Gift Ring to Roll"                                             : LocationData(126, LocationCategory.QUEST,     False),
     "Turn in missing bag"                                           : LocationData(127, LocationCategory.QUEST,     False),
-    "Juno Defeated"                                                 : LocationData(999, LocationCategory.COMBAT,    False),
+    "Take the yellow refractor"                                     : LocationData(128, LocationCategory.QUEST,     False),
+    "Take the red refractor"                                        : LocationData(129, LocationCategory.QUEST,     False),
+    "Earn citizenship in Kattelox City"                             : LocationData(130, LocationCategory.QUEST,     False),
+    "Earn the Class B License"                                      : LocationData(131, LocationCategory.QUEST,     False),
+    "Earn the Class A License"                                      : LocationData(132, LocationCategory.QUEST,     False),
+    "Activate the emergency system"                                 : LocationData(133, LocationCategory.QUEST,     False),
+    "Activate unlock sub-cities"                                    : LocationData(134, LocationCategory.QUEST,     False),
+    "Gai-nee Tooren defeated"                                       : LocationData(135, LocationCategory.COMBAT,    False),
+    "Juno defeated"                                                 : LocationData(136, LocationCategory.COMBAT,    False),
 }
 
 LOCATION_NAME_TO_ID         = {locationName: LOCATION_DATA_DICT[locationName].id         for locationName in LOCATION_DATA_DICT.keys()}
@@ -171,12 +179,59 @@ def create_regular_locations(world: GameWorld) -> None:
         region_data = region_data_dict[region_name]
         region = world.get_region(region_name)
         location_names_with_ids = get_location_names_with_ids(region_data.locationNameList)
+
+        # Don't create the location for defeating Juno if the goal is to defeat Juno, since it will be handled as an event
+        if world.options.goal.value == world.options.goal.option_juno and region_name == "Main Gate - Juno Area (Boss)":
+            location_names_with_ids.pop("Juno defeated", None)
+
+        # If this option is off then the player will get the Splash Arm special weapon as in vanilla game
+        if not world.options.shuffleStartingSpecialWeapon.value and region_name == "Apple Market - Junk Shop (Turn-in Rescue)":
+            location_names_with_ids.pop("Rescue the shop owner's husband", None)
+
+        if world.options.shuffleCitizensCard.value in [world.options.shuffleCitizensCard.option_vanilla, world.options.shuffleCitizensCard.option_open] and region_name == "Cardon Forest (Get Citizen's Card)":
+            location_names_with_ids.pop("Earn citizenship in Kattelox City", None)
+        
+        if world.options.shuffleClassBLicense.value in [world.options.shuffleClassBLicense.option_vanilla, world.options.shuffleClassBLicense.option_open] and region_name == "City Hall - Amelia's Office (Get Class B License)":
+            location_names_with_ids.pop("Earn the Class B License", None)
+        
+        if world.options.shuffleClassALicense.value in [world.options.shuffleClassALicense.option_vanilla, world.options.shuffleClassALicense.option_open] and region_name == "City Hall - Amelia's Office (Get Class A License)":
+            location_names_with_ids.pop("Earn the Class A License", None)
+
+        if world.options.shuffleMainGateUnlock.value in [world.options.shuffleMainGateUnlock.option_vanilla, world.options.shuffleMainGateUnlock.option_open] and region_name == "Clozer Woods Sub-Gate - Control Room (Activate The Emergency System)":
+            location_names_with_ids.pop("Activate the emergency system", None)
+        
+        if world.options.shuffleSubCitiesUnlock.value in [world.options.shuffleSubCitiesUnlock.option_vanilla, world.options.shuffleSubCitiesUnlock.option_open] and region_name == "Main Gate - (Command Terminal)":
+            location_names_with_ids.pop("Activate unlock sub-cities", None)
+
         region.add_locations(location_names_with_ids, GameLocation)
     return None
 
 def create_events(world: GameWorld) -> None:
-    juno_region = world.get_region("Main Gate - Juno Area (Boss)")
-    juno_region.add_event("Juno Defeated", "Victory", location_type=GameLocation, item_type=items.GameItem, rule=lambda state: True)  # Add logic for beating Juno with access.
+    match world.options.goal.value:
+        case world.options.goal.option_juno:
+            juno_region = world.get_region("Main Gate - Juno Area (Boss)")
+            juno_region.add_event("Juno defeated", "Victory", location_type=GameLocation, item_type=items.GameItem, rule=lambda state: True)  # Add logic for beating Juno with access.
+        case world.options.goal.option_all_bosses:
+            event_region = world.get_region("Cardon Forest")
+            event_region.add_event(
+                "All bosses defeated",
+                "Victory",
+                location_type=GameLocation,
+                item_type=items.GameItem,
+                rule=lambda state: (
+                    state.can_reach_location("Escape the Ocean Tower", world.player)
+                    and state.can_reach_location("Ferdinand defeated", world.player)
+                    and state.can_reach_location("Bon Bonne defeated", world.player)
+                    and state.can_reach_location("Marlwolf defeated", world.player)
+                    and state.can_reach_location("Balkon Gerat defeated", world.player)
+                    and state.can_reach_location("Garudoriten defeated", world.player)
+                    and state.can_reach_location("Karumuna Bash Trio defeated", world.player)
+                    and state.can_reach_location("Focke-Wulf defeated", world.player)
+                    and state.can_reach_location("Gai-nee Tooren defeated", world.player)
+                    and state.can_reach_location("Theodore Bruno defeated", world.player)
+                    and state.can_reach_location("Juno defeated", world.player)
+                )
+            )
     world.multiworld.completion_condition[world.player] = lambda state: state.has("Victory", world.player)
 
 def lock_missables_to_filler(world) -> None:
@@ -186,7 +241,10 @@ def lock_missables_to_filler(world) -> None:
         if cls == ItemClassification.filler
     ]
     world.locked_missable_filler_names = []
-    missable_locations = [loc for loc in world.multiworld.get_locations(world.player) if LOCATION_DATA_DICT[loc.name].isMissable]
+    missable_locations = [
+        loc for loc in world.multiworld.get_locations(world.player) 
+        if loc.name in LOCATION_DATA_DICT and LOCATION_DATA_DICT[loc.name].isMissable
+    ]
     for loc in missable_locations:
         name = world.random.choice(filler_item_names) 
         loc.place_locked_item(world.create_item(name))

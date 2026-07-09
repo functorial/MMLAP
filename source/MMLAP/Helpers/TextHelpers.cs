@@ -35,9 +35,10 @@ namespace MMLAP.Helpers
         public static readonly byte[] youGot = [0x2E, 0x3F, 0x45, 0x4F, 0x36, 0x3F, 0x44, 0x13, 0x86];
         public static readonly byte[] youGotSound = [0x8E, 0x86, 0x00];
         public static readonly byte[] redAPItem = [0x89, 0x02, 0x15, 0x24, 0x4F, 0x1D, 0x44, 0x34, 0x3C, 0x89, 0x00];
-        public static readonly byte[] nothing = [0X22, 0X3F, 0X44, 0X37, 0X38, 0X3D, 0X36];
+        public static readonly byte[] nothing = [0x22, 0x3F, 0x44, 0x37, 0x38, 0x3D, 0x36];
         public static readonly byte[] newPage = [0x9F, 0x87, 0x04, 0x00];
         public static readonly byte[] endWindow = [0x9F, 0xA9, 0x84, 0x04, 0x00];
+        public static readonly byte[] breakCutscene = [0x87, 0x1E, 0x00]; // Must go before endWindow
 
         public static readonly Dictionary<char, byte> charDict = new()
         {
@@ -113,6 +114,7 @@ namespace MMLAP.Helpers
             { '/', 0x4E },
             { ' ', 0x4F },
             { '~', 0x51 },
+            { '-', 0x52 },
             { ',', 0x5C },
             { '"', 0x5D },
             { '.', 0x5E },
@@ -120,7 +122,7 @@ namespace MMLAP.Helpers
             { '%', 0x62 },
             { ';', 0x82 },
             { '=', 0x83 },
-            { '\n', 0x86 }
+            { '\n', 0x86 },
            };
 
         public static string TranslateEncoding(byte[] encodedText)
@@ -150,7 +152,7 @@ namespace MMLAP.Helpers
             return res;
         }
 
-        public static byte[] EncodeSimpleString(String text)
+        public static byte[] EncodeSimpleString(string text)
         {
             char[] inArray = text.ToCharArray();
             byte[] outArray = new byte[inArray.Length];
@@ -184,46 +186,89 @@ namespace MMLAP.Helpers
             coloredEncoding[^1] = 0x00; // reset to default color 
             return coloredEncoding;
         }
-
-        public static byte[] EncodeYouGotItemWindow(ItemData itemData, byte[]? suffix = null)
+        
+        public static byte[] PlaySound(byte soundCode)
         {
+            // NOTE: It also looks like 0x8F prefix can play sounds too
+
+            // 0X81 to 0x84 = menu
+            // 0x85 and 0x86 = "you got" sounds
+            // 0x8A = stop all music
+            // 0x8C to 0x9B = megaman
+            // 0x9C = reaverbot sounds
+            // 0x9D to 0x9E = enemy pickups
+            // 0x9F = ledge grab
+            // 0xA0 to 0xA4 = enemies getting hit
+            // 0xD0 = can
+            return [(byte)0x8E, soundCode, (byte)0x00];
+        }
+
+        public static byte[] EncodeYouGotItemWindow(ItemData itemData, byte[]? prefix = null, byte[]? suffix = null, uint? guaranteedLength = null)
+        {
+            prefix ??= [];
             suffix ??= endWindow;
             List<ItemCategory> displayedItemCategories =
             [
                 ItemCategory.Buster,
-                ItemCategory.Special,
+                ItemCategory.SpecialItem,
                 ItemCategory.Normal 
             ];
             byte[] itemByteArray = [];
-            switch (itemData.Category)
+            switch (itemData)
             {
-                case ItemCategory category when displayedItemCategories.Contains(category):
+                case var data when displayedItemCategories.Contains(data.Category):
                     itemByteArray = AddTextColor(EncodeItemDisplay(itemData.ItemCode ?? 0), textColorGreen);
                     break;
-                case ItemCategory.Nothing:
+                case var data when data.Category == ItemCategory.Nothing:
                     itemByteArray = nothing; 
                     break;
-                case ItemCategory.Zenny:
+                case var data when data.Category == ItemCategory.Zenny:
                     itemByteArray = EncodeSimpleString(itemData.Name);
                     break;
-                case ItemCategory.AP:
+                case var data when data.Category == ItemCategory.AP:
                     itemByteArray = redAPItem;
                     break;
+                case var data when data.NickName != null:
+                    itemByteArray = AddTextColor(EncodeSimpleString(itemData.NickName ?? ""), textColorGreen);
+                    break;
+                default:
+                    break;
+            }
+            byte[] spaceFill = [];
+            if (guaranteedLength != null)
+            {
+                int nonItemLength = prefix.Length + youGotSound.Length + youGot.Length + 1 + suffix.Length;
+                int maxItemLength = (int)guaranteedLength - nonItemLength;
+                if (maxItemLength < 0)
+                {
+                    maxItemLength = 0;
+                }
+
+                if (itemByteArray.Length > maxItemLength)
+                {
+                    itemByteArray = itemByteArray.Take(maxItemLength).ToArray();
+                }
+
+                int totalLength = nonItemLength + itemByteArray.Length;
+                spaceFill = Enumerable.Repeat((byte)0x4F, Math.Max(0, (int)guaranteedLength - totalLength)).ToArray();
             }
             List<byte[]> substrs =
             [
+                prefix,
                 youGotSound,
                 youGot,
                 itemByteArray,
                 [charDict['!']],
-                suffix
+                spaceFill,
+                suffix,
             ];
             return ConcatArrayList(substrs);
         }
 
         public static TextData OverwriteText(ulong startAddress, byte[] text)
         {
-            TextData overwrittenTextData = new(startAddress, Memory.ReadByteArray(startAddress, text.Length));
+            ushort sourceLevelId = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+            TextData overwrittenTextData = new(startAddress, Memory.ReadByteArray(startAddress, text.Length), sourceLevelId);
             Memory.WriteByteArray(startAddress, text);
             return overwrittenTextData;
         }
