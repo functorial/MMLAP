@@ -207,7 +207,7 @@ def create_regular_locations(world: GameWorld) -> None:
     return None
 
 def create_events(world: GameWorld) -> None:
-    match world.options.goal:
+    match world.options.goal.value:
         case world.options.goal.option_juno:
             juno_region = world.get_region("Main Gate - Juno Area (Boss)")
             juno_region.add_event("Juno defeated", "Victory", location_type=GameLocation, item_type=items.GameItem, rule=lambda state: True)  # Add logic for beating Juno with access.

@@ -250,7 +250,7 @@ namespace MMLAP.Helpers
                 }
 
                 int totalLength = nonItemLength + itemByteArray.Length;
-                spaceFill = Enumerable.Repeat((byte)0x4F, (int)guaranteedLength - totalLength).ToArray();
+                spaceFill = Enumerable.Repeat((byte)0x4F, Math.Max(0, (int)guaranteedLength - totalLength)).ToArray();
             }
             List<byte[]> substrs =
             [

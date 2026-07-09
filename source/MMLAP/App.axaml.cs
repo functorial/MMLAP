@@ -316,8 +316,8 @@ public partial class App : Application
                 HandleOverlayCommand(a.Command);
                 break;
             default:
+                Log.Logger.Warning("Client command not recognized. Sending to Archipelago host.");
                 APClient?.SendMessage(a.Command);
-                Log.Logger.Information("Command not recognized.");
                 break;
         }
         return;
@@ -915,7 +915,7 @@ public partial class App : Application
                 bool isSaving = MemoryHelpers.ReadAddressDataBit(Addresses.SavingFlag);
                 if (isSaving != WasSaving)
                 {
-                    bool isInSaveDataMenu = MemoryHelpers.ReadAddressDataBit(Addresses.SaveDataMenuFlag);
+                    //bool isInSaveDataMenu = MemoryHelpers.ReadAddressDataBit(Addresses.SaveDataMenuFlag);
                 }
                 if (WasSaving && !isSaving)
                 {
@@ -1013,7 +1013,7 @@ public partial class App : Application
                     LoopHelpers.CheckGoalCondition(hasSubmittedGoal, apClient);
 
                     var slotData = SlotData;
-                    LoopHelpers.ShuffleStartingSpecialWeapon(apClient, SlotData);
+                    LoopHelpers.ShuffleStartingSpecialWeapon(apClient, slotData);
 
                     ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
                     if (currentLevelID != PreviousLevelID_Slow)
