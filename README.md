@@ -12,7 +12,7 @@
 3. Double click the apworld to install your Archipelago installation.
 4. Extract the client zip file and note where MMLAP.Desktop.exe is.
 5. Open DuckStation and load your ROM file.
-6. Open MMLAP.Desktop.exe, the Mega Man Legends client. You will likely want to do so as an administrator.
+6. Open MMLAP.Desktop.exe, the Mega Man Legends client.
 7. In the top left of the Mega Man Legends client, click the "burger" menu to open the settings page.
 8. Enter your host (archipelago.gg:XXXXX, or localhost:38281 if running from source), slot (your Player Name), and optionally your password.
 9. Click Connect. The first time you connect, a few error messages may appear - these are okay.
@@ -25,13 +25,7 @@
 - Peeking into hidden holes in the wall
 - Defeating bosses
 - TV Station games rank A's
-- Some side quests:
-  - The Museum questline
-  - Saving the missing woman
-  - Curing Ira's illness
-  - Turning in gift items to Roll
-  - Finding the Saw
-  - Finding and turning in the missing bag
+- Most side quests
 
 ### Items
 Any item associated with a location above. At the moment, this includes:
@@ -39,9 +33,11 @@ Any item associated with a location above. At the moment, this includes:
 - Most items needed to craft other items (Jump Springs, Drill Arm, Jet Skates, etc.)
 - Non-shop buster parts
 - Most museum items (except the Old Heater)
+- Region lock items (e.g. Citizen's Card and Licenses if shuffled)
 
 ### Completion Goals
 - Defeat Juno
+- Defeat all Bosses (those with a health bar)
 
 ### Anything else?
 Stay tuned!
