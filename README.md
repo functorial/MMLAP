@@ -6,6 +6,13 @@
 - A legal copy of a Mega Man Legends (US) ROM
 - The latest [release](https://github.com/functorial/MMLAP/releases) of the Mega Man Legends Client and apworld
 
+## Very Important!
+**Duckstation MUST be running with the following non-default setting:**
+```
+Settings > Console > CPU Emulation > Execution Mode = Interpreter (Slowest)
+```
+This is because the client makes many runtime edits to the game's code, which fails if Duckstation if running in Recompiler mode (default).
+
 ## Instructions
 1. If hosting your own game, be familiar with [generating and Archipelago game](https://archipelago.gg/tutorial/Archipelago/setup_en#generating-a-game) and [hosting an Archipelago server](https://archipelago.gg/tutorial/Archipelago/setup_en#hosting-an-archipelago-server)
 2. Download the latest mmlap-vX-Y-Z.zip (the client zip file) and mml.apworld files from the GitHub release page.
