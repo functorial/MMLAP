@@ -26,7 +26,7 @@ class GameWorld(World):
     item_name_groups = items.ITEM_NAME_GROUPS
 
     # TODO: Remember to update this!
-    ap_world_version = "0.3.0"
+    ap_world_version = "0.3.1"
 
     starting_special_weapon: int;
 
