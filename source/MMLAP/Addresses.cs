@@ -70,7 +70,6 @@ namespace MMLAP
         public static readonly AddressData HasTakenYellowRefractor                        = new(0xBE37B, 1, null);
         public static readonly AddressData HasYellowRefractor                             = new(0xBE41D, 7, null);
         public static readonly AddressData HasWatchedYellowRefractorCutscene              = new(0xBE3EB, 6, null);
-        public static readonly AddressData HasCalledRollToFixBoat                         = new(0xBE37E, 5, null);
         public static readonly AddressData HasFixedBoat                                   = new(0xBE37A, 6, null);
         public static readonly AddressData HasDefeatedBalkonGerat                         = new(0xBE37B, 2, null);
         public static readonly AddressData HasWatchedBalkonGeratDefeatCutscene            = new(0xBE3EC, 4, null);
@@ -117,7 +116,6 @@ namespace MMLAP
         public static readonly AddressData HasTurnedInOldShield                          = new(0xBE37F, 1, null);
         public static readonly AddressData HasTurnedInShinyRedStone                      = new(0xBE37F, 0, null);
         // Utility addresses for codes
-        public static readonly AddressData FixBoatCallRollUtil                            = new(0x5545C, null, 4);
         public static readonly AddressData YellowRefractorTerminal                        = new(0xBE439, null, 1);
         public static readonly AddressData YellowRefractorTerminalVirtual                 = new(0xBE2E6, null, 1);
         public static readonly AddressData CardonForestSubGateJakkoStarterKeyPickup       = new(0xBE2E7, 0, null);

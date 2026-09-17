@@ -419,7 +419,7 @@ public partial class App : Application
             bool hasEarnedClassALicense = MemoryHelpers.ReadAddressDataBit(Addresses.HasEarnedClassALicense);
             bool hasCompletedCardonTankEvent = MemoryHelpers.ReadAddressDataBit(Addresses.HasCompletedCardonTankEvent);
             bool hasTakenYellowRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenYellowRefractor);
-            bool hasCalledRollToFixBoat = MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat);
+            bool HasFixedBoat = MemoryHelpers.ReadAddressDataBit(Addresses.HasFixedBoat);
             bool hasDefeatedBalkonGerat = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
             bool hasTakenRedRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasTakenRedRefractor);
             bool hasShownRollRedRefractor = MemoryHelpers.ReadAddressDataBit(Addresses.HasShownRollRedRefractor);
@@ -457,7 +457,7 @@ public partial class App : Application
             Log.Logger.Information($"- hasRescuedShopOwnersHusband={hasRescuedShopOwnersHusband}, hasEarnedCitizenship={hasEarnedCitizenship}");
             Log.Logger.Information($"- hasEarnedClassBLicense={hasEarnedClassBLicense}, hasEarnedClassALicense={hasEarnedClassALicense}");
             Log.Logger.Information($"- hasDefeatedBonBonne={hasDefeatedBonBonne}, hasCompletedCardonTankEvent={hasCompletedCardonTankEvent}");
-            Log.Logger.Information($"- hasTakenYellowRefractor={hasTakenYellowRefractor}, hasCalledRollToFixBoat={hasCalledRollToFixBoat}");
+            Log.Logger.Information($"- hasTakenYellowRefractor={hasTakenYellowRefractor}, HasFixedBoat={HasFixedBoat}");
             Log.Logger.Information($"- hasDefeatedBalkonGerat={hasDefeatedBalkonGerat}, hasTakenRedRefractor={hasTakenRedRefractor}, hasShownRollRedRefractor={hasShownRollRedRefractor}");
             Log.Logger.Information($"- HasStartedMainGateOpenCutscene={HasStartedMainGateOpenCutscene}, hasDefeatedJuno={hasDefeatedJuno}");
             Log.Logger.Information($"- hasUnlockedMainGate={hasUnlockedMainGate}, hasUnlockedSubCities={hasUnlockedSubCities}");
@@ -1163,15 +1163,29 @@ public partial class App : Application
         {
             ItemHelpers.ReceiveGenericItem(itemData);
 
-            // Unlock regions for items which do so
-            if (
-                args.Item.Id is 0x022A or 0x022B or 0x022C
-            )
+            // Do things in current area related to the item received, like unlocking doors or changing dialogue.
+            ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
+            if (DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData))
             {
-                ushort currentLevelID = Memory.ReadUShort(Addresses.CurrentLevel.Address, Enums.Endianness.Big);
-                if (DataDicts.LevelDataDict.TryGetValue(currentLevelID, out LevelData? currentLevelData))
+                switch (itemData.Name)
                 {
-                    LoopHelpers.HandleAreaExitLocks(currentLevelData, apClient.Options);
+                    case "Citizen's Card" or "Class A License" or "Class B License":
+                        LoopHelpers.HandleAreaExitLocks(currentLevelData, apClient.Options);
+                        break;
+                    case "Yellow Refractor":
+                        switch (currentLevelData)
+                        {
+                            case var data when data.AreaName == "Wily's Boat" && data.RoomName == "Outside Boat Shop":
+                                bool hasFixedBoatWily = MemoryHelpers.ReadAddressDataBit(Addresses.HasFixedBoat);
+                                if (!hasFixedBoatWily)
+                                {
+                                    Memory.WriteByte(0x15335C, 0x08); // This modifies the control flow directly in the dialogue data for the parser. See note here https://docs.google.com/spreadsheets/d/1OdxZQ6DzbNaAikwdxnH8S9jJZx4L5_loxPrnsaE8nSU/edit?gid=1618614463#gid=1618614463
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
                 }
             }
 
