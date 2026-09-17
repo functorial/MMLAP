@@ -425,15 +425,15 @@ namespace MMLAP.Helpers
                 case var data when data.AreaName == "Wily's Boat":
                     if (MemoryHelpers.ReadAddressDataBit(Addresses.HasYellowRefractor))
                     {
-                        bool HasFixedBoat = MemoryHelpers.ReadAddressDataBit(Addresses.HasFixedBoat);
+                        bool hasFixedBoatWily = MemoryHelpers.ReadAddressDataBit(Addresses.HasFixedBoat);
                         bool hasDefeatedBalkonGeratWily = MemoryHelpers.ReadAddressDataBit(Addresses.HasDefeatedBalkonGerat);
-                        MemoryHelpers.WriteCode(Cheats.FastForwardWilysBoat(currentProgressionCounter, HasFixedBoat, hasDefeatedBalkonGeratWily));
+                        MemoryHelpers.WriteCode(Cheats.FastForwardWilysBoat(currentProgressionCounter, hasFixedBoatWily, hasDefeatedBalkonGeratWily));
                         if (
                             data.RoomName == "Outside Boat Shop" &&
-                            !MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat)
+                            !hasFixedBoatWily
                         )
                         {
-                            MemoryHelpers.WriteCode(Cheats.EnableFixBoatCallRoll());
+                            Memory.WriteByte(0x15335C, 0x08); // This modifies the control flow directly in the dialogue data for the parser. See note here https://docs.google.com/spreadsheets/d/1OdxZQ6DzbNaAikwdxnH8S9jJZx4L5_loxPrnsaE8nSU/edit?gid=1618614463#gid=1618614463
                         }
                     }
                     break;

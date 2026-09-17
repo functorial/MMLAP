@@ -28,7 +28,6 @@ namespace MMLAP
         public static readonly OpCode Restore1FDB0 = new(0x0001FDB0, 0x80631B62); // lb v1, 0x1B62(v1)
         public static readonly OpCode Restore1FDE8 = new(0x0001FDE8, 0x80631B62); // lb v1, 0x1B62(v1)
 
-        public static readonly OpCode RestoreFixBoatCallRoll = new(Addresses.FixBoatCallRollUtil.Address, 0x10400006); // beq v0, zero, 0x80055478
 
         public static (string Name, OpCode Code)[] GetAllRestoreOpCodes()
         {
@@ -50,26 +49,12 @@ namespace MMLAP
                 (nameof(Restore1FD94), Restore1FD94),
                 (nameof(Restore1FDB0), Restore1FDB0),
                 (nameof(Restore1FDE8), Restore1FDE8),
-                (nameof(RestoreFixBoatCallRoll), RestoreFixBoatCallRoll),
             ];
         }
 
         public static void Restore1FXXXWrites(LevelData currentLevelData)
         {
             string levelName = currentLevelData.AreaName + ": " + currentLevelData.RoomName;
-
-            // Restore branch statement noped in EnableFixBoatCallRoll code which is used elsewhere
-            if (
-                levelName != "Wily's Boat: Outside Boat Shop" &&
-                Memory.ReadUInt(Addresses.FixBoatCallRollUtil.Address) == 0x00000000 &&
-                (
-                    MemoryHelpers.ReadAddressDataBit(Addresses.HasCalledRollToFixBoat) ||
-                    currentLevelData.AreaName != "Wily's Boat"
-                )
-            )
-            {
-                MemoryHelpers.WriteCode(RestoreFixBoatCallRoll);
-            }
 
             if (
                 currentLevelData.AreaName != "Lake Jyun"
@@ -687,16 +672,6 @@ namespace MMLAP
                 LoadHalfImmediate(0x00100374, MMLEnums.Register.a1, fastForwardState),
                 // ?? 
                 //LoadHalfImmediate(0x0001FCA8, MMLEnums.Register.v1, fastForwardState),
-            ];
-        }
-        public static OpCode[] EnableFixBoatCallRoll()
-        {
-            // Enable "Call Roll" option when talking to worker which usually checks 0xBE37B[1]
-            // delete branching that checks 0xBE37B[1] (the "has started taking yellow refractor cutscene" flag)
-            // This is used by other stuff and can cause soft locks if not rewritten
-            // An execution breakpoint here only hits once in this area, so it should be safe as long as it's restored later
-            return [
-                Nop(Addresses.FixBoatCallRollUtil.Address),
             ];
         }
 
