@@ -45,8 +45,8 @@ public partial class App : Application
     }
 
     // TODO: Remember to set this in MMLAP.Desktop as well.
-    public static readonly string Version = "0.3.1";
-    public static readonly List<string> SupportedVersions = ["0.3.1", "0.3.0"];
+    public static readonly string Version = "0.3.2";
+    public static readonly List<string> SupportedVersions = ["0.3.2", "0.3.1", "0.3.0"];
     public static MainWindowViewModel? Context;
     public static ArchipelagoClient? APClient { get; set; }
     private static Dictionary<long, ItemData>? ScoutedLocationItemData { get; set; }
