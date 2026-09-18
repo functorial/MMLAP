@@ -402,7 +402,7 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     ExitData("Support Car / R&D Room (Gift Flower)", can_fix_support_car()), #, has_item("Flower")), - Flower is currently vanilla.
                     ExitData("Support Car / R&D Room (Gift Music Box)", has_all([can_fix_support_car(), has_item("Music Box")])),
                     ExitData("Support Car / R&D Room (Gift Ring)", has_all([can_fix_support_car(), has_item("Ring")])),
-                    ExitData("Flutter - Roll's Room", can_steal_red_refractor()),
+                    ExitData("Flutter - Roll's Room", can_fix_flutter()),
                     ExitData("Cardon Forest"),
                     ExitData("Downtown - Outside", is_citizens_card_accessible()),
                     ExitData("City Hall - Outside", is_citizens_card_accessible()),
@@ -1462,8 +1462,8 @@ def get_regionDataDict(world: GameWorld) -> Dict[str, GameRegionData]:
                     "Clozer Woods Sub-Gate, Gorubesshu corridor east chest"
                 ],
                 [
-                    ExitData("Clozer Woods Sub-Gate - Pillar Room (Lower Level)"), # Doors broken if not far enough
-                    ExitData("Clozer Woods Sub-Gate - Generator Room (Lower)"), # Doors broken if not far enough
+                    ExitData("Clozer Woods Sub-Gate - Pillar Room (Lower Level)"),
+                    ExitData("Clozer Woods Sub-Gate - Generator Room (Lower)"),
                     ExitData("Underground Ruins - Drillable Wall Area (Left-Middle, Lower)", is_class_b_license_accessible()),
                 ]
             ),
